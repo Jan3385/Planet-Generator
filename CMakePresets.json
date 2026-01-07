@@ -1,0 +1,31 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "debug",
+            "hidden": false,
+            "description": "Debug configuration",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Wno-unused-parameter -g",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g",
+                "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
+            }
+        },
+        {
+            "name": "release",
+            "hidden": false,
+            "description": "Release configuration",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
+            }
+        }
+    ]
+}
