@@ -3,6 +3,10 @@
 
 #include <iostream>
 
+#include "GLWrapper/BasicShaderProgram.h"
+#include "GLWrapper/Buffer.h"
+#include "GLWrapper/VertexArray.h"
+
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -30,10 +34,31 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // move later
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f,  0.5f, 0.0f
+    };  
+
+    GL::Buffer<float, GL::BufferTarget::ArrayBuffer> vertexBuffer("VertexBuffer");
+    vertexBuffer.SetData(vertices, sizeof(vertices) / sizeof(vertices[0]), GL_STATIC_DRAW);
+
+    GL::VertexArray vertexVAO("VertexArray");
+
+    vertexVAO.AddAttribute<glm::vec3>(0, 3, vertexBuffer, GL_FALSE, 0);
+    vertexVAO.Unbind();
+
+    GL::BasicShaderProgram shader("RenderVertex");
+
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.Use();
+        vertexVAO.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

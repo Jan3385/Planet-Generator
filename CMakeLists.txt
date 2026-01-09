@@ -39,16 +39,28 @@ add_executable(PlanetGenerator
 
 target_include_directories(PlanetGenerator
     PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/src
+    ${CMAKE_CURRENT_LIST_DIR}/source
 )
 
 # VCPKG packages
+find_package(glm CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 
 target_link_libraries( PlanetGenerator
   PRIVATE
     glad
+    glm::glm
     glfw
     OpenGL::GL
+)
+
+set(SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/shader/graphics")
+set(INCLUDE_SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/shader/include")
+
+add_custom_target(copy_assets ALL
+  # Shaders
+  COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Shaders
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Shaders/RenderShaders
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${INCLUDE_SHADERS_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Shaders/Includes
 )

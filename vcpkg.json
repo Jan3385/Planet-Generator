@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "A 3D planet generator",
   "dependencies": [
-    "glfw3"
+    "glfw3",
+    "glm"
   ],
   "builtin-baseline": "b91c3336aee7f32412508f7dd351ae2cabdb8819"
 }
