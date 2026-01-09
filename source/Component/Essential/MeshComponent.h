@@ -1,0 +1,38 @@
+#pragma once
+
+#include <vector>
+
+#include "Component/BaseComponent.h"
+
+namespace Component {
+class Mesh : public BaseComponent {
+public:
+    struct IMeshUpdateCallback{
+    protected:
+        virtual void OnMeshUpdated(Mesh* mesh) = 0;
+        virtual ~IMeshUpdateCallback() = default;
+
+        friend class Mesh;
+    };
+
+    Mesh(Object::BaseObject* owner) : BaseComponent(owner) {};
+    ~Mesh() override;
+    void SetMeshData(std::vector<float> verticies, std::vector<unsigned int> indicies);
+
+    std::vector<float> GetVerticies() const { return verticies; }
+    std::vector<unsigned int> GetIndicies() const { return indicies; }
+
+    bool IsEmpty() const { return verticies.empty() && indicies.empty(); }
+
+    void AddUpdateCallback(IMeshUpdateCallback* callback) {
+        this->updateCallbacks.push_back(callback);
+    }
+    void RemoveUpdateCallback(IMeshUpdateCallback* callback) {
+        std::erase(updateCallbacks, callback);
+    }
+private:
+    std::vector<float> verticies;
+    std::vector<unsigned int> indicies;
+    std::vector<IMeshUpdateCallback*> updateCallbacks;
+};
+}

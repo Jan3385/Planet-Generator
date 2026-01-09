@@ -5,40 +5,41 @@ namespace Object {
 };
 
 namespace Component {
-    class BaseComponent {
-    public:
-        BaseComponent(Object::BaseObject* owner) : owner(owner) {};
-        virtual ~BaseComponent() = default;
+class BaseComponent {
+public:
+    BaseComponent(Object::BaseObject* owner) : owner(owner) {};
+    virtual ~BaseComponent() = default;
 
-        // Disable copy and move
-        BaseComponent(const BaseComponent&) = delete;
-        BaseComponent& operator=(const BaseComponent&) = delete;
-        BaseComponent(BaseComponent&&) = delete;
-        BaseComponent& operator=(BaseComponent&&) = delete;
+    // Disable copy and move
+    BaseComponent(const BaseComponent&) = delete;
+    BaseComponent& operator=(const BaseComponent&) = delete;
+    BaseComponent(BaseComponent&&) = delete;
+    BaseComponent& operator=(BaseComponent&&) = delete;
 
-        bool IsAwake() const { return awake; }
-        bool IsStarted() const { return started; }
-    protected:
-        Object::BaseObject* GetOwner() const { return owner; }
+    bool IsAwake() const { return awake; }
+    bool IsStarted() const { return started; }
+protected:
+    Object::BaseObject* GetOwner() const { return owner; }
 
-        virtual void Awake() {}
-        virtual void Start() {}
-        virtual void OnEnable() {}
-        virtual void OnDisable() {}
-    private:
-        Object::BaseObject* owner = nullptr;
+    virtual void Awake() {}
+    virtual void Start() {}
+    virtual void OnDestroy() {}
+    virtual void OnEnable() {}
+    virtual void OnDisable() {}
+private:
+    Object::BaseObject* owner = nullptr;
 
-        bool awake = false;
-        bool started = false;
+    bool awake = false;
+    bool started = false;
 
-        friend class Object::BaseObject;
-    };
-    class IUpdatable {
-    private:
-        virtual void Update() = 0;
-        virtual void FixedUpdate() = 0;
-        virtual ~IUpdatable() = default;
+    friend class Object::BaseObject;
+};
+class IUpdatable {
+private:
+    virtual void Update() = 0;
+    virtual void FixedUpdate() = 0;
+    virtual ~IUpdatable() = default;
 
-        friend class Object::BaseObject;
-    };
+    friend class Object::BaseObject;
+};
 }

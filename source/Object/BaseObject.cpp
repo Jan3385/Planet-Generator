@@ -1,5 +1,12 @@
 #include "BaseObject.h"
 
+Object::BaseObject::~BaseObject()
+{
+    for (const auto& component : components) {
+        component->OnDestroy();
+    }
+}
+
 /**
  * @brief Updates the Object
  * @details Calls Start on all components that need it and then calls Update on all updatable components
