@@ -7,6 +7,8 @@
 #include "GLWrapper/Buffer.h"
 #include "GLWrapper/VertexArray.h"
 
+#include "Object/BaseObject.h"
+
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -36,13 +38,20 @@ int main(int argc, char* argv[]) {
 
     // move later
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
+        0.5f,  0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
-    };  
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f
+    };
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    }; 
 
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> vertexBuffer("VertexBuffer");
     vertexBuffer.SetData(vertices, sizeof(vertices) / sizeof(vertices[0]), GL_STATIC_DRAW);
+    GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indexBuffer("IndexBuffer");
+    indexBuffer.SetData(indices, sizeof(indices) / sizeof(indices[0]), GL_STATIC_DRAW);
 
     GL::VertexArray vertexVAO("VertexArray");
 
@@ -51,6 +60,8 @@ int main(int argc, char* argv[]) {
 
     GL::BasicShaderProgram shader("RenderVertex");
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
@@ -58,7 +69,8 @@ int main(int argc, char* argv[]) {
 
         shader.Use();
         vertexVAO.Bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        indexBuffer.Bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
