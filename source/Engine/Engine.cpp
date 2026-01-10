@@ -1,17 +1,18 @@
 #include "Engine.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 
 #include "Debug/Logger.h"
 
 #include "GLWrapper/BasicShaderProgram.h"
 #include "Component/Essential/RenderComponent.h"
+#include "Component/Player/MovementComponent.h"
 #include "Object/GameObject.h"
 
 GameEngine* GameEngine::instance = nullptr;
+Renderer* GameEngine::renderer = nullptr;
+Level* GameEngine::currentLevel = nullptr;
+Input* GameEngine::input = nullptr;
 
 GameEngine::GameEngine()
 {
@@ -26,18 +27,13 @@ GameEngine::~GameEngine()
 
 void GameEngine::Run()
 {
-    if (!glfwInit())
-    {
-        Debug::LogFatal("Failed to initialize GLFW");
-        return;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    InitializeGLFW();
 
     renderer = new Renderer();
     currentLevel = new Level();
+    input = new Input();
+
+    Renderer::SetVSYNC(true);
 
     // temp ----
     GL::BasicShaderProgram shader("RenderVertex");
@@ -68,20 +64,37 @@ void GameEngine::Run()
     renderComp->SetRenderShader(&shader);
 
     Object::BaseObject *camObj = currentLevel->CreateObject();
-    Component::Transform *camTransform = camObj->AddComponent<Component::Transform>();
-    camTransform->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
+    camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.0f, 2.5f));
     camObj->AddComponent<Component::Camera>();
+    camObj->AddComponent<Component::Movement>();
     // ---------
+
+    Input::SetCursorMode(Input::CursorMode::Trapped);
 
     while (!renderer->ShouldClose())
     {
-        obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.5f, 0.1f));
-        camTransform->MovePosBy(glm::vec3(0.0f, 0.0f, 0.006f));
+        //obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.5f, 0.1f));
+        glfwPollEvents();
 
         currentLevel->Update();
 
         renderer->Update();
+
+        input->EndFrame();
     }
 
     glfwTerminate();
+}
+
+void GameEngine::InitializeGLFW()
+{
+    if (!glfwInit())
+    {
+        Debug::LogFatal("Failed to initialize GLFW");
+        return;
+    }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }

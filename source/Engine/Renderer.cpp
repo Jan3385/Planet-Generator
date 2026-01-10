@@ -6,7 +6,7 @@
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    GameEngine::instance->renderer->StoreWindowSize(width, height);
+    GameEngine::renderer->StoreWindowSize(width, height);
 }
 
 void Renderer::StoreWindowSize(int width, int height)
@@ -46,12 +46,18 @@ Renderer::~Renderer()
     }
 }
 
+void Renderer::SetVSYNC(bool enabled)
+{
+    if(!enabled) glfwSwapInterval(0);
+    else glfwSwapInterval(1);
+}
+
 void Renderer::Update()
 {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Component::Camera* camera = GameEngine::instance->currentLevel->GetCamera();
+    Component::Camera* camera = GameEngine::currentLevel->GetCamera();
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
     glm::mat4 projection = camera->GetProjection();
@@ -60,7 +66,6 @@ void Renderer::Update()
     for(auto& callback : renderCallbacks) {
         callback->Render(projection, view);
     }
-
+    
     glfwSwapBuffers(window);
-    glfwPollEvents();
 }

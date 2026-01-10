@@ -40,7 +40,7 @@ void Component::RenderComponent::Awake()
     if(this->mesh)
         this->SetMeshData(this->mesh);
 
-    GameEngine::instance->renderer->AddRenderCallback(this);
+    GameEngine::renderer->AddRenderCallback(this);
 }
 
 void Component::RenderComponent::OnDestroy()
@@ -49,17 +49,17 @@ void Component::RenderComponent::OnDestroy()
         this->mesh->RemoveUpdateCallback(this);
     this->mesh = nullptr;
 
-    GameEngine::instance->renderer->RemoveRenderCallback(this);
+    GameEngine::renderer->RemoveRenderCallback(this);
 }
 
 void Component::RenderComponent::OnEnable()
 {
-    GameEngine::instance->renderer->AddRenderCallback(this);
+    GameEngine::renderer->AddRenderCallback(this);
 }
 
 void Component::RenderComponent::OnDisable()
 {
-    GameEngine::instance->renderer->RemoveRenderCallback(this);
+    GameEngine::renderer->RemoveRenderCallback(this);
 }
 
 void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)

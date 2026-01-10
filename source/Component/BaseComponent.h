@@ -35,7 +35,7 @@ private:
     friend class Object::BaseObject;
 };
 class IUpdatable {
-private:
+protected:
     virtual void Update() = 0;
     virtual void FixedUpdate() = 0;
     virtual ~IUpdatable() = default;

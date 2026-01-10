@@ -6,6 +6,8 @@
 
 #include <vector>
 
+class Input;
+
 class Renderer{
 public:
     struct IRendererCallback{
@@ -27,6 +29,9 @@ public:
     }
 
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
+
+    static void SetVSYNC(bool enabled);
+
     void Update();
 
     void StoreWindowSize(int width, int height);
@@ -36,4 +41,6 @@ private:
 
     int windowWidth = 800;
     int windowHeight = 600;
+
+    friend Input;
 };

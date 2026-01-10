@@ -36,7 +36,12 @@ void Component::Camera::SetClipPlanes(float newNearClip, float newFarClip)
 
 glm::mat4 Component::Camera::GetView() const
 {
-    return glm::translate(glm::mat4(1.0f), -this->transform->GetPos());
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::rotate(view, glm::radians(-this->transform->GetRot().x), glm::vec3(1.0f, 0.0f, 0.0f));
+    view = glm::rotate(view, glm::radians(-this->transform->GetRot().y), glm::vec3(0.0f, 1.0f, 0.0f));
+    view = glm::rotate(view, glm::radians(-this->transform->GetRot().z), glm::vec3(0.0f, 0.0f, 1.0f));
+    view = glm::translate(view, -this->transform->GetPos());
+    return view;
 }
 
 void Component::Camera::RecalculateProjection()
@@ -52,21 +57,21 @@ void Component::Camera::Awake()
     if(!this->transform)
         Debug::LogFatal("Camera component requires a Transform component to function properly!");
 
-    GameEngine::instance->currentLevel->SetCamera(this);
+    GameEngine::currentLevel->SetCamera(this);
 }
 
 void Component::Camera::OnDestroy()
 {
-    GameEngine::instance->currentLevel->SetCamera(nullptr);
+    GameEngine::currentLevel->SetCamera(nullptr);
 }
 
 void Component::Camera::OnEnable()
 {
-    GameEngine::instance->currentLevel->SetCamera(this);
+    GameEngine::currentLevel->SetCamera(this);
 }
 
 void Component::Camera::OnDisable()
 {
-    if(GameEngine::instance->currentLevel->GetCamera() == this)
-        GameEngine::instance->currentLevel->SetCamera(nullptr);
+    if(GameEngine::currentLevel->GetCamera() == this)
+        GameEngine::currentLevel->SetCamera(nullptr);
 }
