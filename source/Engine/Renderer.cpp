@@ -1,10 +1,18 @@
 #include "Renderer.h"
 
 #include "Debug/Logger.h"
+#include "Engine/Engine.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    GameEngine::instance->renderer->StoreWindowSize(width, height);
+}
+
+void Renderer::StoreWindowSize(int width, int height)
+{
+    this->windowWidth = width;
+    this->windowHeight = height;
 }
 
 Renderer::Renderer()
@@ -43,8 +51,14 @@ void Renderer::Update()
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Component::Camera* camera = GameEngine::instance->currentLevel->GetCamera();
+    camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
+
+    glm::mat4 projection = camera->GetProjection();
+    glm::mat4 view = camera->GetView();
+
     for(auto& callback : renderCallbacks) {
-        callback->Render();
+        callback->Render(projection, view);
     }
 
     glfwSwapBuffers(window);

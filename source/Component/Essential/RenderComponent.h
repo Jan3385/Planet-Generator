@@ -21,13 +21,7 @@ public:
     RenderComponent(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~RenderComponent() override = default;
 
-    void Awake() override;
-    void OnDestroy() override;
-
-    void OnEnable() override;
-    void OnDisable() override;
-
-    void Render() override;
+    void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     Mesh* GetMesh() const { return mesh; }
     void SetMeshComponent(Mesh* newMesh);
@@ -35,6 +29,12 @@ public:
 protected:
     void OnMeshUpdated(Mesh* mesh) override;
 private:
+    void Awake() override;
+    void OnDestroy() override;
+
+    void OnEnable() override;
+    void OnDisable() override;
+
     void SetMeshData(Mesh* mesh);
     Transform* transform = nullptr;
     Mesh* mesh = nullptr;
@@ -43,5 +43,7 @@ private:
     GL::VertexArray vertexArrayObject;
     GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indiciesBuffer;
     GL::Shader *renderShader;
+
+    friend class Object::BaseObject;
 };
 }

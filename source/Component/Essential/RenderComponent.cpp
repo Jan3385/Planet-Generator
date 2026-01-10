@@ -35,7 +35,7 @@ void Component::RenderComponent::Awake()
         this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 
     if(!this->mesh)
-        this->mesh = this->GetOwner()->GetComponent<Component::Mesh>();
+        this->SetMeshComponent(this->GetOwner()->GetComponent<Component::Mesh>());
 
     if(this->mesh)
         this->SetMeshData(this->mesh);
@@ -62,9 +62,12 @@ void Component::RenderComponent::OnDisable()
     GameEngine::instance->renderer->RemoveRenderCallback(this);
 }
 
-void Component::RenderComponent::Render()
+void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
 {
     this->renderShader->Use();
+
+    this->renderShader->SetMat4("projection", projection);
+    this->renderShader->SetMat4("view", view);
 
     if(this->transform)
         this->renderShader->SetMat4("transform", this->transform->GetMatrixTransform());
@@ -79,10 +82,12 @@ void Component::RenderComponent::SetMeshComponent(Mesh *newMesh)
     if(this->mesh != nullptr)
         this->mesh->RemoveUpdateCallback(this);
 
-    newMesh->AddUpdateCallback(this);
+    if(newMesh != nullptr){
+        newMesh->AddUpdateCallback(this);
+
+        if(this->IsAwake())
+            this->SetMeshData(newMesh);
+    }
 
     this->mesh = newMesh;
-
-    if(this->IsAwake())
-        this->SetMeshData(newMesh);
 }

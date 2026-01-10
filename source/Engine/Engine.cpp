@@ -65,14 +65,21 @@ void GameEngine::Run()
     obj->GetMesh()->SetMeshData(vertices, indices);
 
     Component::RenderComponent *renderComp = obj->GetRenderComponent();
-    renderComp->SetMeshComponent(obj->GetMesh());
     renderComp->SetRenderShader(&shader);
 
+    Object::BaseObject *camObj = currentLevel->CreateObject();
+    Component::Transform *camTransform = camObj->AddComponent<Component::Transform>();
+    camTransform->SetPos(glm::vec3(0.0f, 0.0f, 1.0f));
+    camObj->AddComponent<Component::Camera>();
     // ---------
 
     while (!renderer->ShouldClose())
     {
         obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.5f, 0.1f));
+        camTransform->MovePosBy(glm::vec3(0.0f, 0.0f, 0.006f));
+
+        currentLevel->Update();
+
         renderer->Update();
     }
 

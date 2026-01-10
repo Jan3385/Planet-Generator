@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include <vector>
 
@@ -9,7 +10,7 @@ class Renderer{
 public:
     struct IRendererCallback{
     protected:
-        virtual void Render() = 0;
+        virtual void Render(glm::mat4 &projection, glm::mat4 &view) = 0;
         virtual ~IRendererCallback() = default;
 
         friend class Renderer;
@@ -27,7 +28,12 @@ public:
 
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
     void Update();
+
+    void StoreWindowSize(int width, int height);
 private:
     GLFWwindow* window = nullptr;
     std::vector<IRendererCallback*> renderCallbacks;
+
+    int windowWidth = 800;
+    int windowHeight = 600;
 };
