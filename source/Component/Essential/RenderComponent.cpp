@@ -31,7 +31,13 @@ void Component::RenderComponent::Awake()
     vertexArrayObject.AddAttribute<glm::vec3>(0, 3, verticiesBuffer, GL_FALSE, 0);
     vertexArrayObject.Unbind();
 
-    if(this->mesh != nullptr)
+    if(!this->transform)
+        this->transform = this->GetOwner()->GetComponent<Component::Transform>();
+
+    if(!this->mesh)
+        this->mesh = this->GetOwner()->GetComponent<Component::Mesh>();
+
+    if(this->mesh)
         this->SetMeshData(this->mesh);
 
     GameEngine::instance->renderer->AddRenderCallback(this);
@@ -59,6 +65,10 @@ void Component::RenderComponent::OnDisable()
 void Component::RenderComponent::Render()
 {
     this->renderShader->Use();
+
+    if(this->transform)
+        this->renderShader->SetMat4("transform", this->transform->GetMatrixTransform());
+
     this->vertexArrayObject.Bind();
     this->indiciesBuffer.Bind();
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(this->mesh->GetIndicies().size()), GL_UNSIGNED_INT, 0);

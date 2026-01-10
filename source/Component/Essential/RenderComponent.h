@@ -4,12 +4,18 @@
 
 #include "Component/BaseComponent.h"
 #include "Component/Essential/MeshComponent.h"
+#include "Component/Essential/TransformComponent.h"
 
 #include "GLWrapper/Buffer.h"
 #include "GLWrapper/VertexArray.h"
 #include "GLWrapper/Shader.h"
 
 namespace Component {
+/**
+ * @brief Render component class
+ * @details Handles rendering of the object
+ * @warning On Awake tries to find a transform and mesh automatically. If transform is found and later deleted, it can cause a crash!
+ */
 class RenderComponent : public BaseComponent, public Mesh::IMeshUpdateCallback, public Renderer::IRendererCallback {
 public:
     RenderComponent(Object::BaseObject* owner) : BaseComponent(owner) {};
@@ -30,6 +36,7 @@ protected:
     void OnMeshUpdated(Mesh* mesh) override;
 private:
     void SetMeshData(Mesh* mesh);
+    Transform* transform = nullptr;
     Mesh* mesh = nullptr;
 
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> verticiesBuffer;

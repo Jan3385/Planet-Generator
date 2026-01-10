@@ -25,6 +25,8 @@ Renderer::Renderer()
         return;
     }
 
+    glEnable(GL_DEPTH_TEST);
+    
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
@@ -39,7 +41,7 @@ Renderer::~Renderer()
 void Renderer::Update()
 {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for(auto& callback : renderCallbacks) {
         callback->Render();

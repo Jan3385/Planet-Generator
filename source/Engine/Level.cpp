@@ -12,6 +12,16 @@ Object::BaseObject *Level::CreateObject()
     return objectPtr;
 }
 
+Object::GameObject *Level::CreateGameObject()
+{
+    auto gameObject = std::make_unique<Object::GameObject>();
+
+    Object::GameObject* gameObjectPtr = gameObject.get();
+    objects.push_back(std::move(gameObject));
+
+    return gameObjectPtr;
+}
+
 void Level::ObjectDestroy(Object::BaseObject *object)
 {
     destroyQueue.push(object);

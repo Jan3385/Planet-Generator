@@ -1,4 +1,8 @@
 #include "BaseObject.h"
+
+#include "Component/Essential/TransformComponent.h"
+#include "Debug/Logger.h"
+
 using namespace Object;
 
 template<class ComponentType>
@@ -50,11 +54,16 @@ inline std::vector<ComponentType *> Object::BaseObject::GetComponents()
 template <class ComponentType>
 inline void Object::BaseObject::RemoveComponents()
 {
+    if constexpr (std::is_same_v<ComponentType, Component::Transform>) {
+        Debug::LogWarn("Removed Transform component from object. This may lead to unexpected behavior!");
+    }
+
     if constexpr (std::is_base_of_v<Component::IUpdatable, ComponentType>) {
         std::erase_if(updatables, [](Component::IUpdatable* updatable) {
             return typeid(*updatable) == typeid(ComponentType);
         });
     }
+
     std::erase_if(components, [](const std::unique_ptr<Component::BaseComponent>& component) {
         return typeid(*component) == typeid(ComponentType);
     });
