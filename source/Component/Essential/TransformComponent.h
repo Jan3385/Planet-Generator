@@ -42,11 +42,21 @@ public:
     // euler angles
     void RotateBy(const glm::vec3& deltaRot);
 
+    /**
+     * @brief Sets whether to lock the pitch rotation between -89 and 89 degrees
+     * @param lock True to lock, false to unlock
+     * @note Default `false`
+     */
+    void SetLockPitchRange(bool lock) { this->lockPitchRange = lock; }
+
     void ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
 private:
     glm::vec3 position = glm::vec3(0.0f);
+
+    bool lockPitchRange = false;
+
     // quaternion angle
     glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     float yaw = 0.0f;

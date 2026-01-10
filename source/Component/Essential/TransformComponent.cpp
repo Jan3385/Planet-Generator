@@ -13,7 +13,7 @@ void Component::Transform::SetRot(const glm::vec2 &newRot)
     dirtyTransform = true;
     this->yaw = newRot.x;
     this->pitch = newRot.y;
-    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
     this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }
@@ -23,7 +23,7 @@ void Component::Transform::SetRot(const glm::vec3 &newRot)
     dirtyTransform = true;
     this->yaw = newRot.x;
     this->pitch = newRot.y;
-    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = newRot.z;
     this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }
@@ -45,7 +45,7 @@ void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
     dirtyTransform = true;
     this->yaw += deltaRot.x;
     this->pitch += deltaRot.y;
-    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
     this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }
@@ -55,7 +55,7 @@ void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
     dirtyTransform = true;
     this->yaw += deltaRot.x;
     this->pitch += deltaRot.y;
-    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
     this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }

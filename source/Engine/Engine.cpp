@@ -13,6 +13,7 @@ GameEngine* GameEngine::instance = nullptr;
 Renderer* GameEngine::renderer = nullptr;
 Level* GameEngine::currentLevel = nullptr;
 Input* GameEngine::input = nullptr;
+Lighting* GameEngine::lighting = nullptr;
 
 GameEngine::GameEngine()
 {
@@ -23,6 +24,8 @@ GameEngine::~GameEngine()
 {
     delete renderer;
     delete currentLevel;
+    delete input;
+    delete lighting;
 }
 
 void GameEngine::Run()
@@ -32,11 +35,16 @@ void GameEngine::Run()
     renderer = new Renderer();
     currentLevel = new Level();
     input = new Input();
+    lighting = new Lighting();
+    lighting->SetAmbientColor(glm::vec3(1.0f, 1.0f, 1.0f));
 
     Renderer::SetVSYNC(true);
 
     // temp ----
-    GL::BasicShaderProgram shader("RenderVertex");
+    GL::BasicShaderProgram lightShader("LightedShader");
+    lightShader.Use();
+    lightShader.SetVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
+    lighting->RegisterShaderLightUpdateCallback(&lightShader);
 
     std::vector<float> vertices = {
         -0.5f,  -0.5f, -0.5f,
@@ -61,7 +69,7 @@ void GameEngine::Run()
     obj->GetMesh()->SetMeshData(vertices, indices);
 
     Component::RenderComponent *renderComp = obj->GetRenderComponent();
-    renderComp->SetRenderShader(&shader);
+    renderComp->SetRenderShader(&lightShader);
 
     Object::BaseObject *camObj = currentLevel->CreateObject();
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.0f, 2.5f));
@@ -73,7 +81,8 @@ void GameEngine::Run()
 
     while (!renderer->ShouldClose())
     {
-        //obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.5f, 0.1f));
+        obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.5f, 0.1f));
+        lighting->SetAmbientIntensity((sin((float)glfwGetTime()) + 1.0f) / 2.0f);
         glfwPollEvents();
 
         currentLevel->Update();
