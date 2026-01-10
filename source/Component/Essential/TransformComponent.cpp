@@ -8,10 +8,24 @@ void Component::Transform::SetPos(const glm::vec3 &newPos)
     this->position = newPos;
 }
 
+void Component::Transform::SetRot(const glm::vec2 &newRot)
+{
+    dirtyTransform = true;
+    this->yaw = newRot.x;
+    this->pitch = newRot.y;
+    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    this->roll = 0.0f;
+    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+}
+
 void Component::Transform::SetRot(const glm::vec3 &newRot)
 {
     dirtyTransform = true;
-    this->rotation = newRot;
+    this->yaw = newRot.x;
+    this->pitch = newRot.y;
+    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    this->roll = newRot.z;
+    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }
 
 void Component::Transform::SetScale(const glm::vec3 &newScale)
@@ -26,10 +40,24 @@ void Component::Transform::MovePosBy(const glm::vec3 &deltaPos)
     this->position += deltaPos;
 }
 
+void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
+{
+    dirtyTransform = true;
+    this->yaw += deltaRot.x;
+    this->pitch += deltaRot.y;
+    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    this->roll = 0.0f;
+    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+}
+
 void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
 {
     dirtyTransform = true;
-    this->rotation += deltaRot;
+    this->yaw += deltaRot.x;
+    this->pitch += deltaRot.y;
+    this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    this->roll += deltaRot.z;
+    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
 }
 
 void Component::Transform::ScaleBy(const glm::vec3 &deltaScale)
@@ -44,9 +72,7 @@ glm::mat4 Component::Transform::GetMatrixTransform()
 
     this->matrixTransform = glm::mat4(1.0f);
     this->matrixTransform = glm::translate(this->matrixTransform, this->position);
-    this->matrixTransform = glm::rotate(this->matrixTransform, glm::radians(this->rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    this->matrixTransform = glm::rotate(this->matrixTransform, glm::radians(this->rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    this->matrixTransform = glm::rotate(this->matrixTransform, glm::radians(this->rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    this->matrixTransform = this->matrixTransform * glm::mat4_cast(this->rotation);
     this->matrixTransform = glm::scale(this->matrixTransform, this->scale);
 
     dirtyTransform = false;

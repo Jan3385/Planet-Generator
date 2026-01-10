@@ -41,9 +41,9 @@ glm::vec2 Input::GetMovementVector()
 {
     glm::vec2 movement(0.0f, 0.0f);
     if(IsKeyDown(GLFW_KEY_W))
-        movement.y -= 1.0f;
-    if(IsKeyDown(GLFW_KEY_S))
         movement.y += 1.0f;
+    if(IsKeyDown(GLFW_KEY_S))
+        movement.y -= 1.0f;
     if(IsKeyDown(GLFW_KEY_A))
         movement.x -= 1.0f;
     if(IsKeyDown(GLFW_KEY_D))

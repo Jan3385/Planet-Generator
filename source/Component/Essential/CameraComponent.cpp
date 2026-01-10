@@ -37,9 +37,7 @@ void Component::Camera::SetClipPlanes(float newNearClip, float newFarClip)
 glm::mat4 Component::Camera::GetView() const
 {
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::rotate(view, glm::radians(-this->transform->GetRot().x), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = glm::rotate(view, glm::radians(-this->transform->GetRot().y), glm::vec3(0.0f, 1.0f, 0.0f));
-    view = glm::rotate(view, glm::radians(-this->transform->GetRot().z), glm::vec3(0.0f, 0.0f, 1.0f));
+    view = view * glm::mat4_cast(glm::conjugate(this->transform->GetRotQuaternion()));
     view = glm::translate(view, -this->transform->GetPos());
     return view;
 }

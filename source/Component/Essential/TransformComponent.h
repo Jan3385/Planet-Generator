@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "Component/BaseComponent.h"
 
@@ -17,20 +18,41 @@ public:
     ~Transform() override = default;
 
     glm::vec3 GetPos() const { return position; }
-    glm::vec3 GetRot() const { return rotation; }
+    glm::quat GetRotQuaternion() const { return rotation; }
+    glm::vec3 GetRot() const { return glm::eulerAngles(rotation); }
+    
+    glm::vec3 GetForwardVector() const { return rotation * glm::vec3(0.0f, 0.0f, -1.0f); }
+    glm::vec3 GetRightVector() const { return rotation * glm::vec3(1.0f, 0.0f, 0.0f); }
+    glm::vec3 GetUpVector() const { return rotation * glm::vec3(0.0f, 1.0f, 0.0f); }
+
     glm::vec3 GetScale() const { return scale; }
     void SetPos(const glm::vec3& newPos);
+
+    // dx, dy in degrees
+    void SetRot(const glm::vec2& newRot);
+    // euler angles
     void SetRot(const glm::vec3& newRot);
+
     void SetScale(const glm::vec3& newScale);
+
     void MovePosBy(const glm::vec3& deltaPos);
+
+    // dx, dy in degrees
+    void RotateBy(const glm::vec2& deltaRot);
+    // euler angles
     void RotateBy(const glm::vec3& deltaRot);
+
     void ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
 private:
     glm::vec3 position = glm::vec3(0.0f);
-    // Euler angles in degrees
-    glm::vec3 rotation = glm::vec3(0.0f);
+    // quaternion angle
+    glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float roll = 0.0f;
+
     glm::vec3 scale    = glm::vec3(1.0f);
 
     bool dirtyTransform = true;
