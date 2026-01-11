@@ -8,13 +8,19 @@ void Component::PointLightSource::SetLightData(const PointLightData &newData)
 {
     this->data.diffuse = newData.color * newData.intensity;
     this->data.specular = newData.color * newData.intensity;
+    this->data.constant = newData.constant;
+    this->data.linear = newData.linear;
+    this->data.quadratic = newData.quadratic;
     this->data.radius = newData.radius;
 }
 
-void Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float radius)
+void Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius)
 {
     this->data.diffuse = color * diffuseIntensity;
     this->data.specular = color * specularIntensity;
+    this->data.constant = 1.0f;
+    this->data.linear = linear;
+    this->data.quadratic = quadratic;
     this->data.radius = radius;
 }
 

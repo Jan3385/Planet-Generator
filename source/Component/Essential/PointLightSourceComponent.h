@@ -14,10 +14,14 @@ public:
         glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
         float intensity = 1.0f;
         float radius = 5.0f;
+
+        float constant = 1.0f;
+        float linear = 0.09f;
+        float quadratic = 0.032f;
     };
 
     void SetLightData(const PointLightData& newData);
-    void SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float radius);
+    void SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius);
 
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;

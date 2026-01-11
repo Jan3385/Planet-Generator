@@ -105,6 +105,9 @@ void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
                 this->renderShader->SetVec3(baseName + ".position", light->position);
                 this->renderShader->SetVec3(baseName + ".diffuse", light->diffuse);
                 this->renderShader->SetVec3(baseName + ".specular", light->specular);
+                this->renderShader->SetFloat(baseName + ".constant", light->constant);
+                this->renderShader->SetFloat(baseName + ".linear", light->linear);
+                this->renderShader->SetFloat(baseName + ".quadratic", light->quadratic);
                 lightCount++;
             }
         }

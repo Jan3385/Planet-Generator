@@ -23,6 +23,10 @@ struct PointLight {
     
     vec3 diffuse;
     vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
 };
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
@@ -40,8 +44,15 @@ void main()
         vec3 reflectDir = reflect(-lightDir, Normal);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128.0);
 
-        diffuse += (diff * material.diffuse) * pointLights[i].diffuse;
-        specular += (spec * material.specular) * pointLights[i].specular;
+        float distance = length(pointLights[i].position - FragPos);
+        float attenuation = 1.0 / (
+            pointLights[i].constant + 
+            pointLights[i].linear * distance + 
+            pointLights[i].quadratic * (distance * distance)
+        );
+
+        diffuse += (diff * material.diffuse) * pointLights[i].diffuse * attenuation;
+        specular += (spec * material.specular) * pointLights[i].specular * attenuation;
     }
 
     // ambient lighting

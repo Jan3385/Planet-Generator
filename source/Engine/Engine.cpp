@@ -156,7 +156,7 @@ void GameEngine::Run()
     lightObj->GetRenderComponent()->passLightDataToShader = false;
 
     Component::PointLightSource *pointLight = lightObj->AddComponent<Component::PointLightSource>();
-    pointLight->SetLightData(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, 0.5f, 5.0f);
+    pointLight->SetLightData(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
     
     Object::GameObject *lightObj2 = currentLevel->CreateGameObject();
@@ -171,7 +171,7 @@ void GameEngine::Run()
     lightObj2->GetRenderComponent()->passLightDataToShader = false;
 
     Component::PointLightSource *pointLight2 = lightObj2->AddComponent<Component::PointLightSource>();
-    pointLight2->SetLightData(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, 5.0f);
+    pointLight2->SetLightData(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
 
     Object::GameObject *lightObj3 = currentLevel->CreateGameObject();
@@ -186,7 +186,7 @@ void GameEngine::Run()
     lightObj3->GetRenderComponent()->passLightDataToShader = false;
 
     Component::PointLightSource *pointLight3 = lightObj3->AddComponent<Component::PointLightSource>();
-    pointLight3->SetLightData(glm::vec3(0.2f, 1.0f, 0.2f), 0.5f, 0.5f, 5.0f);
+    pointLight3->SetLightData(glm::vec3(0.2f, 1.0f, 0.2f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
