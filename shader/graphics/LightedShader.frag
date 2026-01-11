@@ -31,9 +31,16 @@ struct PointLight {
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
+struct DirectionLight{
+    vec3 direction;
+    vec3 diffuse;
+    vec3 specular;
+};
+uniform DirectionLight directionalLight;
+
 void main()
 {
-    // diffuse lighting
+    // diffuse + specular lighting
     vec3 diffuse = vec3(0.0f);
     vec3 specular = vec3(0.0f);
     for(int i = 0; i < numPointLights; i++) {
@@ -54,6 +61,16 @@ void main()
         diffuse += (diff * material.diffuse) * pointLights[i].diffuse * attenuation;
         specular += (spec * material.specular) * pointLights[i].specular * attenuation;
     }
+
+    // directional light
+    vec3 dirLightDir = normalize(-directionalLight.direction);
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-dirLightDir, Normal);
+
+    float dirDiff = max(dot(Normal, dirLightDir), 0.0);
+    float dirSpec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128.0);
+    diffuse += (dirDiff * material.diffuse) * directionalLight.diffuse;
+    specular += (dirSpec * material.specular) * directionalLight.specular;
 
     // ambient lighting
     vec3 ambient = (ambientColor * material.ambient) * ambientIntensity;

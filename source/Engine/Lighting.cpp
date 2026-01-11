@@ -33,6 +33,9 @@ void Lighting::RegisterShaderLightUpdateCallback(GL::Shader *shader)
     shader->Use();
     shader->SetVec3("ambientColor", this->ambientColor);
     shader->SetFloat("ambientIntensity", this->ambientIntensity);
+    shader->SetVec3("directionalLight.direction", this->directionalLightSource.direction);
+    shader->SetVec3("directionalLight.diffuse", this->directionalLightSource.diffuse);
+    shader->SetVec3("directionalLight.specular", this->directionalLightSource.specular);
 }
 
 /**
@@ -84,11 +87,28 @@ void Lighting::RemovePointLightSource(PointLightSource *pointLight)
         this->pointLightSources.end());
 }
 
+void Lighting::SetDirectionalLightSource(const DirectionLightSource &directionalLight)
+{
+    this->directionalLightSource = directionalLight;
+    this->TriggerShaderLightUpdateCallback();
+}
+
+void Lighting::SetDirectionalLightSource(const glm::vec3 &direction, const glm::vec3 &diffuse, const glm::vec3 &specular)
+{
+    this->directionalLightSource.direction = direction;
+    this->directionalLightSource.diffuse = diffuse;
+    this->directionalLightSource.specular = specular;
+    this->TriggerShaderLightUpdateCallback();
+}
+
 void Lighting::TriggerShaderLightUpdateCallback()
 {
     for (GL::Shader* shader : this->shaderLightUpdateCallbackList) {
         shader->Use();
         shader->SetVec3("ambientColor", this->ambientColor);
         shader->SetFloat("ambientIntensity", this->ambientIntensity);
+        shader->SetVec3("directionalLight.direction", this->directionalLightSource.direction);
+        shader->SetVec3("directionalLight.diffuse", this->directionalLightSource.diffuse);
+        shader->SetVec3("directionalLight.specular", this->directionalLightSource.specular);
     }
 }

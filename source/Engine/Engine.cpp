@@ -40,6 +40,11 @@ void GameEngine::Run()
     currentLevel = new Level();
     input = new Input();
     lighting = new Lighting();
+    lighting->SetDirectionalLightSource(
+        glm::vec3(-0.2f, 1.0f, -0.3f),
+        glm::vec3(0.5f, 0.5f, 0.5f),
+        glm::vec3(0.5f, 0.5f, 0.5f)
+    );
 
     Renderer::SetVSYNC(true);
 
@@ -144,6 +149,7 @@ void GameEngine::Run()
     renderComp->SetMaterial(GetMaterial(MatIndex::RedPlastic));
 
     // Light source obj
+    
     Object::GameObject *lightObj = currentLevel->CreateGameObject();
 
     lightObj->GetMesh()->SetMeshData(vertices, normals);

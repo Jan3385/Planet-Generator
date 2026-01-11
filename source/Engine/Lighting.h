@@ -23,6 +23,13 @@ public:
         float radius;
     };
 
+    struct DirectionLightSource {
+        glm::vec3 direction;
+
+        glm::vec3 diffuse;
+        glm::vec3 specular;
+    };
+
     Lighting() = default;
     ~Lighting() = default;
 
@@ -38,8 +45,14 @@ public:
 
     void AddPointLightSource(PointLightSource* pointLight);
     void RemovePointLightSource(PointLightSource* pointLight);
+
+    void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
+    void SetDirectionalLightSource(const glm::vec3& direction,
+                                   const glm::vec3& diffuse,
+                                   const glm::vec3& specular);  
 private:
     std::vector<PointLightSource*> pointLightSources;
+    DirectionLightSource directionalLightSource;
 
     void TriggerShaderLightUpdateCallback();
     std::vector<GL::Shader*> shaderLightUpdateCallbackList;
