@@ -13,7 +13,7 @@ public:
     Movement(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Movement() override = default;
 protected:
-    static constexpr float SPEED = 0.08f;
+    static constexpr float SPEED = 4.8f;
 private:
     void Awake() override;
     void OnDestroy() override;

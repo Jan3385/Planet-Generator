@@ -28,7 +28,10 @@ void Component::Movement::OnDisable()
 
 void Component::Movement::Update()
 {
-    transform->RotateBy(glm::vec2(-GameEngine::input->GetCursorDelta().x * 0.1f, -GameEngine::input->GetCursorDelta().y * 0.1f));
+    transform->RotateBy(
+        glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
+        * GameEngine::instance->DeltaTime() * 6.0f
+    );
 
     glm::vec2 input = Input::GetMovementVector();
 
@@ -52,6 +55,8 @@ void Component::Movement::Update()
         moveVector.y += SPEED;
     if(Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
         moveVector.y -= SPEED;
+
+    moveVector *= GameEngine::instance->DeltaTime();
 
     transform->MovePosBy(moveVector);
 }

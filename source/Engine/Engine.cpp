@@ -180,12 +180,17 @@ void GameEngine::Run()
 
     Input::SetCursorMode(Input::CursorMode::Trapped);
 
+    double lastFrameTime = glfwGetTime();
     while (!renderer->ShouldClose())
     {
+        double currentFrameTime = glfwGetTime();
+        this->deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
+        lastFrameTime = currentFrameTime;
+
         obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
         glfwPollEvents();
 
-        currentLevel->Update();
+        currentLevel->Update(); 
 
         renderer->Update();
 

@@ -13,10 +13,13 @@ public:
     static Input* input;
     static Lighting* lighting;
 
+    float DeltaTime() const { return deltaTime; }
+
     GameEngine();
     ~GameEngine();
 
     void Run();
 private:
+    float deltaTime = 0.166f;
     void InitializeGLFW();
 };
