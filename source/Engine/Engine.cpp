@@ -31,6 +31,9 @@ GameEngine::~GameEngine()
 
 void GameEngine::Run()
 {
+    Debug::Logger::Instance().AddSink(new Debug::Logger::ConsoleSink());
+    Debug::Logger::Instance().minLogLevel = Debug::Logger::Level::SPAM;
+
     InitializeGLFW();
 
     renderer = new Renderer();
@@ -43,7 +46,6 @@ void GameEngine::Run()
     // temp ----
     GL::BasicShaderProgram lightShader("LightedShader");
     lightShader.Use();
-    lightShader.SetVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
     lighting->RegisterShaderLightUpdateCallback(&lightShader);
 
     GL::BasicShaderProgram colorShader("BasicShader.vert", "ColorShader.frag", "Color Shader");
@@ -139,6 +141,7 @@ void GameEngine::Run()
 
     Component::RenderComponent *renderComp = obj->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
+    renderComp->SetMaterial(GetMaterial(MatIndex::RedPlastic));
 
     // Light source obj
     Object::GameObject *lightObj = currentLevel->CreateGameObject();
@@ -153,10 +156,9 @@ void GameEngine::Run()
     lightObj->GetRenderComponent()->passLightDataToShader = false;
 
     Component::PointLightSource *pointLight = lightObj->AddComponent<Component::PointLightSource>();
-    pointLight->SetLightData(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, 5.0f);
+    pointLight->SetLightData(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, 0.5f, 5.0f);
 
-
-
+    
     Object::GameObject *lightObj2 = currentLevel->CreateGameObject();
 
     lightObj2->GetMesh()->SetMeshData(vertices, normals);
@@ -169,7 +171,22 @@ void GameEngine::Run()
     lightObj2->GetRenderComponent()->passLightDataToShader = false;
 
     Component::PointLightSource *pointLight2 = lightObj2->AddComponent<Component::PointLightSource>();
-    pointLight2->SetLightData(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 5.0f);
+    pointLight2->SetLightData(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, 5.0f);
+
+
+    Object::GameObject *lightObj3 = currentLevel->CreateGameObject();
+
+    lightObj3->GetMesh()->SetMeshData(vertices, normals);
+    Component::Transform *lightTransform3 = lightObj3->GetTransform();
+
+    lightTransform3->SetScale(glm::vec3(0.2f));
+    lightTransform3->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
+
+    lightObj3->GetRenderComponent()->SetRenderShader(&colorShader);
+    lightObj3->GetRenderComponent()->passLightDataToShader = false;
+
+    Component::PointLightSource *pointLight3 = lightObj3->AddComponent<Component::PointLightSource>();
+    pointLight3->SetLightData(glm::vec3(0.2f, 1.0f, 0.2f), 0.5f, 0.5f, 5.0f);
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
@@ -186,6 +203,14 @@ void GameEngine::Run()
         double currentFrameTime = glfwGetTime();
         this->deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
         lastFrameTime = currentFrameTime;
+
+        static int i = 0;
+        i ++;
+        if(i >= 120){
+            i = 0;
+            MatIndex randomMat = static_cast<MatIndex>(rand() % static_cast<int>(MatIndex::Count));
+            renderComp->SetMaterial(GetMaterial(randomMat));
+        }
 
         obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
         glfwPollEvents();

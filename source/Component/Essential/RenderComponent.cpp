@@ -65,6 +65,19 @@ void Component::RenderComponent::OnDisable()
 
 void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
 {
+    if(!this->material && this->passLightDataToShader){ //TODO: make new component for light render
+        Debug::LogError("RenderComponent rendered with no material assigned!");
+        return;
+    }
+    if(!this->mesh){
+        Debug::LogError("RenderComponent rendered with no mesh assigned!");
+        return;
+    }
+    if(!this->transform){
+        Debug::LogError("RenderComponent rendered with no transform assigned!");
+        return;
+    }
+
     this->renderShader->Use();
 
     this->renderShader->SetMat4("projection", projection);
@@ -81,13 +94,17 @@ void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
         auto closestLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
         int lightCount = 0;
 
+        this->renderShader->SetVec3("material.ambient", this->material->ambient);
+        this->renderShader->SetVec3("material.diffuse", this->material->diffuse);
+        this->renderShader->SetVec3("material.specular", this->material->specular);
+        this->renderShader->SetFloat("material.shininess", this->material->shininess);
+
         for (auto* light : closestLights) {
             if (light != nullptr) {
                 std::string baseName = "pointLights[" + std::to_string(lightCount) + "]";
                 this->renderShader->SetVec3(baseName + ".position", light->position);
-                this->renderShader->SetVec3(baseName + ".color", light->color);
-                this->renderShader->SetFloat(baseName + ".intensity", light->intensity);
-                this->renderShader->SetFloat(baseName + ".radius", light->radius);
+                this->renderShader->SetVec3(baseName + ".diffuse", light->diffuse);
+                this->renderShader->SetVec3(baseName + ".specular", light->specular);
                 lightCount++;
             }
         }

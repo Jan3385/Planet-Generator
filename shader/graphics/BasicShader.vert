@@ -5,8 +5,6 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 transform;
 
-out vec3 FragPos;
-
 void main()
 {
     gl_Position = projection * view * transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);

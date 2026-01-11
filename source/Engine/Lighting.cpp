@@ -33,7 +33,6 @@ void Lighting::RegisterShaderLightUpdateCallback(GL::Shader *shader)
     shader->Use();
     shader->SetVec3("ambientColor", this->ambientColor);
     shader->SetFloat("ambientIntensity", this->ambientIntensity);
-    shader->SetFloat("specularIntensity", this->specularIntensity);
 }
 
 /**
@@ -91,6 +90,5 @@ void Lighting::TriggerShaderLightUpdateCallback()
         shader->Use();
         shader->SetVec3("ambientColor", this->ambientColor);
         shader->SetFloat("ambientIntensity", this->ambientIntensity);
-        shader->SetFloat("specularIntensity", this->specularIntensity);
     }
 }

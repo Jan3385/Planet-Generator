@@ -6,25 +6,16 @@
 
 void Component::PointLightSource::SetLightData(const PointLightData &newData)
 {
-    this->data.color = newData.color;
-    this->data.intensity = newData.intensity;
+    this->data.diffuse = newData.color * newData.intensity;
+    this->data.specular = newData.color * newData.intensity;
     this->data.radius = newData.radius;
 }
 
-void Component::PointLightSource::SetLightData(glm::vec3 color, float intensity, float radius)
+void Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float radius)
 {
-    this->data.color = color;
-    this->data.intensity = intensity;
+    this->data.diffuse = color * diffuseIntensity;
+    this->data.specular = color * specularIntensity;
     this->data.radius = radius;
-}
-
-Component::PointLightSource::PointLightData Component::PointLightSource::GetLightData() const
-{
-    PointLightData lightData;
-    lightData.color = this->data.color;
-    lightData.intensity = this->data.intensity;
-    lightData.radius = this->data.radius;
-    return lightData;
 }
 
 void Component::PointLightSource::Awake()

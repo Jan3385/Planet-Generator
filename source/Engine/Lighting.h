@@ -12,8 +12,10 @@ public:
 
     struct PointLightSource {
         glm::vec3 position;
-        glm::vec3 color;
-        float intensity;
+
+        glm::vec3 diffuse;
+        glm::vec3 specular;
+
         float radius;
     };
 
@@ -37,8 +39,6 @@ private:
 
     void TriggerShaderLightUpdateCallback();
     std::vector<GL::Shader*> shaderLightUpdateCallbackList;
-
-    float specularIntensity = 0.5f;
 
     glm::vec3 ambientColor = glm::vec3(1.0f, 1.0f, 1.0f);
     float ambientIntensity = 0.2f;

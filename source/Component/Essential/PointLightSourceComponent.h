@@ -17,8 +17,7 @@ public:
     };
 
     void SetLightData(const PointLightData& newData);
-    void SetLightData(glm::vec3 color, float intensity, float radius);
-    PointLightData GetLightData() const;
+    void SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float radius);
 
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;

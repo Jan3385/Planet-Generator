@@ -2,6 +2,8 @@
 
 #include "Engine/Renderer.h"
 
+#include "Object/Material.h"
+
 #include "Component/BaseComponent.h"
 #include "Component/Essential/MeshComponent.h"
 #include "Component/Essential/TransformComponent.h"
@@ -24,6 +26,7 @@ public:
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     Mesh* GetMesh() const { return mesh; }
+    void SetMaterial(Material* newMaterial) { this->material = newMaterial; }
     void SetMeshComponent(Mesh* newMesh);
     void SetRenderShader(GL::Shader* shader) { this->renderShader = shader; }
 
@@ -39,6 +42,8 @@ private:
 
     void SetMeshData(Mesh* mesh);
     Transform* transform = nullptr;
+
+    Material *material = nullptr;    
     Mesh* mesh = nullptr;
 
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> verticiesBuffer;
