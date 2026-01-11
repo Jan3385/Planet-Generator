@@ -26,6 +26,8 @@ public:
     Mesh* GetMesh() const { return mesh; }
     void SetMeshComponent(Mesh* newMesh);
     void SetRenderShader(GL::Shader* shader) { this->renderShader = shader; }
+
+    bool passLightDataToShader = true;
 protected:
     void OnMeshUpdated(Mesh* mesh) override;
 private:
@@ -40,8 +42,8 @@ private:
     Mesh* mesh = nullptr;
 
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> verticiesBuffer;
+    GL::Buffer<float, GL::BufferTarget::ArrayBuffer> normalsBuffer;
     GL::VertexArray vertexArrayObject;
-    GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indiciesBuffer;
     GL::Shader *renderShader;
 
     friend class Object::BaseObject;

@@ -3,17 +3,16 @@
 Component::Mesh::~Mesh()
 {
     verticies.clear();
-    indicies.clear();
 
     for(auto& callback : updateCallbacks){
         callback->OnMeshUpdated(this);
     }
 }
 
-void Component::Mesh::SetMeshData(std::vector<float> verticies, std::vector<unsigned int> indicies)
+void Component::Mesh::SetMeshData(std::vector<float> verticies, std::vector<float> normals)
 {
     this->verticies = verticies;
-    this->indicies = indicies;
+    this->normals = normals;
 
     for(auto& callback : updateCallbacks){
         callback->OnMeshUpdated(this);

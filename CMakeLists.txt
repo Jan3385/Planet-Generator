@@ -18,6 +18,7 @@ endif()
 message(STATUS "triplet: ${VCPKG_TARGET_TRIPLET}")
 message(STATUS "Using generator: ${CMAKE_GENERATOR}")
 message(STATUS "Using VCPKG toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "Preset build type: ${CMAKE_BUILD_TYPE}")
 
 # GLAD
 add_library(glad STATIC

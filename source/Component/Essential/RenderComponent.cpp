@@ -1,6 +1,7 @@
 #include "RenderComponent.h"
 
 #include "Engine/Engine.h"
+#include "Engine/Lighting.h"
 
 void Component::RenderComponent::OnMeshUpdated(Mesh *mesh)
 {
@@ -17,18 +18,18 @@ void Component::RenderComponent::SetMeshData(Component::Mesh *mesh)
 {
     std::vector<float> verticies = mesh->GetVerticies();
     this->verticiesBuffer.SetData(verticies.data(), verticies.size() * sizeof(float), GL_STATIC_DRAW);
-    std::vector<unsigned int> indicies = mesh->GetIndicies();
-    this->indiciesBuffer.SetData(indicies.data(), indicies.size() * sizeof(unsigned int), GL_STATIC_DRAW);
-    
+    std::vector<float> normals = mesh->GetNormals();
+    this->normalsBuffer.SetData(normals.data(), normals.size() * sizeof(float), GL_STATIC_DRAW);
 }
 
 void Component::RenderComponent::Awake()
 {
     this->verticiesBuffer = GL::Buffer<float, GL::BufferTarget::ArrayBuffer>("RC_VerticiesBuffer");
-    this->indiciesBuffer = GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer>("RC_IndiciesBuffer");
+    this->normalsBuffer = GL::Buffer<float, GL::BufferTarget::ArrayBuffer>("RC_NormalsBuffer");
     this->vertexArrayObject = GL::VertexArray("RC_VertexArrayObject");
 
     vertexArrayObject.AddAttribute<glm::vec3>(0, 3, verticiesBuffer, GL_FALSE, 0);
+    vertexArrayObject.AddAttribute<glm::vec3>(1, 3, normalsBuffer, GL_FALSE, 0);
     vertexArrayObject.Unbind();
 
     if(!this->transform)
@@ -69,12 +70,33 @@ void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
     this->renderShader->SetMat4("projection", projection);
     this->renderShader->SetMat4("view", view);
 
-    if(this->transform)
-        this->renderShader->SetMat4("transform", this->transform->GetMatrixTransform());
+    glm::mat4 model = this->transform->GetMatrixTransform();
+
+    this->renderShader->SetMat4("transform", model);
+
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+    this->renderShader->SetMat3("normalMatrix", normalMatrix);
+
+    if(this->passLightDataToShader) {
+        auto closestLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
+        int lightCount = 0;
+
+        for (auto* light : closestLights) {
+            if (light != nullptr) {
+                std::string baseName = "pointLights[" + std::to_string(lightCount) + "]";
+                this->renderShader->SetVec3(baseName + ".position", light->position);
+                this->renderShader->SetVec3(baseName + ".color", light->color);
+                this->renderShader->SetFloat(baseName + ".intensity", light->intensity);
+                this->renderShader->SetFloat(baseName + ".radius", light->radius);
+                lightCount++;
+            }
+        }
+        this->renderShader->SetInt("numPointLights", lightCount);
+    }
 
     this->vertexArrayObject.Bind();
-    this->indiciesBuffer.Bind();
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(this->mesh->GetIndicies().size()), GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(this->mesh->GetIndicies().size()), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->GetVerticies().size() / 3));
 }
 
 void Component::RenderComponent::SetMeshComponent(Mesh *newMesh)

@@ -4,6 +4,8 @@
 
 void Component::Transform::SetPos(const glm::vec3 &newPos)
 {
+    if(newPos == this->position) return;
+
     dirtyTransform = true;
     this->position = newPos;
 }
@@ -36,12 +38,16 @@ void Component::Transform::SetScale(const glm::vec3 &newScale)
 
 void Component::Transform::MovePosBy(const glm::vec3 &deltaPos)
 {
+    if(deltaPos == glm::vec3(0.0f)) return;
+
     dirtyTransform = true;
     this->position += deltaPos;
 }
 
 void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
 {
+    if(deltaRot == glm::vec2(0.0f)) return;
+
     dirtyTransform = true;
     this->yaw += deltaRot.x;
     this->pitch += deltaRot.y;
@@ -52,16 +58,20 @@ void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
 
 void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
 {
+    if(deltaRot == glm::vec3(0.0f)) return;
+
     dirtyTransform = true;
     this->yaw += deltaRot.x;
     this->pitch += deltaRot.y;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
-    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+    this->rotation = glm::quat(glm::radians(glm::vec3(yaw, pitch, roll)));
 }
 
 void Component::Transform::ScaleBy(const glm::vec3 &deltaScale)
 {
+    if(deltaScale == glm::vec3(0.0f)) return;
+
     dirtyTransform = true;
     this->scale += deltaScale;
 }

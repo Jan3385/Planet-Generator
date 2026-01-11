@@ -1,6 +1,10 @@
 #include "Lighting.h"
 
+#include <array>
 #include <algorithm>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 
 void Lighting::SetAmbientColor(const glm::vec3 &color)
 {
@@ -42,6 +46,42 @@ void Lighting::UnregisterShaderLightUpdateCallback(GL::Shader *shader)
                     this->shaderLightUpdateCallbackList.end(),
                     shader),
         this->shaderLightUpdateCallbackList.end());
+}
+
+std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> Lighting::GetClosestPointLights(const glm::vec3 &position)
+{
+    std::vector<Lighting::PointLightSource*> viableLights;
+    for (Lighting::PointLightSource* light : this->pointLightSources) {
+        float distance2 = glm::distance2(light->position, position);
+        if (distance2 <= light->radius * light->radius) {
+            viableLights.push_back(light);
+        }
+    }
+    std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
+
+    // Sort viableLights by distance
+    std::sort(viableLights.begin(), viableLights.end(), [&position](Lighting::PointLightSource* a, Lighting::PointLightSource* b) {
+        return glm::distance2(a->position, position) < glm::distance2(b->position, position);
+    });
+
+    for (size_t i = 0; i < Lighting::MAX_EFFECTING_POINT_LIGHTS && i < viableLights.size(); ++i) {
+        closestLights[i] = viableLights[i];
+    }
+    return closestLights;
+}
+
+void Lighting::AddPointLightSource(PointLightSource *pointLight)
+{
+    this->pointLightSources.push_back(pointLight);
+}
+
+void Lighting::RemovePointLightSource(PointLightSource *pointLight)
+{
+    this->pointLightSources.erase(
+        std::remove(this->pointLightSources.begin(),
+                    this->pointLightSources.end(),
+                    pointLight),
+        this->pointLightSources.end());
 }
 
 void Lighting::TriggerShaderLightUpdateCallback()

@@ -1,6 +1,7 @@
 #include "Shader.h"
 
 #include "Debug/Logger.h"
+#include "Engine/Lighting.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -15,7 +16,8 @@ const std::string GL::Shader::SHADER_INCLUDE_EXTENSION = ".glsl";
 const std::string GL::Shader::SHADER_INCLUDE_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "Includes/";
 
 const std::unordered_map<std::string, std::string> shaderConstants = {
-    {"SHADER_VERSION", "460"}
+    {"SHADER_VERSION", "460"},
+    {"MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS)}
 };
 
 GLuint GL::Shader::activeShaderID = 0;
@@ -167,6 +169,11 @@ void GL::Shader::SetInt(const std::string &name, int value)
 void GL::Shader::SetFloat(const std::string &name, float value)
 {
     glUniform1f(this->GetUniformLocation(name.c_str()), value);
+}
+
+void GL::Shader::SetMat3(const std::string &name, glm::mat3 value)
+{
+    glUniformMatrix3fv(this->GetUniformLocation(name.c_str()), 1, GL_FALSE, &value[0][0]);
 }
 
 void GL::Shader::SetMat4(const std::string &name, glm::mat4 value)

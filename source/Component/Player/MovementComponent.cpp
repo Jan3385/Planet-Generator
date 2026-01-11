@@ -31,20 +31,27 @@ void Component::Movement::Update()
     transform->RotateBy(glm::vec2(-GameEngine::input->GetCursorDelta().x * 0.1f, -GameEngine::input->GetCursorDelta().y * 0.1f));
 
     glm::vec2 input = Input::GetMovementVector();
-    if(input == glm::vec2(0.0f, 0.0f)) return;
 
-    glm::vec3 forward = transform->GetForwardVector();
-    glm::vec3 right = transform->GetRightVector();
+    glm::vec3 moveVector = glm::vec3(0.0f);
+    if(input != glm::vec2(0.0f, 0.0f)){
+        glm::vec3 forward = transform->GetForwardVector();
+        glm::vec3 right = transform->GetRightVector();
 
-    // ignore tilt
-    forward.y = 0.0f;
-    right.y = 0.0f;
+        // ignore tilt
+        forward.y = 0.0f;
+        right.y = 0.0f;
 
-    forward = glm::normalize(forward);
-    right = glm::normalize(right);
+        forward = glm::normalize(forward);
+        right = glm::normalize(right);
 
-    glm::vec3 moveVector = forward * input.y + right * input.x;
-    moveVector = glm::normalize(moveVector) * SPEED;
+        moveVector = forward * input.y + right * input.x;
+        moveVector = glm::normalize(moveVector) * SPEED;
+    }
+
+    if(Input::IsKeyDown(GLFW_KEY_SPACE))
+        moveVector.y += SPEED;
+    if(Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+        moveVector.y -= SPEED;
 
     transform->MovePosBy(moveVector);
 }

@@ -47,7 +47,7 @@ public:
 
     struct LogMessage{
         std::chrono::system_clock::time_point timestamp;
-        Level level;
+        Logger::Level level;
         std::string message;
     };
 

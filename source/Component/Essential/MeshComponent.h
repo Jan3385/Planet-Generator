@@ -17,12 +17,12 @@ public:
 
     Mesh(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Mesh() override;
-    void SetMeshData(std::vector<float> verticies, std::vector<unsigned int> indicies);
+    void SetMeshData(std::vector<float> verticies, std::vector<float> normals);
 
     std::vector<float> GetVerticies() const { return verticies; }
-    std::vector<unsigned int> GetIndicies() const { return indicies; }
+    std::vector<float> GetNormals() const { return normals; }
 
-    bool IsEmpty() const { return verticies.empty() && indicies.empty(); }
+    bool IsEmpty() const { return verticies.empty(); }
 
     void AddUpdateCallback(IMeshUpdateCallback* callback) {
         this->updateCallbacks.push_back(callback);
@@ -32,7 +32,7 @@ public:
     }
 private:
     std::vector<float> verticies;
-    std::vector<unsigned int> indicies;
+    std::vector<float> normals;
     std::vector<IMeshUpdateCallback*> updateCallbacks;
 };
 }
