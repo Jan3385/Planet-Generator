@@ -38,6 +38,8 @@ private:
     void TriggerShaderLightUpdateCallback();
     std::vector<GL::Shader*> shaderLightUpdateCallbackList;
 
+    float specularIntensity = 0.5f;
+
     glm::vec3 ambientColor = glm::vec3(1.0f, 1.0f, 1.0f);
     float ambientIntensity = 0.2f;
 };

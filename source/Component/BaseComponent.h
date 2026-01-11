@@ -18,9 +18,9 @@ public:
 
     bool IsAwake() const { return awake; }
     bool IsStarted() const { return started; }
-protected:
-    Object::BaseObject* GetOwner() const { return owner; }
 
+    Object::BaseObject* GetOwner() const { return owner; }
+protected:
     virtual void Awake() {}
     virtual void Start() {}
     virtual void OnDestroy() {}

@@ -92,6 +92,9 @@ void Component::RenderComponent::Render(glm::mat4 &projection, glm::mat4 &view)
             }
         }
         this->renderShader->SetInt("numPointLights", lightCount);
+        
+        this->renderShader->SetVec3("viewPos", 
+            GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
     }
 
     this->vertexArrayObject.Bind();

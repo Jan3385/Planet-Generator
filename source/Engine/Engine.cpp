@@ -41,7 +41,7 @@ void GameEngine::Run()
     Renderer::SetVSYNC(true);
 
     // temp ----
-    GL::BasicShaderProgram lightShader("BasicShader.vert", "LightedShader.frag", "Lighted Shader");
+    GL::BasicShaderProgram lightShader("LightedShader");
     lightShader.Use();
     lightShader.SetVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
     lighting->RegisterShaderLightUpdateCallback(&lightShader);
@@ -182,7 +182,7 @@ void GameEngine::Run()
 
     while (!renderer->ShouldClose())
     {
-        obj->GetTransform()->RotateBy(glm::vec3(0.0f, 0.3f, 0.0f));
+        obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
         glfwPollEvents();
 
         currentLevel->Update();
