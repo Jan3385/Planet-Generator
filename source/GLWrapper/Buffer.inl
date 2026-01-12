@@ -101,7 +101,7 @@ inline void Buffer<T, Target>::SetData(const std::vector<T> &data, GLenum usage)
 {
     this->Bind();
     if constexpr (!std::is_same_v<T, bool>) {
-        BufferData(Target, data.size() * sizeof(T), data.data(), usage);
+        glBufferData(Target, data.size() * sizeof(T), data.data(), usage);
         this->bufferSize = static_cast<GLint>(data.size());
     } else{
         // special behaviour for std::vector<bool>

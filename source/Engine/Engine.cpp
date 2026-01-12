@@ -5,7 +5,8 @@
 #include "Debug/Logger.h"
 
 #include "GLWrapper/BasicShaderProgram.h"
-#include "Component/Essential/RenderComponent.h"
+#include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
+#include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Player/MovementComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
 #include "Object/GameObject.h"
@@ -55,7 +56,6 @@ void GameEngine::Run()
 
     GL::BasicShaderProgram colorShader("BasicShader.vert", "ColorShader.frag", "Color Shader");
     colorShader.Use();
-    colorShader.SetVec3("objectColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     std::vector<float> vertices = {
         -0.5f, -0.5f, -0.5f, 
@@ -144,55 +144,57 @@ void GameEngine::Run()
     
     obj->GetMesh()->SetMeshData(vertices, normals);
 
-    Component::RenderComponent *renderComp = obj->GetRenderComponent();
+    Component::PhongMeshRender *renderComp = obj->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
     renderComp->SetMaterial(GetMaterial(MatIndex::RedPlastic));
 
     // Light source obj
-    
-    Object::GameObject *lightObj = currentLevel->CreateGameObject();
 
-    lightObj->GetMesh()->SetMeshData(vertices, normals);
-    Component::Transform *lightTransform = lightObj->GetTransform();
+    Object::BaseObject *lightObj = currentLevel->CreateObject();
+
+    lightObj->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    Component::Transform *lightTransform = lightObj->AddComponent<Component::Transform>();
 
     lightTransform->SetScale(glm::vec3(0.2f));
     lightTransform->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
 
-    lightObj->GetRenderComponent()->SetRenderShader(&colorShader);
-    lightObj->GetRenderComponent()->passLightDataToShader = false;
+    Component::ColorMeshRender *lightRenderer = lightObj->AddComponent<Component::ColorMeshRender>();
+    lightRenderer->SetRenderShader(&colorShader);
+    lightRenderer->color = glm::vec3(1.0f, 0.0f, 0.0f);
 
     Component::PointLightSource *pointLight = lightObj->AddComponent<Component::PointLightSource>();
-    pointLight->SetLightData(glm::vec3(1.0f, 0.0f, 0.0f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
+    pointLight->SetLightData(lightRenderer->color, 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
-    
-    Object::GameObject *lightObj2 = currentLevel->CreateGameObject();
+    Object::BaseObject *lightObj2 = currentLevel->CreateObject();
 
-    lightObj2->GetMesh()->SetMeshData(vertices, normals);
-    Component::Transform *lightTransform2 = lightObj2->GetTransform();
+    lightObj2->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    Component::Transform *lightTransform2 = lightObj2->AddComponent<Component::Transform>();
 
     lightTransform2->SetScale(glm::vec3(0.2f));
     lightTransform2->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
 
-    lightObj2->GetRenderComponent()->SetRenderShader(&colorShader);
-    lightObj2->GetRenderComponent()->passLightDataToShader = false;
+    Component::ColorMeshRender *lightRenderer2 = lightObj2->AddComponent<Component::ColorMeshRender>();
+    lightRenderer2->SetRenderShader(&colorShader);
+    lightRenderer2->color = glm::vec3(1.0f, 1.0f, 1.0f);
 
     Component::PointLightSource *pointLight2 = lightObj2->AddComponent<Component::PointLightSource>();
-    pointLight2->SetLightData(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
+    pointLight2->SetLightData(lightRenderer2->color, 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
 
-    Object::GameObject *lightObj3 = currentLevel->CreateGameObject();
+    Object::BaseObject *lightObj3 = currentLevel->CreateObject();
 
-    lightObj3->GetMesh()->SetMeshData(vertices, normals);
-    Component::Transform *lightTransform3 = lightObj3->GetTransform();
+    lightObj3->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    Component::Transform *lightTransform3 = lightObj3->AddComponent<Component::Transform>();
 
     lightTransform3->SetScale(glm::vec3(0.2f));
     lightTransform3->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
 
-    lightObj3->GetRenderComponent()->SetRenderShader(&colorShader);
-    lightObj3->GetRenderComponent()->passLightDataToShader = false;
+    Component::ColorMeshRender *lightRenderer3 = lightObj3->AddComponent<Component::ColorMeshRender>();
+    lightRenderer3->SetRenderShader(&colorShader);
+    lightRenderer3->color = glm::vec3(0.2f, 1.0f, 0.2f);
 
     Component::PointLightSource *pointLight3 = lightObj3->AddComponent<Component::PointLightSource>();
-    pointLight3->SetLightData(glm::vec3(0.2f, 1.0f, 0.2f), 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
+    pointLight3->SetLightData(lightRenderer3->color, 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
