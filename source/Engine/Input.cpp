@@ -2,6 +2,11 @@
 
 #include "Engine/Engine.h"
 
+constexpr int KEY_OFFSET = GLFW_KEY_SPACE;
+Input::CursorMode Input::currentCursorMode = Input::CursorMode::Normal;
+bool Input::currKey[GLFW_KEY_LAST - GLFW_KEY_SPACE + 1] = { false };
+bool Input::prevKey[GLFW_KEY_LAST - GLFW_KEY_SPACE + 1] = { false };
+
 Input::Input()
 {
     glfwSetCursorPosCallback(GameEngine::renderer->window,
@@ -13,8 +18,6 @@ Input::Input()
         [](GLFWwindow* window, double xoffset, double yoffset) {
             GameEngine::input->MouseScrollCallback(window, xoffset, yoffset);
         });
-
-    
 }
 
 Input::~Input()
@@ -24,29 +27,46 @@ Input::~Input()
 
 void Input::SetCursorMode(CursorMode mode)
 {
+    Input::currentCursorMode = mode;
     glfwSetInputMode(GameEngine::renderer->window, GLFW_CURSOR, static_cast<int>(mode));
+}
+
+void Input::ToggleTrappedCursor()
+{
+    if(Input::currentCursorMode == CursorMode::Trapped) SetCursorMode(CursorMode::Normal);
+    else SetCursorMode(CursorMode::Trapped);
+}
+
+bool Input::IsKeyPressed(int keycode)
+{
+    return Input::currKey[keycode - KEY_OFFSET] && !Input::prevKey[keycode - KEY_OFFSET];
 }
 
 bool Input::IsKeyDown(int keycode)
 {
-    return glfwGetKey(GameEngine::renderer->window, keycode) == GLFW_PRESS;
+    return Input::currKey[keycode - KEY_OFFSET];
 }
 
 bool Input::IsKeyUp(int keycode)
 {
-    return glfwGetKey(GameEngine::renderer->window, keycode) == GLFW_RELEASE;
+    return !Input::currKey[keycode - KEY_OFFSET];
+}
+
+bool Input::IsKeyReleased(int keycode)
+{
+    return !Input::currKey[keycode - KEY_OFFSET] && Input::prevKey[keycode - KEY_OFFSET];
 }
 
 glm::vec2 Input::GetMovementVector()
 {
     glm::vec2 movement(0.0f, 0.0f);
-    if(IsKeyDown(GLFW_KEY_W))
+    if(Input::IsKeyDown(GLFW_KEY_W))
         movement.y += 1.0f;
-    if(IsKeyDown(GLFW_KEY_S))
+    if(Input::IsKeyDown(GLFW_KEY_S))
         movement.y -= 1.0f;
-    if(IsKeyDown(GLFW_KEY_A))
+    if(Input::IsKeyDown(GLFW_KEY_A))
         movement.x -= 1.0f;
-    if(IsKeyDown(GLFW_KEY_D))
+    if(Input::IsKeyDown(GLFW_KEY_D))
         movement.x += 1.0f;
     return movement;
 }
@@ -66,10 +86,21 @@ glm::vec2 Input::GetCursorDelta() const
     return cursorDelta;
 }
 
+void Input::Update()
+{
+    glfwPollEvents();
+
+    for(int key = KEY_OFFSET; key <= GLFW_KEY_LAST; key++){
+        Input::currKey[key - KEY_OFFSET] = glfwGetKey(GameEngine::renderer->window, key) == GLFW_PRESS;
+    }
+}
+
 void Input::EndFrame()
 {
     cursorDelta = glm::vec2(0.0f, 0.0f);
     scrollDelta = glm::vec2(0.0f, 0.0f);
+
+    std::copy(std::begin(Input::currKey), std::end(Input::currKey), std::begin(Input::prevKey));
 }
 
 void Input::CursorPositionCallback(GLFWwindow *window, double xpos, double ypos)

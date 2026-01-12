@@ -219,7 +219,8 @@ void GameEngine::Run()
         }
 
         obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
-        glfwPollEvents();
+
+        input->Update();
 
         currentLevel->Update(); 
 

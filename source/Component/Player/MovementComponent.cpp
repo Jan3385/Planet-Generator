@@ -28,10 +28,11 @@ void Component::Movement::OnDisable()
 
 void Component::Movement::Update()
 {
-    transform->RotateBy(
-        glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
-        * GameEngine::instance->DeltaTime() * 6.0f
-    );
+    if(Input::GetCursorMode() == Input::CursorMode::Trapped)
+        transform->RotateBy(
+            glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
+            * GameEngine::instance->DeltaTime() * 6.0f
+        );
 
     glm::vec2 input = Input::GetMovementVector();
 
@@ -59,6 +60,9 @@ void Component::Movement::Update()
     moveVector *= GameEngine::instance->DeltaTime();
 
     transform->MovePosBy(moveVector);
+
+    if(GameEngine::input->IsKeyPressed(GLFW_KEY_ESCAPE))
+        Input::ToggleTrappedCursor();
 }
 
 void Component::Movement::FixedUpdate()
