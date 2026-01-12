@@ -18,6 +18,9 @@ public:
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Transform)}; }
 private:
     friend class Object::BaseObject;
 };

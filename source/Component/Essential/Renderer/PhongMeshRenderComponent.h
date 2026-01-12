@@ -19,6 +19,9 @@ public:
 
     void SetMaterial(Material* newMaterial) { this->material = newMaterial; }
 protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Transform)}; }
+
     Material *material = nullptr;   
     
     void Awake() override;

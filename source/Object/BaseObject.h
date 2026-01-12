@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <queue>
+#include <typeindex>
 
 #include "Component/BaseComponent.h"
 
@@ -26,6 +27,9 @@ public:
 
     template<class ComponentType>
     std::vector<ComponentType*> GetComponents();
+
+    bool HasComponentType(const std::type_index &type) const;
+    bool HasAllComponentTypes(const std::vector<std::type_index> &types) const;
 
     template<class ComponentType>
     void RemoveComponents();

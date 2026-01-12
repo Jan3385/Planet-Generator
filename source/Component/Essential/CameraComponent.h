@@ -26,6 +26,9 @@ protected:
     void RecalculateProjection();
 
     glm::mat4 projection;
+protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Transform)}; }
 private:
     void Awake() override;
     void OnDestroy() override;

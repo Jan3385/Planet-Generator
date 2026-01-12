@@ -26,6 +26,8 @@ public:
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;
 protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Transform)}; }
 private:
     Lighting::PointLightSource data;
 

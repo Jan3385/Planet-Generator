@@ -27,6 +27,9 @@ public:
     void SetMeshComponent(Mesh* newMesh);
     void SetRenderShader(GL::Shader* shader) { this->renderShader = shader; }
 protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Transform)}; }
+
     void OnMeshUpdated(Mesh* mesh) override;
 
     void Awake() override;

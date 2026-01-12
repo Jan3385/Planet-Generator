@@ -30,6 +30,9 @@ public:
     void RemoveUpdateCallback(IMeshUpdateCallback* callback) {
         std::erase(updateCallbacks, callback);
     }
+protected:
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {}; }
 private:
     std::vector<float> verticies;
     std::vector<float> normals;

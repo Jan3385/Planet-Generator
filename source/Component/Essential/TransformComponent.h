@@ -52,6 +52,9 @@ public:
     void ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
+
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {}; }
 private:
     glm::vec3 position = glm::vec3(0.0f);
 

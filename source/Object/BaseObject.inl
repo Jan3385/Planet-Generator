@@ -22,6 +22,8 @@ ComponentType* BaseObject::AddComponent()
     componentPtr->awake = true;
     componentPtr->Awake();
 
+    componentPtr->CheckDependencies();
+
     return componentPtr;
 }
 

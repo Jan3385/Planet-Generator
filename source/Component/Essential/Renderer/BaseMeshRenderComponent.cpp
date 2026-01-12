@@ -79,6 +79,8 @@ glm::mat4 Component::BaseMeshRender::RenderSetBasics(glm::mat4 &projection, glm:
 
 void Component::BaseMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
+    if(!this->mesh) return;
+    
     this->RenderSetBasics(projection, view);
 
     this->vertexArrayObject.Bind();

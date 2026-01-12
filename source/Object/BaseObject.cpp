@@ -7,6 +7,25 @@ Object::BaseObject::~BaseObject()
     }
 }
 
+bool Object::BaseObject::HasComponentType(const std::type_index &type) const
+{
+    for (const auto& component : components) {
+        if (typeid(*component) == type) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+bool Object::BaseObject::HasAllComponentTypes(const std::vector<std::type_index> &types) const
+{
+    for (const auto& type : types) {
+        if (!HasComponentType(type)) return false;
+    }
+
+    return true;
+}
+
 /**
  * @brief Updates the Object
  * @details Calls Start on all components that need it and then calls Update on all updatable components

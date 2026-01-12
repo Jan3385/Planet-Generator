@@ -1,5 +1,8 @@
 #pragma once
 
+#include <typeindex>
+#include <vector>
+
 namespace Object {
     class BaseObject;
 };
@@ -8,7 +11,9 @@ namespace Component {
 class BaseComponent {
 public:
     BaseComponent(Object::BaseObject* owner) : owner(owner) {};
-    virtual ~BaseComponent() = default;
+    virtual ~BaseComponent(){
+        this->OnDestroy();
+    };
 
     // Disable copy and move
     BaseComponent(const BaseComponent&) = delete;
@@ -19,6 +24,8 @@ public:
     bool IsAwake() const { return awake; }
     bool IsStarted() const { return started; }
 
+    void CheckDependencies() const;
+
     Object::BaseObject* GetOwner() const { return owner; }
 protected:
     virtual void Awake() {}
@@ -26,6 +33,8 @@ protected:
     virtual void OnDestroy() {}
     virtual void OnEnable() {}
     virtual void OnDisable() {}
+
+    virtual std::vector<std::type_index> GetDependencies() const { return {}; }
 private:
     Object::BaseObject* owner = nullptr;
 

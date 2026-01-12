@@ -5,6 +5,8 @@
 
 void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
+    if(!this->mesh) return;
+
     glm::mat4 model = this->RenderSetBasics(projection, view);
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
@@ -36,7 +38,7 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
         GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
 
     this->vertexArrayObject.Bind();
-    //glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(this->mesh->GetIndicies().size()), GL_UNSIGNED_INT, 0);
+
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->GetVerticies().size() / 3));
 }
 

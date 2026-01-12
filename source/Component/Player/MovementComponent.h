@@ -14,6 +14,9 @@ public:
     ~Movement() override = default;
 protected:
     static constexpr float SPEED = 4.8f;
+
+    std::vector<std::type_index> GetDependencies() const override 
+        { return {typeid(Component::Camera), typeid(Component::Transform)}; }
 private:
     void Awake() override;
     void OnDestroy() override;

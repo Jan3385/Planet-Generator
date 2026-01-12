@@ -9,9 +9,6 @@ void Component::Movement::Awake()
     camera = this->GetOwner()->GetComponent<Component::Camera>();
 
     transform->SetLockPitchRange(true);
-    
-    if(!transform) Debug::LogFatal("Movement component requires a Transform component to function properly!");
-    if(!camera) Debug::LogFatal("Movement component requires a Camera component to function properly!");
 }
 
 void Component::Movement::OnDestroy()
