@@ -18,63 +18,32 @@ uniform float ambientIntensity;
 
 #get MAX_POINT_LIGHTS
 
-struct PointLight {
-    vec3 position;
-    
-    vec3 diffuse;
-    vec3 specular;
+#include "LightTypes.glsl"
 
-    float constant;
-    float linear;
-    float quadratic;
-};
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
-struct DirectionLight{
-    vec3 direction;
-    vec3 diffuse;
-    vec3 specular;
-};
 uniform DirectionLight directionalLight;
+
+#include "LightFunctions.glsl"
 
 void main()
 {
-    // diffuse + specular lighting
+    vec3 result = vec3(0.0f);
+    vec3 viewDir = normalize(viewPos - FragPos);
+
+    // Point lights
     vec3 diffuse = vec3(0.0f);
     vec3 specular = vec3(0.0f);
     for(int i = 0; i < numPointLights; i++) {
-        vec3 lightDir = normalize(pointLights[i].position - FragPos);
-        float diff = max(dot(Normal, lightDir), 0.0);
-
-        vec3 viewDir = normalize(viewPos - FragPos);
-        vec3 reflectDir = reflect(-lightDir, Normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128.0);
-
-        float distance = length(pointLights[i].position - FragPos);
-        float attenuation = 1.0 / (
-            pointLights[i].constant + 
-            pointLights[i].linear * distance + 
-            pointLights[i].quadratic * (distance * distance)
-        );
-
-        diffuse += (diff * material.diffuse) * pointLights[i].diffuse * attenuation;
-        specular += (spec * material.specular) * pointLights[i].specular * attenuation;
+        result += CalculatePointLight(pointLights[i], Normal, FragPos, viewDir);
     }
 
     // directional light
-    vec3 dirLightDir = normalize(-directionalLight.direction);
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-dirLightDir, Normal);
-
-    float dirDiff = max(dot(Normal, dirLightDir), 0.0);
-    float dirSpec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128.0);
-    diffuse += (dirDiff * material.diffuse) * directionalLight.diffuse;
-    specular += (dirSpec * material.specular) * directionalLight.specular;
+    result += CalculateDirLight(directionalLight, Normal, viewDir);
 
     // ambient lighting
-    vec3 ambient = (ambientColor * material.ambient) * ambientIntensity;
+    result += (ambientColor * material.ambient) * ambientIntensity;
 
-    vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0f);
 } 
