@@ -3,10 +3,24 @@
 #include <glm/gtc/constants.hpp>
 #include <unordered_map>
 
+/**
+ * Calculates normal vector for the triangle defined by v1, v2, v3
+ * @param v1 First vertex of the triangle
+ * @param v2 Second vertex of the triangle
+ * @param v3 Third vertex of the triangle
+ * @return Normalized normal vector
+ */
 glm::vec3 CalculateNormal(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3)
 {
     return glm::normalize(glm::cross(v2 - v1, v3 - v1));
 }
+
+/**
+ * Calculates cubic UV coordinates for a given vertex position and normal
+ * @note Cubic mapping
+ * @param pos Vertex position
+ * @param normal Vertex normal
+ */
 glm::vec2 CalculateUVCube(
     const glm::vec3& pos,
     const glm::vec3& normal)
@@ -23,6 +37,12 @@ glm::vec2 CalculateUVCube(
 
     return uv * 0.5f + 0.5f;
 }
+/**
+ * Calculates spherical UV coordinates for a given vertex position
+ * @note Spherical mapping
+ * @param vertex Vertex position
+ * @return UV coordinates
+ */
 glm::vec2 CalculateUVSpherical(const glm::vec3 &vertex)
 {
     float u = 0.5f + (atan2(vertex.z, vertex.x) / (2.0f * glm::pi<float>()));
@@ -43,6 +63,11 @@ struct VertexKey {
                u == other.u && v == other.v;
     }
 };
+/**
+ * Generates a unique key for a vertex based on its attributes
+ * @param vertex The vertex for which to generate the key
+ * @return A VertexKey struct representing the unique key
+ */
 VertexKey GenerateVertexKey(const GL::VertexObj &vertex) {
     VertexKey key;
     key.px = static_cast<int>(vertex.position.x * KEY_SCALE);
@@ -71,6 +96,12 @@ struct VertexKeyHash{
         return h;
     }
 };
+/**
+ * Removes duplicate vertices and generates index buffer
+ * @param IN_Vertices Input list of vertices with duplicates
+ * @param OUT_Vertices Output list of unique vertices
+ * @param OUT_Indices Output index buffer referencing unique vertices
+ */
 void DeduplicateVertices(
     std::vector<GL::VertexObj> &IN_Vertices,
     std::vector<GL::VertexObj> &OUT_Vertices,
@@ -94,7 +125,12 @@ void DeduplicateVertices(
         }
     }
 }
+// end of deduplication
 
+/**
+ * Generates vertex positions for a unit cube centered at the origin
+ * @return A vector of floats representing the cube's vertex positions (x1, y1, z1, x2, y2,...)
+ */
 std::vector<float> MeshGenerator::GenerateCubeVerticesValues()
 {
     return std::vector<float>{
@@ -142,6 +178,10 @@ std::vector<float> MeshGenerator::GenerateCubeVerticesValues()
     };
 }
 
+/**
+ * Generates a cube mesh with vertices, normals, UVs, and indices
+ * @return A GL::Mesh object representing a cube
+ */
 GL::Mesh MeshGenerator::GenerateCubeMesh()
 {
     GL::Mesh mesh;
