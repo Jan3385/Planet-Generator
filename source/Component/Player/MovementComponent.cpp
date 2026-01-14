@@ -28,7 +28,7 @@ void Component::Movement::Update()
     if(Input::GetCursorMode() == Input::CursorMode::Trapped)
         transform->RotateBy(
             glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
-            * GameEngine::instance->DeltaTime() * 6.0f
+            * 0.15f
         );
 
     glm::vec2 input = Input::GetMovementVector();

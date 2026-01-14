@@ -1,6 +1,8 @@
 #include "TransformComponent.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 
 void Component::Transform::SetPos(const glm::vec3 &newPos)
 {
@@ -17,7 +19,8 @@ void Component::Transform::SetRot(const glm::vec2 &newRot)
     this->pitch = newRot.y;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
-    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+    
+    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
 }
 
 void Component::Transform::SetRot(const glm::vec3 &newRot)
@@ -27,7 +30,8 @@ void Component::Transform::SetRot(const glm::vec3 &newRot)
     this->pitch = newRot.y;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = newRot.z;
-    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+
+    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
 }
 
 void Component::Transform::SetScale(const glm::vec3 &newScale)
@@ -53,7 +57,8 @@ void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
     this->pitch += deltaRot.y;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
-    this->rotation = glm::quat(glm::radians(glm::vec3(pitch, yaw, roll)));
+    
+    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
 }
 
 void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
@@ -65,7 +70,7 @@ void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
     this->pitch += deltaRot.y;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
-    this->rotation = glm::quat(glm::radians(glm::vec3(yaw, pitch, roll)));
+    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
 }
 
 void Component::Transform::ScaleBy(const glm::vec3 &deltaScale)
