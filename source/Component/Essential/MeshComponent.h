@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Component/BaseComponent.h"
+#include "GLWrapper/Mesh.h"
 
 namespace Component {
 class Mesh : public BaseComponent {
