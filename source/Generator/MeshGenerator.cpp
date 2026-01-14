@@ -1,6 +1,7 @@
 #include "MeshGenerator.h"
 
 #include <glm/gtc/constants.hpp>
+#include <unordered_map>
 
 glm::vec3 CalculateNormal(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3)
 {
@@ -27,6 +28,71 @@ glm::vec2 CalculateUVSpherical(const glm::vec3 &vertex)
     float u = 0.5f + (atan2(vertex.z, vertex.x) / (2.0f * glm::pi<float>()));
     float v = 0.5f - (asin(vertex.y) / glm::pi<float>());
     return glm::vec2(u, v);
+}
+
+// generating indices
+constexpr int KEY_SCALE = 10000;
+struct VertexKey {
+    int px, py, pz;
+    int nx, ny, nz;
+    int u, v;
+
+    bool operator==(const VertexKey& other) const {
+        return px == other.px && py == other.py && pz == other.pz &&
+               nx == other.nx && ny == other.ny && nz == other.nz &&
+               u == other.u && v == other.v;
+    }
+};
+VertexKey GenerateVertexKey(const GL::VertexObj &vertex) {
+    VertexKey key;
+    key.px = static_cast<int>(vertex.position.x * KEY_SCALE);
+    key.py = static_cast<int>(vertex.position.y * KEY_SCALE);
+    key.pz = static_cast<int>(vertex.position.z * KEY_SCALE);
+    key.nx = static_cast<int>(vertex.normal.x * KEY_SCALE);
+    key.ny = static_cast<int>(vertex.normal.y * KEY_SCALE);
+    key.nz = static_cast<int>(vertex.normal.z * KEY_SCALE);
+    key.u  = static_cast<int>(vertex.uv.x * KEY_SCALE);
+    key.v  = static_cast<int>(vertex.uv.y * KEY_SCALE);
+    return key;
+}
+struct VertexKeyHash{
+    size_t operator()(const VertexKey &key) const {
+        size_t h = 0;
+
+        // Evil hash math
+        auto hash_combine = [&h](int v) {
+            h ^= std::hash<int>()(v) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        };
+
+        hash_combine(key.px); hash_combine(key.py); hash_combine(key.pz);
+        hash_combine(key.nx); hash_combine(key.ny); hash_combine(key.nz);
+        hash_combine(key.u);  hash_combine(key.v);
+
+        return h;
+    }
+};
+void DeduplicateVertices(
+    std::vector<GL::VertexObj> &IN_Vertices,
+    std::vector<GL::VertexObj> &OUT_Vertices,
+    std::vector<unsigned int>  &OUT_Indices
+){
+    std::unordered_map<VertexKey, uint32_t, VertexKeyHash> vertexMap;
+    
+    for(const GL::VertexObj &vertex : IN_Vertices) {
+        VertexKey key = GenerateVertexKey(vertex);
+
+        auto it = vertexMap.find(key);
+        if(it != vertexMap.end()) {
+            // Vertex already exists
+            OUT_Indices.push_back(it->second);
+        } else {
+            // New vertex
+            uint32_t newIndex = static_cast<uint32_t>(OUT_Vertices.size());
+            OUT_Vertices.push_back(vertex);
+            OUT_Indices.push_back(newIndex);
+            vertexMap[key] = newIndex;
+        }
+    }
 }
 
 std::vector<float> MeshGenerator::GenerateCubeVerticesValues()
@@ -98,9 +164,12 @@ GL::Mesh MeshGenerator::GenerateCubeMesh()
             vertex.uv = CalculateUVCube(positions[j], normal);
 
             mesh.vertices.push_back(vertex);
-            mesh.indices.push_back(static_cast<unsigned int>(mesh.indices.size()));
         }
     }
+
+    std::vector<GL::VertexObj> dedupedVertices;
+    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
+    mesh.vertices = std::move(dedupedVertices);
 
     return mesh;
 }
