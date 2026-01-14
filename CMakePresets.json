@@ -27,6 +27,18 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
             }
+        },
+        {
+            "name": "release-linux",
+            "hidden": false,
+            "description": "Release configuration",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "VCPKG_TARGET_TRIPLET": "x64-linux"
+            }
         }
     ]
 }
