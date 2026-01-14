@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/Lighting.h"
+#include "Debug/Logger.h"
 
 void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
@@ -12,61 +13,42 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     this->renderShader->SetMat3("normalMatrix", normalMatrix);
 
-    auto closestLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
-    int lightCount = 0;
+    this->material->Bind(*this->renderShader);
 
-    this->renderShader->SetVec3("material.ambient", this->material->ambient);
-    this->renderShader->SetVec3("material.diffuse", this->material->diffuse);
-    this->renderShader->SetVec3("material.specular", this->material->specular);
-    this->renderShader->SetFloat("material.shininess", this->material->shininess);
+    auto closestPLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
+    int pointLightCount = 0;
 
-    for (auto* light : closestLights) {
-        if (light != nullptr) {
-            std::string baseName = "pointLights[" + std::to_string(lightCount) + "]";
-            this->renderShader->SetVec3(baseName + ".position", light->position);
-            this->renderShader->SetVec3(baseName + ".diffuse", light->diffuse);
-            this->renderShader->SetVec3(baseName + ".specular", light->specular);
-            this->renderShader->SetFloat(baseName + ".constant", light->constant);
-            this->renderShader->SetFloat(baseName + ".linear", light->linear);
-            this->renderShader->SetFloat(baseName + ".quadratic", light->quadratic);
-            lightCount++;
+    for (auto* pointLight : closestPLights) {
+        if (pointLight != nullptr) {
+            pointLight->Bind(*this->renderShader, pointLightCount);
+            pointLightCount++;
         }
     }
-    this->renderShader->SetInt("numPointLights", lightCount);
+    this->renderShader->SetInt("numPointLights", pointLightCount);
     
     this->renderShader->SetVec3("viewPos", 
         GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
 
-    this->vertexArrayObject.Bind();
+    if(!mesh || mesh->IsEmpty()) {
+        Debug::LogWarn("PhongMeshRender: No mesh set or mesh is empty!");
+    }
 
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->GetVerticies().size() / 3));
+    this->mesh->GLBind();
+    this->mesh->GLDraw();
+}
+
+void Component::PhongMeshRender::SetMeshComponent(Component::GLMesh *newMesh)
+{
+    this->mesh = newMesh;
 }
 
 void Component::PhongMeshRender::Awake()
 {
-    this->verticiesBuffer = GL::Buffer<float, GL::BufferTarget::ArrayBuffer>("RC_VerticiesBuffer");
-    this->normalsBuffer = GL::Buffer<float, GL::BufferTarget::ArrayBuffer>("RC_NormalsBuffer");
-    this->vertexArrayObject = GL::VertexArray("RC_VertexArrayObject");
-    
-    vertexArrayObject.AddAttribute<glm::vec3>(0, 3, verticiesBuffer, GL_FALSE, 0);
-    vertexArrayObject.AddAttribute<glm::vec3>(1, 3, normalsBuffer, GL_FALSE, 0);
-    vertexArrayObject.Unbind();
-
     if(!this->transform)
         this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 
     if(!this->mesh)
-        this->SetMeshComponent(this->GetOwner()->GetComponent<Component::Mesh>());
-
-    if(this->mesh)
-        this->SetMeshData(this->mesh);
+        this->SetMeshComponent(this->GetOwner()->GetComponent<Component::GLMesh>());
 
     GameEngine::renderer->AddRenderCallback(this);
-}
-
-void Component::PhongMeshRender::SetMeshData(Mesh *mesh)
-{
-    BaseMeshRender::SetMeshData(mesh);
-
-    this->normalsBuffer.SetData(mesh->GetNormals(), GL_STATIC_DRAW);
 }

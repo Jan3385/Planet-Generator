@@ -23,17 +23,25 @@ public:
     std::vector<unsigned int> indices;
     std::vector<GL::TextureObj> textures;
     
-    Mesh(std::vector<GL::VertexObj> vertices, std::vector<unsigned int> indices, std::vector<GL::TextureObj> textures)
-        : vertices(vertices), indices(indices), textures(textures) { };
+    Mesh() = default;
+    Mesh(std::vector<GL::VertexObj> vertices, std::vector<unsigned int> indices, std::vector<GL::TextureObj> textures);
     ~Mesh() = default;
 
+    // Copy & move
+    Mesh(const Mesh&);
+    Mesh& operator=(const Mesh&);
+    Mesh(Mesh&&) noexcept;
+    Mesh& operator=(Mesh&&) noexcept;
+
     void Bind() const;
-private:
-    GL::Buffer<glm::vec3, GL::BufferTarget::ArrayBuffer> vertexBuffer;
-    GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indexBuffer;
-    GL::VertexArray vertexArrayObject;
 
     void UpdateMeshBuffers();
+protected:
+    void SetupMeshBuffers();
+private:
+    GL::Buffer<GL::VertexObj, GL::BufferTarget::ArrayBuffer> vertexBuffer;
+    GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indexBuffer;
+    GL::VertexArray vertexArrayObject;
 };
 }
 

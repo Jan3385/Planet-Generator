@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GLWrapper/Shader.h"
 #include <glm/glm.hpp>
 
 struct Material {
@@ -7,6 +8,13 @@ struct Material {
     glm::vec3 diffuse;
     glm::vec3 specular;
     float shininess;
+
+    void Bind(GL::Shader& shader) const{
+        shader.SetVec3("material.ambient", this->ambient);
+        shader.SetVec3("material.diffuse", this->diffuse);
+        shader.SetVec3("material.specular", this->specular);
+        shader.SetFloat("material.shininess", this->shininess);
+    }
 };
 
 enum class MatIndex {

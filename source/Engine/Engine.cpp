@@ -11,6 +11,8 @@
 #include "Component/Essential/PointLightSourceComponent.h"
 #include "Object/GameObject.h"
 
+#include "Generator/MeshGenerator.h"
+
 GameEngine* GameEngine::instance = nullptr;
 Renderer* GameEngine::renderer = nullptr;
 Level* GameEngine::currentLevel = nullptr;
@@ -57,92 +59,10 @@ void GameEngine::Run()
     GL::BasicShaderProgram colorShader("BasicShader.vert", "ColorShader.frag", "Color Shader");
     colorShader.Use();
 
-    std::vector<float> vertices = {
-        -0.5f, -0.5f, -0.5f, 
-        0.5f, -0.5f, -0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-
-        -0.5f, -0.5f,  0.5f, 
-        0.5f, -0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f, -0.5f,  0.5f, 
-
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f,  0.5f,  0.5f, 
-
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f, -0.5f,  
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-
-        -0.5f, -0.5f, -0.5f, 
-        0.5f, -0.5f, -0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        0.5f, -0.5f,  0.5f,  
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-
-        -0.5f,  0.5f, -0.5f, 
-        0.5f,  0.5f, -0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        0.5f,  0.5f,  0.5f,  
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
-    };
-    std::vector<float> normals = {
-        0.0f,  0.0f, -1.0f,
-        0.0f,  0.0f, -1.0f, 
-        0.0f,  0.0f, -1.0f, 
-        0.0f,  0.0f, -1.0f, 
-        0.0f,  0.0f, -1.0f, 
-        0.0f,  0.0f, -1.0f, 
-        0.0f,  0.0f, 1.0f,
-        0.0f,  0.0f, 1.0f,
-        0.0f,  0.0f, 1.0f,
-        0.0f,  0.0f, 1.0f,
-        0.0f,  0.0f, 1.0f,
-        0.0f,  0.0f, 1.0f,
-        -1.0f,  0.0f,  0.0f,
-        -1.0f,  0.0f,  0.0f,
-        -1.0f,  0.0f,  0.0f,
-        -1.0f,  0.0f,  0.0f,
-        -1.0f,  0.0f,  0.0f,
-        -1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        1.0f,  0.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f, -1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f,
-        0.0f,  1.0f,  0.0f
-    };
-
     // Normal obj
     Object::GameObject *obj = currentLevel->CreateGameObject();
     
-    obj->GetMesh()->SetMeshData(vertices, normals);
+    obj->GetMesh()->SetMeshData(MeshGenerator::GenerateCubeMesh());
 
     Component::PhongMeshRender *renderComp = obj->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
@@ -152,7 +72,7 @@ void GameEngine::Run()
 
     Object::BaseObject *lightObj = currentLevel->CreateObject();
 
-    lightObj->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    lightObj->AddComponent<Component::SimpleMesh>()->SetMeshData(MeshGenerator::GenerateCubeVerticesValues());
     Component::Transform *lightTransform = lightObj->AddComponent<Component::Transform>();
 
     lightTransform->SetScale(glm::vec3(0.2f));
@@ -167,7 +87,7 @@ void GameEngine::Run()
 
     Object::BaseObject *lightObj2 = currentLevel->CreateObject();
 
-    lightObj2->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    lightObj2->AddComponent<Component::SimpleMesh>()->SetMeshData(MeshGenerator::GenerateCubeVerticesValues());
     Component::Transform *lightTransform2 = lightObj2->AddComponent<Component::Transform>();
 
     lightTransform2->SetScale(glm::vec3(0.2f));
@@ -183,7 +103,7 @@ void GameEngine::Run()
 
     Object::BaseObject *lightObj3 = currentLevel->CreateObject();
 
-    lightObj3->AddComponent<Component::Mesh>()->SetMeshData(vertices, normals);
+    lightObj3->AddComponent<Component::SimpleMesh>()->SetMeshData(MeshGenerator::GenerateCubeVerticesValues());
     Component::Transform *lightTransform3 = lightObj3->AddComponent<Component::Transform>();
 
     lightTransform3->SetScale(glm::vec3(0.2f));

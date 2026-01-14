@@ -21,6 +21,16 @@ public:
         float quadratic;
 
         float radius;
+
+        void Bind(GL::Shader& shader, int index) const{
+            std::string baseName = "pointLights[" + std::to_string(index) + "]";
+            shader.SetVec3(baseName + ".position", this->position);
+            shader.SetVec3(baseName + ".diffuse", this->diffuse);
+            shader.SetVec3(baseName + ".specular", this->specular);
+            shader.SetFloat(baseName + ".constant", this->constant);
+            shader.SetFloat(baseName + ".linear", this->linear);
+            shader.SetFloat(baseName + ".quadratic", this->quadratic);
+        };
     };
 
     struct DirectionLightSource {

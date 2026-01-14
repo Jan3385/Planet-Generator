@@ -15,11 +15,11 @@ public:
     ~GameObject() override = default;
 
     Component::Transform* GetTransform();
-    Component::Mesh* GetMesh();
+    Component::GLMesh* GetMesh();
     Component::PhongMeshRender* GetRenderComponent();
 private:
     Component::Transform* transform = nullptr;
-    Component::Mesh* mesh = nullptr;
+    Component::GLMesh* mesh = nullptr;
     Component::PhongMeshRender* renderComponent = nullptr;
 };
 }
