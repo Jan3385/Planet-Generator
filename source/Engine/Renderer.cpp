@@ -34,6 +34,13 @@ Renderer::Renderer()
     }
 
     glEnable(GL_DEPTH_TEST);
+    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); //GL_LINE
+    //glPointSize(7.0f);
 }
 
 Renderer::~Renderer()
