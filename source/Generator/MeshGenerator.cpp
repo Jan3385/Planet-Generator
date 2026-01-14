@@ -189,13 +189,13 @@ GL::Mesh MeshGenerator::GenerateCubeMesh()
     std::vector<float> vertices = MeshGenerator::GenerateCubeVerticesValues();
 
     for (size_t i = 0; i < vertices.size(); i += 9) {
+        // three points forming a triangle
         glm::vec3 v0(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
         glm::vec3 v1(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
         glm::vec3 v2(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
+        glm::vec3 positions[3] = { v0, v1, v2 };
 
         glm::vec3 normal = CalculateNormal(v0, v1, v2);
-
-        glm::vec3 positions[3] = { v0, v1, v2 };
 
         for (int j = 0; j < 3; ++j) {
             GL::VertexObj vertex;
@@ -207,6 +207,7 @@ GL::Mesh MeshGenerator::GenerateCubeMesh()
         }
     }
 
+    // removing duplicate vertices
     std::vector<GL::VertexObj> dedupedVertices;
     DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
     mesh.vertices = std::move(dedupedVertices);
