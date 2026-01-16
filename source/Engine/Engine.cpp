@@ -65,7 +65,16 @@ void GameEngine::Run()
 
     Component::PhongMeshRender *renderComp = obj->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
-    renderComp->SetMaterial(GetMaterial(MatIndex::RedPlastic));
+    renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
+
+    Object::GameObject *floor = currentLevel->CreateGameObject();
+    floor->GetMesh()->SetMeshData(MeshGenerator::GenerateCubeMesh());
+    floor->GetTransform()
+        ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
+        ->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+    Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
+    floorRenderComp->SetRenderShader(&lightShader);
+    floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
 
 
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), colorShader);
