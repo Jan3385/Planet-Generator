@@ -1,7 +1,12 @@
 #include "Input.h"
 
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include "Engine/Engine.h"
 
+bool Input::ignoreKeyboardInput = false;
+bool Input::ignoreMouseInput = false;
 constexpr int KEY_OFFSET = GLFW_KEY_SPACE;
 Input::CursorMode Input::currentCursorMode = Input::CursorMode::Normal;
 bool Input::currKey[GLFW_KEY_LAST - GLFW_KEY_SPACE + 1] = { false };
@@ -73,12 +78,12 @@ glm::vec2 Input::GetMovementVector()
 
 bool Input::IsMouseButtonDown(MouseButton button)
 {
-    return glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_PRESS;
+    return !Input::ignoreMouseInput && glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonUp(MouseButton button)
 {
-    return glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_RELEASE;
+    return Input::ignoreMouseInput || glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_RELEASE;
 }
 
 glm::vec2 Input::GetCursorDelta() const
@@ -88,10 +93,15 @@ glm::vec2 Input::GetCursorDelta() const
 
 void Input::Update()
 {
+    ImGuiIO& io = ImGui::GetIO();
+
+    Input::ignoreMouseInput = io.WantCaptureMouse ? true : false;
+    Input::ignoreKeyboardInput = io.WantCaptureKeyboard ? true : false;
+
     glfwPollEvents();
 
     for(int key = KEY_OFFSET; key <= GLFW_KEY_LAST; key++){
-        Input::currKey[key - KEY_OFFSET] = glfwGetKey(GameEngine::renderer->window, key) == GLFW_PRESS;
+        Input::currKey[key - KEY_OFFSET] = glfwGetKey(GameEngine::renderer->window, key) == GLFW_PRESS && !Input::ignoreKeyboardInput;
     }
 }
 
@@ -105,6 +115,8 @@ void Input::EndFrame()
 
 void Input::CursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
 {
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+    
     if(firstCursorUpdate){
         cursorPos = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
         firstCursorUpdate = false;
@@ -118,5 +130,6 @@ void Input::CursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
 
 void Input::MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
     scrollDelta = glm::vec2(static_cast<float>(xoffset), static_cast<float>(yoffset));   
 }

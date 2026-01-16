@@ -33,9 +33,15 @@ public:
     static void SetVSYNC(bool enabled);
 
     void Update();
+    void WireframeMode(bool enabled);
+    void BackfaceCulling(bool enabled);
 
     void StoreWindowSize(int width, int height);
 private:
+    bool isWireframeMode = false;
+    bool isBackfaceCullingEnabled = true;
+
+    void DrawImGuiWindows();
     GLFWwindow* window = nullptr;
     std::vector<IRendererCallback*> renderCallbacks;
 

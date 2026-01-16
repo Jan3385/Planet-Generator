@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "Debug/Logger.h"
-
 #include "GLWrapper/BasicShaderProgram.h"
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"

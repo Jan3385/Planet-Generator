@@ -43,6 +43,9 @@ public:
     void Update();
     void EndFrame();
 private:
+    static bool ignoreKeyboardInput;
+    static bool ignoreMouseInput;
+
     bool firstCursorUpdate = true;
 
     static CursorMode currentCursorMode;
