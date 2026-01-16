@@ -86,20 +86,10 @@ void GameEngine::Run()
 
     Input::SetCursorMode(Input::CursorMode::Trapped);
 
-    double lastFrameTime = glfwGetTime();
+    this->lastFrameTime = glfwGetTime();
     while (!renderer->ShouldClose())
     {
-        double currentFrameTime = glfwGetTime();
-        this->deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
-        lastFrameTime = currentFrameTime;
-
-        static int i = 0;
-        i ++;
-        if(i >= 120){
-            i = 0;
-            MatIndex randomMat = static_cast<MatIndex>(rand() % static_cast<int>(MatIndex::Count));
-            renderComp->SetMaterial(GetMaterial(randomMat));
-        }
+        this->CalculateDeltaTime();
 
         obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
 
@@ -113,6 +103,13 @@ void GameEngine::Run()
     }
 
     glfwTerminate();
+}
+
+void GameEngine::CalculateDeltaTime()
+{
+    double currentFrameTime = glfwGetTime();
+    this->deltaTime = static_cast<float>(currentFrameTime - this->lastFrameTime);
+    this->lastFrameTime = currentFrameTime;
 }
 
 void GameEngine::InitializeGLFW()

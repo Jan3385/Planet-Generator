@@ -3,7 +3,7 @@
 #include "Object/BaseObject.h"
 #include "Object/GameObject.h"
 #include "Component/Essential/CameraComponent.h"
-#include "Math/RGB.h"
+#include "Math/Color.h"
 
 class Level {
 public:

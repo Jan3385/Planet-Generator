@@ -20,6 +20,8 @@ public:
 
     void Run();
 private:
+    void CalculateDeltaTime();
+    double lastFrameTime = 0.0;
     float deltaTime = 0.166f;
     void InitializeGLFW();
 };
