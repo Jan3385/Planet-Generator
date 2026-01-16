@@ -26,8 +26,8 @@ void Component::Transform::SetRot(const glm::vec2 &newRot)
 void Component::Transform::SetRot(const glm::vec3 &newRot)
 {
     dirtyTransform = true;
-    this->yaw = newRot.x;
-    this->pitch = newRot.y;
+    this->yaw = newRot.y;
+    this->pitch = newRot.x;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = newRot.z;
 
@@ -66,8 +66,8 @@ void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
     if(deltaRot == glm::vec3(0.0f)) return;
 
     dirtyTransform = true;
-    this->yaw += deltaRot.x;
-    this->pitch += deltaRot.y;
+    this->yaw += deltaRot.y;
+    this->pitch += deltaRot.x;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
     this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
