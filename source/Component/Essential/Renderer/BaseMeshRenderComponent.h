@@ -21,7 +21,7 @@ public:
     BaseMeshRender(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~BaseMeshRender() override = default;
 
-    void SetRenderShader(GL::Shader* shader) { this->renderShader = shader; }
+    BaseMeshRender* SetRenderShader(GL::Shader* shader) { this->renderShader = shader; return this; }
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }

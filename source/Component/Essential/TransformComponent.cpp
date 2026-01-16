@@ -4,15 +4,17 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 
-void Component::Transform::SetPos(const glm::vec3 &newPos)
+Component::Transform* Component::Transform::SetPos(const glm::vec3 &newPos)
 {
-    if(newPos == this->position) return;
+    if(newPos == this->position) return this;
 
     dirtyTransform = true;
     this->position = newPos;
+    
+    return this;
 }
 
-void Component::Transform::SetRot(const glm::vec2 &newRot)
+Component::Transform* Component::Transform::SetRot(const glm::vec2 &newRot)
 {
     dirtyTransform = true;
     this->yaw = newRot.x;
@@ -21,9 +23,11 @@ void Component::Transform::SetRot(const glm::vec2 &newRot)
     this->roll = 0.0f;
     
     this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+
+    return this;
 }
 
-void Component::Transform::SetRot(const glm::vec3 &newRot)
+Component::Transform* Component::Transform::SetRot(const glm::vec3 &newRot)
 {
     dirtyTransform = true;
     this->yaw = newRot.y;
@@ -32,25 +36,31 @@ void Component::Transform::SetRot(const glm::vec3 &newRot)
     this->roll = newRot.z;
 
     this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+
+    return this;
 }
 
-void Component::Transform::SetScale(const glm::vec3 &newScale)
+Component::Transform* Component::Transform::SetScale(const glm::vec3 &newScale)
 {
     dirtyTransform = true;
     this->scale = newScale;
+
+    return this;
 }
 
-void Component::Transform::MovePosBy(const glm::vec3 &deltaPos)
+Component::Transform* Component::Transform::MovePosBy(const glm::vec3 &deltaPos)
 {
-    if(deltaPos == glm::vec3(0.0f)) return;
+    if(deltaPos == glm::vec3(0.0f)) return this;
 
     dirtyTransform = true;
     this->position += deltaPos;
+
+    return this;
 }
 
-void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
+Component::Transform* Component::Transform::RotateBy(const glm::vec2 &deltaRot)
 {
-    if(deltaRot == glm::vec2(0.0f)) return;
+    if(deltaRot == glm::vec2(0.0f)) return this;
 
     dirtyTransform = true;
     this->yaw += deltaRot.x;
@@ -59,11 +69,13 @@ void Component::Transform::RotateBy(const glm::vec2 &deltaRot)
     this->roll = 0.0f;
     
     this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+
+    return this;
 }
 
-void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
+Component::Transform* Component::Transform::RotateBy(const glm::vec3 &deltaRot)
 {
-    if(deltaRot == glm::vec3(0.0f)) return;
+    if(deltaRot == glm::vec3(0.0f)) return this;
 
     dirtyTransform = true;
     this->yaw += deltaRot.y;
@@ -71,14 +83,18 @@ void Component::Transform::RotateBy(const glm::vec3 &deltaRot)
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
     this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+
+    return this;
 }
 
-void Component::Transform::ScaleBy(const glm::vec3 &deltaScale)
+Component::Transform* Component::Transform::ScaleBy(const glm::vec3 &deltaScale)
 {
-    if(deltaScale == glm::vec3(0.0f)) return;
+    if(deltaScale == glm::vec3(0.0f)) return this;
 
     dirtyTransform = true;
     this->scale += deltaScale;
+
+    return this;
 }
 
 glm::mat4 Component::Transform::GetMatrixTransform()

@@ -5,9 +5,10 @@ Component::SimpleMesh::~SimpleMesh()
     this->verticies.clear();
 }
 
-void Component::SimpleMesh::SetMeshData(std::vector<float> verticies)
+Component::SimpleMesh* Component::SimpleMesh::SetMeshData(std::vector<float> verticies)
 {
     this->verticies = verticies;
 
     this->NotifyMeshUpdated();
+    return this;
 }

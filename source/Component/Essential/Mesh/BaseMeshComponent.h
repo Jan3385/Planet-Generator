@@ -21,11 +21,13 @@ public:
 
     virtual bool IsEmpty() const { return true; }
 
-    void AddUpdateCallback(IMeshUpdateCallback* callback) {
+    BaseMesh* AddUpdateCallback(IMeshUpdateCallback* callback) {
         this->updateCallbacks.push_back(callback);
+        return this;
     }
-    void RemoveUpdateCallback(IMeshUpdateCallback* callback) {
+    BaseMesh* RemoveUpdateCallback(IMeshUpdateCallback* callback) {
         std::erase(updateCallbacks, callback);
+        return this;
     }
 protected:
     void NotifyMeshUpdated() {

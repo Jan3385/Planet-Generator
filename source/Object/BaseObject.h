@@ -13,11 +13,23 @@ public:
     BaseObject() = default;
     virtual ~BaseObject();
 
-    // Disable copy and move
+    // Disable copy
     BaseObject(const BaseObject&) = delete;
     BaseObject& operator=(const BaseObject&) = delete;
-    BaseObject(BaseObject&&) = delete;
-    BaseObject& operator=(BaseObject&&) = delete;
+    // Enable move
+    BaseObject(BaseObject&& other){
+        this->components = std::move(other.components);
+        this->updatables = std::move(other.updatables);
+        this->startables = std::move(other.startables);
+        this->enabled = other.enabled;
+    };
+    BaseObject& operator=(BaseObject&& other){
+        this->components = std::move(other.components);
+        this->updatables = std::move(other.updatables);
+        this->startables = std::move(other.startables);
+        this->enabled = other.enabled;
+        return *this;
+    };
 
     template<class ComponentType>
     ComponentType* AddComponent();

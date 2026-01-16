@@ -15,7 +15,7 @@ void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->GetVerticies().size() / 3));
 }
 
-void Component::ColorMeshRender::SetMeshComponent(BaseMesh *newMesh)
+Component::ColorMeshRender* Component::ColorMeshRender::SetMeshComponent(BaseMesh *newMesh)
 {
     if(this->mesh != nullptr)
         this->mesh->RemoveUpdateCallback(this);
@@ -28,6 +28,7 @@ void Component::ColorMeshRender::SetMeshComponent(BaseMesh *newMesh)
     }
 
     this->mesh = newMesh;
+    return this;
 }
 
 void Component::ColorMeshRender::Awake()
@@ -37,12 +38,6 @@ void Component::ColorMeshRender::Awake()
     
     vertexArrayObject.AddAttribute<glm::vec3>(0, 3, verticiesBuffer, GL_FALSE, 0);
     vertexArrayObject.Unbind();
-
-    if(!this->mesh)
-        this->SetMeshComponent(this->GetOwner()->GetComponent<Component::SimpleMesh>());
-
-    if(this->mesh)
-        this->SetMeshData(this->mesh);
 
     BaseMeshRender::Awake();
 }

@@ -12,9 +12,9 @@ public:
     Camera(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Camera() override = default;
 
-    void SetFOV(float newFov);
-    void SetAspectRatio(float newAspectRatio);
-    void SetClipPlanes(float newNearClip, float newFarClip);
+    Camera* SetFOV(float newFov);
+    Camera* SetAspectRatio(float newAspectRatio);
+    Camera* SetClipPlanes(float newNearClip, float newFarClip);
     glm::mat4 GetProjection() const { return projection; }
     glm::mat4 GetView() const;
 protected:

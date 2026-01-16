@@ -26,7 +26,8 @@ std::vector<unsigned int> Component::GLMesh::GetIndices() const
     return this->mesh.indices;
 }
 
-void Component::GLMesh::SetMeshData(const GL::Mesh &mesh)
+Component::GLMesh* Component::GLMesh::SetMeshData(const GL::Mesh &mesh)
 {
     this->mesh = mesh;
+    return this;
 }

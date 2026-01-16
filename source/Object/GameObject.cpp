@@ -7,6 +7,7 @@ Object::GameObject::GameObject()
     this->transform = this->AddComponent<Component::Transform>();
     this->mesh = this->AddComponent<Component::GLMesh>();
     this->renderComponent = this->AddComponent<Component::PhongMeshRender>();
+    this->renderComponent->SetMeshComponent(this->mesh);
 }
 
 Component::Transform *Object::GameObject::GetTransform()

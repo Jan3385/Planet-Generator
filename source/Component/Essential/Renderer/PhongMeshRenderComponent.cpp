@@ -37,18 +37,16 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->mesh->GLDraw();
 }
 
-void Component::PhongMeshRender::SetMeshComponent(Component::GLMesh *newMesh)
+Component::PhongMeshRender* Component::PhongMeshRender::SetMeshComponent(Component::GLMesh *newMesh)
 {
     this->mesh = newMesh;
+    return this;
 }
 
 void Component::PhongMeshRender::Awake()
 {
     if(!this->transform)
         this->transform = this->GetOwner()->GetComponent<Component::Transform>();
-
-    if(!this->mesh)
-        this->SetMeshComponent(this->GetOwner()->GetComponent<Component::GLMesh>());
 
     GameEngine::renderer->AddRenderCallback(this);
 }

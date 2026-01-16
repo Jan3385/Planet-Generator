@@ -3,11 +3,13 @@
 #include "Object/BaseObject.h"
 #include "Object/GameObject.h"
 #include "Component/Essential/CameraComponent.h"
+#include "Math/RGB.h"
 
 class Level {
 public:
     Object::BaseObject* CreateObject();
     Object::GameObject* CreateGameObject();
+    Object::BaseObject* CreateLightObject(Math::RGB color, GL::Shader &colorShader);
     void ObjectDestroy(Object::BaseObject* object);
 
     void Update();

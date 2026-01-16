@@ -18,7 +18,7 @@ public:
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     BaseMesh* GetMesh() const { return mesh; }
-    void SetMeshComponent(BaseMesh* newMesh);
+    ColorMeshRender* SetMeshComponent(BaseMesh* newMesh);
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 protected:

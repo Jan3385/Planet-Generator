@@ -26,30 +26,31 @@ public:
     glm::vec3 GetUpVector() const { return rotation * glm::vec3(0.0f, 1.0f, 0.0f); }
 
     glm::vec3 GetScale() const { return scale; }
-    void SetPos(const glm::vec3& newPos);
+
+    Transform* SetPos(const glm::vec3& newPos);
 
     // dx, dy in degrees
-    void SetRot(const glm::vec2& newRot);
+    Transform* SetRot(const glm::vec2& newRot);
     // euler angles
-    void SetRot(const glm::vec3& newRot);
+    Transform* SetRot(const glm::vec3& newRot);
 
-    void SetScale(const glm::vec3& newScale);
+    Transform* SetScale(const glm::vec3& newScale);
 
-    void MovePosBy(const glm::vec3& deltaPos);
+    Transform* MovePosBy(const glm::vec3& deltaPos);
 
     // dx, dy in degrees
-    void RotateBy(const glm::vec2& deltaRot);
+    Transform* RotateBy(const glm::vec2& deltaRot);
     // euler angles
-    void RotateBy(const glm::vec3& deltaRot);
+    Transform* RotateBy(const glm::vec3& deltaRot);
 
     /**
      * @brief Sets whether to lock the pitch rotation between -89 and 89 degrees
      * @param lock True to lock, false to unlock
      * @note Default `false`
      */
-    void SetLockPitchRange(bool lock) { this->lockPitchRange = lock; }
+    Transform* SetLockPitchRange(bool lock) { this->lockPitchRange = lock; return this; }
 
-    void ScaleBy(const glm::vec3& deltaScale);
+    Transform* ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
 

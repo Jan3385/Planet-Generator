@@ -6,32 +6,38 @@
 #include "Engine/Engine.h"
 #include "Debug/Logger.h"
 
-void Component::Camera::SetFOV(float newFov)
+Component::Camera* Component::Camera::SetFOV(float newFov)
 {
     if(this->fov == newFov)
-        return;
+        return this;
 
     this->fov = newFov;
     this->RecalculateProjection();
+
+    return this;
 }
 
-void Component::Camera::SetAspectRatio(float newAspectRatio)
+Component::Camera* Component::Camera::SetAspectRatio(float newAspectRatio)
 {
     if(this->aspectRatio == newAspectRatio)
-        return;
+        return this;
 
     this->aspectRatio = newAspectRatio;
     this->RecalculateProjection();
+
+    return this;
 }
 
-void Component::Camera::SetClipPlanes(float newNearClip, float newFarClip)
+Component::Camera* Component::Camera::SetClipPlanes(float newNearClip, float newFarClip)
 {
     if(this->nearClip == newNearClip && this->farClip == newFarClip)
-        return;
+        return this;
 
     this->nearClip = newNearClip;
     this->farClip = newFarClip;
     this->RecalculateProjection();
+
+    return this;
 }
 
 glm::mat4 Component::Camera::GetView() const
@@ -51,9 +57,6 @@ void Component::Camera::Awake()
 {
     if(!this->transform)
         this->transform = this->GetOwner()->GetComponent<Component::Transform>();
-
-    if(!this->transform)
-        Debug::LogFatal("Camera component requires a Transform component to function properly!");
 
     GameEngine::currentLevel->SetCamera(this);
 }

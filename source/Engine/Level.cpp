@@ -1,5 +1,8 @@
 #include "Level.h"
 
+#include "Generator/MeshGenerator.h"
+#include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
+#include "Component/Essential/PointLightSourceComponent.h"
 #include <memory>
 
 Object::BaseObject *Level::CreateObject()
@@ -20,6 +23,31 @@ Object::GameObject *Level::CreateGameObject()
     objects.push_back(std::move(gameObject));
 
     return gameObjectPtr;
+}
+
+Object::BaseObject *Level::CreateLightObject(Math::RGB color, GL::Shader &colorShader)
+{
+    auto lightObject = std::make_unique<Object::BaseObject>();
+
+    Component::Transform *lightTransform = lightObject->AddComponent<Component::Transform>();
+    lightObject->AddComponent<Component::SimpleMesh>()->SetMeshData(MeshGenerator::GenerateCubeVerticesValues());
+
+    lightTransform->SetScale(glm::vec3(0.2f));
+
+    Component::ColorMeshRender *lightRenderer = lightObject->AddComponent<Component::ColorMeshRender>();
+    lightRenderer
+        ->SetMeshComponent(lightObject->GetComponent<Component::SimpleMesh>())
+        ->SetRenderShader(&colorShader);
+        
+    lightRenderer->color = glm::vec3(color.ToVec3());
+
+    Component::PointLightSource *pointLight = lightObject->AddComponent<Component::PointLightSource>();
+    pointLight->SetLightData(lightRenderer->color, 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
+    
+    Object::BaseObject* lightObjectPtr = lightObject.get();
+    objects.push_back(std::move(lightObject));
+
+    return lightObjectPtr;
 }
 
 void Level::ObjectDestroy(Object::BaseObject *object)

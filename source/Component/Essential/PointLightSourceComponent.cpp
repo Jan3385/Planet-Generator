@@ -4,7 +4,7 @@
 #include "Engine/Engine.h"
 #include "Debug/Logger.h"
 
-void Component::PointLightSource::SetLightData(const PointLightData &newData)
+Component::PointLightSource* Component::PointLightSource::SetLightData(const PointLightData &newData)
 {
     this->data.diffuse = newData.color * newData.intensity;
     this->data.specular = newData.color * newData.intensity;
@@ -12,9 +12,10 @@ void Component::PointLightSource::SetLightData(const PointLightData &newData)
     this->data.linear = newData.linear;
     this->data.quadratic = newData.quadratic;
     this->data.radius = newData.radius;
+    return this;
 }
 
-void Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius)
+Component::PointLightSource* Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius)
 {
     this->data.diffuse = color * diffuseIntensity;
     this->data.specular = color * specularIntensity;
@@ -22,15 +23,14 @@ void Component::PointLightSource::SetLightData(glm::vec3 color, float diffuseInt
     this->data.linear = linear;
     this->data.quadratic = quadratic;
     this->data.radius = radius;
+
+    return this;
 }
 
 void Component::PointLightSource::Awake()
 {
-    this->transform = this->GetOwner()->GetComponent<Component::Transform>();
-    if(!this->transform) {
-        Debug::LogFatal("PointLightSource component requires a Transform component to function properly!");
-        return;
-    }
+    if(!this->transform)
+        this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 
     this->data.position = this->transform->GetPos();
 

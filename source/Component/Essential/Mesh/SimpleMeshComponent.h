@@ -14,7 +14,7 @@ public:
         return verticies;
     }
 
-    void SetMeshData(std::vector<float> verticies);
+    SimpleMesh* SetMeshData(std::vector<float> verticies);
 
 protected:
     std::vector<float> verticies;

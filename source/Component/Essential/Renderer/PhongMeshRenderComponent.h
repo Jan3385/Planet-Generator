@@ -18,8 +18,8 @@ public:
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
-    void SetMaterial(Material* newMaterial) { this->material = newMaterial; }
-    void SetMeshComponent(Component::GLMesh* newMesh);
+    PhongMeshRender* SetMaterial(Material* newMaterial) { this->material = newMaterial; return this; }
+    PhongMeshRender* SetMeshComponent(Component::GLMesh* newMesh);
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }

@@ -14,6 +14,22 @@ public:
     GameObject();
     ~GameObject() override = default;
 
+    // disable copy
+    GameObject(const GameObject&) = delete;
+    GameObject& operator=(const GameObject&) = delete;
+    // enable move
+    GameObject(GameObject&& other){
+        this->transform = other.transform;
+        this->mesh = other.mesh;
+        this->renderComponent = other.renderComponent;
+    };
+    GameObject& operator=(GameObject&& other){
+        this->transform = other.transform;
+        this->mesh = other.mesh;
+        this->renderComponent = other.renderComponent;
+        return *this;
+    };
+
     Component::Transform* GetTransform();
     Component::GLMesh* GetMesh();
     Component::PhongMeshRender* GetRenderComponent();

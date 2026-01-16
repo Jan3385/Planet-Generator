@@ -20,8 +20,8 @@ public:
         float quadratic = 0.032f;
     };
 
-    void SetLightData(const PointLightData& newData);
-    void SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius);
+    PointLightSource* SetLightData(const PointLightData& newData);
+    PointLightSource* SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius);
 
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;
