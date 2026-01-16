@@ -178,6 +178,92 @@ std::vector<float> MeshGenerator::GenerateCubeVerticesValues()
     };
 }
 
+std::vector<float> MeshGenerator::GenerateSpherifiedCudeVerticesValues(int subdivisions)
+{
+    const double step = 1.0 / static_cast<double>(subdivisions);
+    std::vector<float> vertices;
+
+    for(uint8_t face = 0; face < 6; ++face) {
+        for(int i = 0; i < subdivisions; ++i) {
+            for(int j = 0; j < subdivisions; ++j) {
+                // Calculate four corners of the quad
+                glm::vec3 v0, v1, v2, v3;
+                float x0 = -0.5f + j * step;
+                float y0 = -0.5f + i * step;
+                float x1 = -0.5f + (j + 1) * step;
+                float y1 = -0.5f + (i + 1) * step;
+
+                switch(face) {
+                    case 0: // Front
+                        v0 = glm::vec3(x0, y0, 0.5f);
+                        v1 = glm::vec3(x1, y0, 0.5f);
+                        v2 = glm::vec3(x1, y1, 0.5f);
+                        v3 = glm::vec3(x0, y1, 0.5f);
+                        break;
+                    case 1: // Back
+                        v0 = glm::vec3(x1, y0, -0.5f);
+                        v1 = glm::vec3(x0, y0, -0.5f);
+                        v2 = glm::vec3(x0, y1, -0.5f);
+                        v3 = glm::vec3(x1, y1, -0.5f);
+                        break;
+                    case 2: // Left
+                        v0 = glm::vec3(-0.5f, y0, x0);
+                        v1 = glm::vec3(-0.5f, y0, x1);
+                        v2 = glm::vec3(-0.5f, y1, x1);
+                        v3 = glm::vec3(-0.5f, y1, x0);
+                        break;
+                    case 3: // Right
+                        v0 = glm::vec3(0.5f, y0, x0);
+                        v1 = glm::vec3(0.5f, y0, x1);
+                        v2 = glm::vec3(0.5f, y1, x1);
+                        v3 = glm::vec3(0.5f, y1, x0);
+                        break;
+                    case 4: // Top
+                        v0 = glm::vec3(x0, 0.5f, y1);
+                        v1 = glm::vec3(x1, 0.5f, y1);
+                        v2 = glm::vec3(x1, 0.5f, y0);
+                        v3 = glm::vec3(x0, 0.5f, y0);
+                        break;
+                    case 5: // Bottom
+                        v0 = glm::vec3(x0, -0.5f, y0);
+                        v1 = glm::vec3(x1, -0.5f, y0);
+                        v2 = glm::vec3(x1, -0.5f, y1);
+                        v3 = glm::vec3(x0, -0.5f, y1);
+                        break;
+                }
+
+                // Spherify the vertices
+                v0 = glm::normalize(v0);
+                v1 = glm::normalize(v1);
+                v2 = glm::normalize(v2);
+                v3 = glm::normalize(v3);
+                
+                // Construct two triangles
+                // Right face has reversed winding order
+                if (face == 3) {
+                    vertices.push_back(v0.x); vertices.push_back(v0.y); vertices.push_back(v0.z);
+                    vertices.push_back(v2.x); vertices.push_back(v2.y); vertices.push_back(v2.z);
+                    vertices.push_back(v1.x); vertices.push_back(v1.y); vertices.push_back(v1.z);
+
+                    vertices.push_back(v0.x); vertices.push_back(v0.y); vertices.push_back(v0.z);
+                    vertices.push_back(v3.x); vertices.push_back(v3.y); vertices.push_back(v3.z);
+                    vertices.push_back(v2.x); vertices.push_back(v2.y); vertices.push_back(v2.z);
+                } else {
+                    vertices.push_back(v0.x); vertices.push_back(v0.y); vertices.push_back(v0.z);
+                    vertices.push_back(v1.x); vertices.push_back(v1.y); vertices.push_back(v1.z);
+                    vertices.push_back(v2.x); vertices.push_back(v2.y); vertices.push_back(v2.z);
+
+                    vertices.push_back(v2.x); vertices.push_back(v2.y); vertices.push_back(v2.z);
+                    vertices.push_back(v3.x); vertices.push_back(v3.y); vertices.push_back(v3.z);
+                    vertices.push_back(v0.x); vertices.push_back(v0.y); vertices.push_back(v0.z);
+                }
+            }
+        }
+    }
+
+    return vertices;
+}
+
 /**
  * Generates a cube mesh with vertices, normals, UVs, and indices
  * @return A GL::Mesh object representing a cube
@@ -212,5 +298,41 @@ GL::Mesh MeshGenerator::GenerateCubeMesh()
     DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
     mesh.vertices = std::move(dedupedVertices);
 
+    return mesh;
+}
+
+/**
+ * Generates a spherified cube mesh with vertices, normals, UVs, and indices
+ * @return A GL::Mesh object representing a sphere
+ */
+GL::Mesh MeshGenerator::GenerateSpherifiedCubeMesh(int subdivisions)
+{
+    GL::Mesh mesh;
+
+    std::vector<float> vertices = MeshGenerator::GenerateSpherifiedCudeVerticesValues(subdivisions);
+
+    for (size_t i = 0; i < vertices.size(); i += 9) {
+        // three points forming a triangle
+        glm::vec3 v0(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
+        glm::vec3 v1(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
+        glm::vec3 v2(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
+        glm::vec3 positions[3] = { v0, v1, v2 };
+
+        glm::vec3 normal = CalculateNormal(positions[0], positions[1], positions[2]);
+
+        for (int j = 0; j < 3; ++j) {
+            GL::VertexObj vertex;
+            vertex.position = positions[j];
+            vertex.normal = normal;
+            vertex.uv = CalculateUVSpherical(positions[j]);
+
+            mesh.vertices.push_back(vertex);
+        }
+    }
+
+    // removing duplicate vertices
+    std::vector<GL::VertexObj> dedupedVertices;
+    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
+    mesh.vertices = std::move(dedupedVertices);
     return mesh;
 }

@@ -61,7 +61,8 @@ void GameEngine::Run()
 
     // Normal obj
     Object::GameObject *obj = currentLevel->CreateGameObject();
-    obj->GetMesh()->SetMeshData(MeshGenerator::GenerateCubeMesh());
+    obj->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(10));
+    obj->GetTransform()->SetScale(glm::vec3(0.7f, 0.7f, 0.7f));
 
     Component::PhongMeshRender *renderComp = obj->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
@@ -100,7 +101,7 @@ void GameEngine::Run()
     {
         this->CalculateDeltaTime();
 
-        obj->GetTransform()->RotateBy(glm::vec3(0.1f, 0.3f, 0.04f));
+        obj->GetTransform()->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 
         input->Update();
 
