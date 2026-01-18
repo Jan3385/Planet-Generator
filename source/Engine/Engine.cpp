@@ -61,8 +61,8 @@ void GameEngine::Run()
 
     // Normal obj
     Object::GameObject *planet = currentLevel->CreateGameObject();
-    planet->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(10));
-    planet->GetTransform()->SetScale(glm::vec3(0.7f, 0.7f, 0.7f));
+    planet->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(20));
+    planet->GetTransform()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 
     Component::PhongMeshRender *renderComp = planet->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
@@ -79,6 +79,8 @@ void GameEngine::Run()
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetRenderShader(&lightShader);
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+
+    floor->Disable();
 
 
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), colorShader);
