@@ -30,7 +30,7 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color, GL::Shader &colorS
     auto lightObject = std::make_unique<Object::BaseObject>();
 
     Component::Transform *lightTransform = lightObject->AddComponent<Component::Transform>();
-    lightObject->AddComponent<Component::SimpleMesh>()->SetMeshData(MeshGenerator::GenerateCubeVerticesValues());
+    lightObject->AddComponent<Component::SimpleMesh>()->SetVerticies(MeshGenerator::GenerateCubeVerticesValues());
 
     lightTransform->SetScale(glm::vec3(0.2f));
 

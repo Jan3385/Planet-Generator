@@ -7,6 +7,7 @@
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Player/MovementComponent.h"
+#include "Component/Planet/PlanetGenComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
 #include "Object/GameObject.h"
 
@@ -59,19 +60,22 @@ void GameEngine::Run()
     colorShader.Use();
 
     // Normal obj
-    Object::GameObject *obj = currentLevel->CreateGameObject();
-    obj->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(10));
-    obj->GetTransform()->SetScale(glm::vec3(0.7f, 0.7f, 0.7f));
+    Object::GameObject *planet = currentLevel->CreateGameObject();
+    planet->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(10));
+    planet->GetTransform()->SetScale(glm::vec3(0.7f, 0.7f, 0.7f));
 
-    Component::PhongMeshRender *renderComp = obj->GetRenderComponent();
+    Component::PhongMeshRender *renderComp = planet->GetRenderComponent();
     renderComp->SetRenderShader(&lightShader);
     renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
 
+    planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(42);
+
+    // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetMesh()->SetMeshData(MeshGenerator::GenerateCubeMesh());
     floor->GetTransform()
         ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
-        ->SetPos(glm::vec3(0.0f, -1.0f, 0.0f));
+        ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetRenderShader(&lightShader);
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
@@ -100,7 +104,7 @@ void GameEngine::Run()
     {
         this->CalculateDeltaTime();
 
-        obj->GetTransform()->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
+        planet->GetTransform()->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 
         input->Update();
 

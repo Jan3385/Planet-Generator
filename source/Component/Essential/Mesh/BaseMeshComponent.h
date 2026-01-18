@@ -18,6 +18,7 @@ public:
     ~BaseMesh() override;
 
     virtual std::vector<float> GetVerticies() const = 0;
+    virtual void SetVerticies(const std::vector<float>& verticies) = 0;
 
     virtual bool IsEmpty() const { return true; }
 

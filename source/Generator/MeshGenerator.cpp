@@ -127,6 +127,37 @@ void DeduplicateVertices(
 }
 // end of deduplication
 
+GL::Mesh MeshGenerator::GenerateMeshFromVerticesValues(const std::vector<float> &verticesValues)
+{
+    GL::Mesh mesh;
+
+    for (size_t i = 0; i < verticesValues.size(); i += 9) {
+        // three points forming a triangle
+        glm::vec3 v0(verticesValues[i + 0], verticesValues[i + 1], verticesValues[i + 2]);
+        glm::vec3 v1(verticesValues[i + 3], verticesValues[i + 4], verticesValues[i + 5]);
+        glm::vec3 v2(verticesValues[i + 6], verticesValues[i + 7], verticesValues[i + 8]);
+        glm::vec3 positions[3] = { v0, v1, v2 };
+
+        glm::vec3 normal = CalculateNormal(v0, v1, v2);
+
+        for (int j = 0; j < 3; ++j) {
+            GL::VertexObj vertex;
+            vertex.position = positions[j];
+            vertex.normal = normal;
+            vertex.uv = CalculateUVCube(positions[j], normal);
+
+            mesh.vertices.push_back(vertex);
+        }
+    }
+
+    // removing duplicate vertices
+    std::vector<GL::VertexObj> dedupedVertices;
+    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
+    mesh.vertices = std::move(dedupedVertices);
+
+    return mesh;
+}
+
 /**
  * Generates vertex positions for a unit cube centered at the origin
  * @return A vector of floats representing the cube's vertex positions (x1, y1, z1, x2, y2,...)
@@ -270,35 +301,9 @@ std::vector<float> MeshGenerator::GenerateSpherifiedCudeVerticesValues(int subdi
  */
 GL::Mesh MeshGenerator::GenerateCubeMesh()
 {
-    GL::Mesh mesh;
-
     std::vector<float> vertices = MeshGenerator::GenerateCubeVerticesValues();
 
-    for (size_t i = 0; i < vertices.size(); i += 9) {
-        // three points forming a triangle
-        glm::vec3 v0(vertices[i + 0], vertices[i + 1], vertices[i + 2]);
-        glm::vec3 v1(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
-        glm::vec3 v2(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
-        glm::vec3 positions[3] = { v0, v1, v2 };
-
-        glm::vec3 normal = CalculateNormal(v0, v1, v2);
-
-        for (int j = 0; j < 3; ++j) {
-            GL::VertexObj vertex;
-            vertex.position = positions[j];
-            vertex.normal = normal;
-            vertex.uv = CalculateUVCube(positions[j], normal);
-
-            mesh.vertices.push_back(vertex);
-        }
-    }
-
-    // removing duplicate vertices
-    std::vector<GL::VertexObj> dedupedVertices;
-    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
-    mesh.vertices = std::move(dedupedVertices);
-
-    return mesh;
+    return MeshGenerator::GenerateMeshFromVerticesValues(vertices);
 }
 
 /**

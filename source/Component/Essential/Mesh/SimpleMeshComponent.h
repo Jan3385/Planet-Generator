@@ -13,9 +13,10 @@ public:
     std::vector<float> GetVerticies() const override {
         return verticies;
     }
-
-    SimpleMesh* SetMeshData(std::vector<float> verticies);
-
+    void SetVerticies(const std::vector<float>& verticies) override {
+        this->verticies = verticies;
+        this->NotifyMeshUpdated();
+    }
 protected:
     std::vector<float> verticies;
 };

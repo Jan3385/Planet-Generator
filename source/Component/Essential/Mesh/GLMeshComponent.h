@@ -13,8 +13,10 @@ public:
     bool IsEmpty() const override;
 
     std::vector<float> GetVerticies() const override;
+    void SetVerticies(const std::vector<float>& verticies) override;
     std::vector<unsigned int> GetIndices() const;
     std::vector<GL::VertexObj> GetGLVerticies() const { return this->mesh.vertices; }
+    void SetGLVerticies(const std::vector<GL::VertexObj>& verticies);
     GLMesh* SetMeshData(const GL::Mesh& mesh);
 
     void GLBind() const { this->mesh.Bind(); }
