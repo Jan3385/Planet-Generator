@@ -3,6 +3,7 @@
 #include "Component/BaseComponent.h"
 #include "Component/Essential/TransformComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
+#include "Math/Color.h"
 
 namespace Component {
 /**
@@ -17,6 +18,8 @@ public:
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform), typeid(Component::PlanetMeshRender)}; }
+
+    Math::RGB GetVertexColor(float height, glm::vec3 position);
 private:
     void Awake() override;
     void OnDestroy() override;

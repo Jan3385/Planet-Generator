@@ -67,12 +67,13 @@ void GameEngine::Run()
     cube = MeshGenerator::GenerateCubeMesh();
     
     GL::Mesh spherifiedCube;
-    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
+    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(100);
     GL::ColorMesh planetMesh(spherifiedCube);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    constexpr float planetScale = 1.0f;
+    planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
     renderComp->SetRenderShader(&planetShader);

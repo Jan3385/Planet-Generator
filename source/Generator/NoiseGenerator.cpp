@@ -1,5 +1,7 @@
 #include "NoiseGenerator.h"
 
+#include "Math/Random.h"
+
 inline float Generator::ValueNoise::lerp(float a, float b, float t)
 {
     return a + t * (b - a);
@@ -19,23 +21,6 @@ Generator::ValueNoise::~ValueNoise()
 {
 }
 
-
-/// @brief Convert hash to float in range [-1, 1]
-/// @param hash input hash
-/// @return float in range [-1, 1]
-static inline float HashToFloat(uint32_t hash)
-{
-    hash ^= 0x6a09e667;
-    hash *= 0x85ebca6b;
-    hash ^= hash >> 13;
-    hash *= 0xc2b2ae35;
-    hash ^= hash >> 16;
-
-    float f = (hash & 0xFFFFFF) / float(0xFFFFFF);
-    
-    return f * 2.0f - 1.0f;
-}
-
 float Generator::ValueNoise::GetNoise(glm::vec3 pos)
 {
     glm::ivec3 cell = glm::floor(pos);
@@ -46,13 +31,8 @@ float Generator::ValueNoise::GetNoise(glm::vec3 pos)
         for(int y = 0; y <= 1; y++){
             for(int z = 0; z <= 1; z++){
                 glm::ivec3 cornerPos = cell + glm::ivec3(x, y, z);
-                uint32_t hash = static_cast<uint32_t>(
-                    cornerPos.x * 73856093 ^
-                    cornerPos.y * 19349663 ^
-                    cornerPos.z * 83492791 ^
-                    seed
-                );
-                corners[x][y][z] = HashToFloat(hash);
+                uint32_t hash = Math::Random::HashFromPos(cornerPos, this->seed);
+                corners[x][y][z] = Math::Random::FloatFromHash(hash, -1.0f, 1.0f);
             }
         }
     }
