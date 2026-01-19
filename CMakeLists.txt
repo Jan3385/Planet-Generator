@@ -70,8 +70,36 @@ target_include_directories(PlanetGenerator
 
 # VCPKG packages
 find_package(glm CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+if(UNIX)
+  find_package(PkgConfig QUIET)
+
+  if (NOT PkgConfig_FOUND)
+    message(FATAL_ERROR "PkgConfig not found, please install it.")
+  endif()
+
+  pkg_check_modules(WAYLAND REQUIRED wayland-client)
+
+  if(WAYLAND_FOUND)
+    message(STATUS "Running under Wayland, checking for system GLFW")
+
+    pkg_check_modules(GLFW3 QUIET glfw3)
+
+    if(NOT GLFW3_FOUND)
+      message(FATAL_ERROR "GLFW with Wayland support not found! Please install GLFW with Wayland support.")
+    else()
+      message(STATUS "System GLFW found")
+      include_directories(${GLFW3_INCLUDE_DIRS})
+      link_directories(${GLFW3_LIBRARY_DIRS})
+    endif()
+  else()
+    find_package(glfw3 CONFIG REQUIRED)
+  endif()
+
+  list(APPEND EXTRA_LIBS m)
+elseif(WIN32)
+  find_package(glfw3 CONFIG REQUIRED)
+endif()
 
 target_link_libraries( PlanetGenerator
   PRIVATE
