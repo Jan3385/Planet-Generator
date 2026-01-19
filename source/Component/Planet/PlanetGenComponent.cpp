@@ -14,7 +14,11 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 
     for(size_t i = 0; i < vertices.size(); ++i) {
         glm::vec3 normal = glm::normalize(vertices[i].position);
-        float height = noise.GetNoise(normal * 2.5f) * 0.1f;
+        float height = noise.GetNoise(normal * 1.0f) * 0.12f;
+        height += noise.GetNoise(normal * 5.0f) * 0.04f;
+        height += noise.GetNoise(normal * 25.0f) * 0.008f;
+
+        if(height < 0.02f) height = 0.0f;
 
         colors[i] = GetVertexColor(height, normal).ToVec3();
             
