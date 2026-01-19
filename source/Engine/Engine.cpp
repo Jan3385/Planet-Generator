@@ -129,6 +129,19 @@ void GameEngine::CalculateDeltaTime()
 
 void GameEngine::InitializeGLFW()
 {
+    if (glfwPlatformSupported(GLFW_PLATFORM_WAYLAND)){
+      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+    }
+    else if (glfwPlatformSupported(GLFW_PLATFORM_X11)){
+      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+    }
+    else if (glfwPlatformSupported(GLFW_PLATFORM_WIN32)){
+      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WIN32);
+    }
+    else { // fallback
+      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_NULL);
+    }
+
     if (!glfwInit())
     {
         Debug::LogFatal("Failed to initialize GLFW");
