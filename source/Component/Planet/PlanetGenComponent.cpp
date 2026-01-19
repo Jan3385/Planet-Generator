@@ -13,16 +13,18 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
     Generator::ValueNoise noise(seed);
 
     for(size_t i = 0; i < vertices.size(); ++i) {
-        glm::vec3 normal = glm::normalize(vertices[i].position);
-        float height = noise.GetNoise(normal * 1.0f) * 0.12f;
-        height += noise.GetNoise(normal * 5.0f) * 0.04f;
-        height += noise.GetNoise(normal * 25.0f) * 0.008f;
+        glm::vec3 pos = vertices[i].position;
+        pos *= noise.GetNoise(pos * 0.5f) + 1.0f;
 
-        if(height < 0.02f) height = 0.0f;
+        float height = noise.GetNoise(pos * 1.0f) * 0.12f;
+        height += noise.GetNoise(pos * 5.0f) * 0.04f;
+        height += noise.GetNoise(pos * 25.0f) * 0.008f;
 
-        colors[i] = GetVertexColor(height, normal).ToVec3();
+        colors[i] = GetVertexColor(height, pos).ToVec3();
+
+        if(height < 0.02f) height = 0.02f;
             
-        vertices[i].position += normal * height;
+        vertices[i].position += pos * height;
     }
 
     mesh->vertices = std::move(vertices);
