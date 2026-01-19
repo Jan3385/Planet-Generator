@@ -33,12 +33,13 @@ public:
     Mesh(Mesh&&) noexcept;
     Mesh& operator=(Mesh&&) noexcept;
 
-    void Bind() const;
+    virtual void Bind() const;
+    virtual void Draw() const { glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0); };
 
-    void UpdateMeshBuffers();
+    virtual void UpdateMeshBuffers();
 protected:
-    void SetupMeshBuffers();
-private:
+    virtual void SetupMeshBuffers();
+
     GL::Buffer<GL::VertexObj, GL::BufferTarget::ArrayBuffer> vertexBuffer;
     GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indexBuffer;
     GL::VertexArray vertexArrayObject;

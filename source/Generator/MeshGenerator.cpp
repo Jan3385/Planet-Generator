@@ -339,5 +339,6 @@ GL::Mesh MeshGenerator::GenerateSpherifiedCubeMesh(int subdivisions)
     std::vector<GL::VertexObj> dedupedVertices;
     DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
     mesh.vertices = std::move(dedupedVertices);
+
     return mesh;
 }

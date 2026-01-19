@@ -29,6 +29,7 @@ GL::Mesh &GL::Mesh::operator=(const GL::Mesh &other)
 // Move
 GL::Mesh::Mesh(GL::Mesh &&other) noexcept
 {
+    Debug::LogSpam("Moved GL::Mesh");
     this->vertices = std::move(other.vertices);
     this->indices = std::move(other.indices);
     this->textures = std::move(other.textures);
@@ -39,6 +40,7 @@ GL::Mesh::Mesh(GL::Mesh &&other) noexcept
 
 GL::Mesh &GL::Mesh::operator=(GL::Mesh &&other) noexcept
 {
+    Debug::LogSpam("Moved GL::Mesh");
     if (this != &other) {
         this->vertices = std::move(other.vertices);
         this->indices = std::move(other.indices);

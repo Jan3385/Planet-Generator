@@ -3,6 +3,7 @@
 #include "Component/BaseComponent.h"
 #include "Component/Essential/TransformComponent.h"
 #include "Component/Essential/Mesh/GLMeshComponent.h"
+#include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 
 namespace Component {
 /**
@@ -16,7 +17,7 @@ public:
     void PlanetifyMesh(uint32_t seed);
 protected:
     std::vector<std::type_index> GetDependencies() const override 
-        { return {typeid(Component::Transform), typeid(Component::GLMesh)}; }
+        { return {typeid(Component::Transform), typeid(Component::PlanetMeshRender)}; }
 private:
     void Awake() override;
     void OnDestroy() override;
@@ -28,7 +29,7 @@ private:
     void FixedUpdate() override;
 
     Transform* transform = nullptr;
-    GLMesh* mesh = nullptr;
+    PlanetMeshRender* renderComponent = nullptr;
 
     friend class Object::BaseObject;
 };

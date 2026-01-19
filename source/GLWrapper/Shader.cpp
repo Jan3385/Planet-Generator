@@ -14,6 +14,14 @@ const std::string GL::Shader::SHADER_VERSION = "460";
 const std::string GL::Shader::SHADER_DEFAULT_DIRECTORY = "Shaders/";
 const std::string GL::Shader::SHADER_INCLUDE_EXTENSION = ".glsl";
 const std::string GL::Shader::SHADER_INCLUDE_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "Includes/";
+const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
+    {ShaderType::Vertex, "Vertex Shader"},
+    {ShaderType::Fragment, "Fragment Shader"},
+    {ShaderType::Geometry, "Geometry Shader"},
+    {ShaderType::Compute, "Compute Shader"},
+    {ShaderType::TessControl, "Tessellation Control Shader"},
+    {ShaderType::TessEvaluation, "Tessellation Evaluation Shader"}
+};
 
 const std::unordered_map<std::string, std::string> shaderConstants = {
     {"SHADER_VERSION", "460"},
@@ -211,7 +219,9 @@ GLuint GL::Shader::CompileShader(const char *shaderSource, const std::string &sh
     if (!success) {
         GLchar infoLog[512];
         glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
-        Debug::LogError("Error compiling " + shaderName + ": " + std::string(infoLog));
+        Debug::LogError(std::format(
+            "[{}] Error compiling {}: {}", ShaderTypeToString.at(shaderType), shaderName, std::string(infoLog)
+        ));
     }
 
     return shaderID;

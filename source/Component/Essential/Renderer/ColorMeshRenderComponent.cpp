@@ -12,23 +12,7 @@ void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     this->vertexArrayObject.Bind();
     
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->GetVerticies().size() / 3));
-}
-
-Component::ColorMeshRender* Component::ColorMeshRender::SetMeshComponent(BaseMesh *newMesh)
-{
-    if(this->mesh != nullptr)
-        this->mesh->RemoveUpdateCallback(this);
-
-    if(newMesh != nullptr){
-        newMesh->AddUpdateCallback(this);
-        
-        if(this->IsAwake())
-            this->SetMeshData(newMesh);
-    }
-
-    this->mesh = newMesh;
-    return this;
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->vertices.size() / 3));
 }
 
 void Component::ColorMeshRender::Awake()
@@ -44,21 +28,11 @@ void Component::ColorMeshRender::Awake()
 
 void Component::ColorMeshRender::OnDestroy()
 {
-    if(this->mesh != nullptr)
-        this->mesh->RemoveUpdateCallback(this);
-    this->mesh = nullptr;
-
     BaseMeshRender::OnDestroy();
 }
 
 void Component::ColorMeshRender::OnMeshUpdated(BaseMesh *mesh)
 {
-     // mesh is getting deleted
-    if(mesh->IsEmpty()){
-        this->SetMeshComponent(nullptr);
-        return;
-    }
-
     this->SetMeshData(mesh);
 }
 

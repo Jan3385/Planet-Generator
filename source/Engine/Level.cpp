@@ -30,14 +30,11 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color, GL::Shader &colorS
     auto lightObject = std::make_unique<Object::BaseObject>();
 
     Component::Transform *lightTransform = lightObject->AddComponent<Component::Transform>();
-    lightObject->AddComponent<Component::SimpleMesh>()->SetVerticies(MeshGenerator::GenerateCubeVerticesValues());
 
     lightTransform->SetScale(glm::vec3(0.2f));
 
     Component::ColorMeshRender *lightRenderer = lightObject->AddComponent<Component::ColorMeshRender>();
-    lightRenderer
-        ->SetMeshComponent(lightObject->GetComponent<Component::SimpleMesh>())
-        ->SetRenderShader(&colorShader);
+    lightRenderer->SetRenderShader(&colorShader);
         
     lightRenderer->color = glm::vec3(color.ToVec3());
 

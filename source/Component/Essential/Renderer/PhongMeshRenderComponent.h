@@ -27,8 +27,6 @@ protected:
     Material *material = nullptr;   
     
     void Awake() override;
-
-    Component::GLMesh *mesh = nullptr;
 private:
     friend class Object::BaseObject;
 };

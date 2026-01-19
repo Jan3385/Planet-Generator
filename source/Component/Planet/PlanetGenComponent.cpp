@@ -5,7 +5,7 @@
 
 void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 {
-    std::vector<GL::VertexObj> vertices = mesh->GetGLVerticies();
+    std::vector<GL::VertexObj> vertices = renderComponent->GetMesh()->vertices;
 
     Generator::ValueNoise noise(seed);
 
@@ -16,13 +16,13 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
         vertex.position += normal * height;
     }
 
-    mesh->SetGLVerticies(vertices);
+    renderComponent->GetMesh()->vertices = vertices;
 }
 
 void Component::PlanetGen::Awake()
 {
     transform = GetOwner()->GetComponent<Component::Transform>();
-    mesh = GetOwner()->GetComponent<Component::GLMesh>();
+    renderComponent = GetOwner()->GetComponent<Component::PlanetMeshRender>();
 }
 
 void Component::PlanetGen::OnDestroy()
@@ -39,6 +39,7 @@ void Component::PlanetGen::OnDisable()
 
 void Component::PlanetGen::Update()
 {
+    this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 }
 
 void Component::PlanetGen::FixedUpdate()

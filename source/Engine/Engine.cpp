@@ -6,6 +6,7 @@
 #include "GLWrapper/BasicShaderProgram.h"
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
+#include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 #include "Component/Player/MovementComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
@@ -34,7 +35,6 @@ GameEngine::~GameEngine()
 
 void GameEngine::Run()
 {
-    Debug::Logger::Instance().AddSink(new Debug::Logger::ConsoleSink());
     Debug::Logger::Instance().minLogLevel = Debug::Logger::Level::SPAM;
 
     InitializeGLFW();
@@ -59,38 +59,55 @@ void GameEngine::Run()
     GL::BasicShaderProgram colorShader("BasicShader.vert", "ColorShader.frag", "Color Shader");
     colorShader.Use();
 
-    // Normal obj
-    Object::GameObject *planet = currentLevel->CreateGameObject();
-    planet->GetMesh()->SetMeshData(MeshGenerator::GenerateSpherifiedCubeMesh(20));
-    planet->GetTransform()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    GL::BasicShaderProgram planetShader("PlanetShader");
+    planetShader.Use();
+    lighting->RegisterShaderLightUpdateCallback(&planetShader);
 
-    Component::PhongMeshRender *renderComp = planet->GetRenderComponent();
-    renderComp->SetRenderShader(&lightShader);
-    renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
+    GL::Mesh cube = MeshGenerator::GenerateCubeMesh();
+    cube.UpdateMeshBuffers();
+    
+    GL::Mesh spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
+    spherifiedCube.UpdateMeshBuffers();
+
+    // Normal obj
+    Object::BaseObject *planet = currentLevel->CreateObject();
+    planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+
+    Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
+    renderComp->SetRenderShader(&planetShader);
+    renderComp->SetMesh(&spherifiedCube);
+    //renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(42);
 
+    planet->Disable();
+
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
-    floor->GetMesh()->SetMeshData(MeshGenerator::GenerateCubeMesh());
     floor->GetTransform()
         ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
         ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetRenderShader(&lightShader);
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+    floorRenderComp->SetMesh(&cube);
 
     floor->Disable();
 
 
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), colorShader);
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
+    lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
+    lightObj->Disable();
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255), colorShader);
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
+    lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
+    lightObj2->Disable();
 
     Object::BaseObject *lightObj3 = currentLevel->CreateLightObject(Math::RGB(51, 255, 51), colorShader);
     lightObj3->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
+    lightObj3->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
@@ -105,8 +122,6 @@ void GameEngine::Run()
     while (!renderer->ShouldClose())
     {
         this->CalculateDeltaTime();
-
-        planet->GetTransform()->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 
         input->Update();
 

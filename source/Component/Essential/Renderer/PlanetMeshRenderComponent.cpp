@@ -1,17 +1,13 @@
-#include "PhongMeshRenderComponent.h"
+#include "PlanetMeshRenderComponent.h"
 
 #include "Engine/Engine.h"
-#include "Engine/Lighting.h"
-#include "Debug/Logger.h"
 
-void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
+void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
     glm::mat4 model = this->RenderSetBasics(projection, view);
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     this->renderShader->SetMat3("normalMatrix", normalMatrix);
-
-    this->material->Bind(*this->renderShader);
 
     auto closestPLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
     int pointLightCount = 0;
@@ -35,10 +31,15 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->mesh->Draw();
 }
 
-void Component::PhongMeshRender::Awake()
+void Component::PlanetMeshRender::Awake()
 {
     if(!this->transform)
         this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 
     GameEngine::renderer->AddRenderCallback(this);
+}
+
+void Component::PlanetMeshRender::OnDestroy()
+{
+    GameEngine::renderer->RemoveRenderCallback(this);
 }

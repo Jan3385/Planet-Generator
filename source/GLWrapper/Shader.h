@@ -17,6 +17,7 @@ enum ShaderType : GLenum {
     TessControl = GL_TESS_CONTROL_SHADER,
     TessEvaluation = GL_TESS_EVALUATION_SHADER
 };
+extern const std::unordered_map<ShaderType, std::string> ShaderTypeToString;
 
 class Shader{
 public:

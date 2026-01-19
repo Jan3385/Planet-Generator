@@ -5,9 +5,7 @@
 Object::GameObject::GameObject()
 {
     this->transform = this->AddComponent<Component::Transform>();
-    this->mesh = this->AddComponent<Component::GLMesh>();
     this->renderComponent = this->AddComponent<Component::PhongMeshRender>();
-    this->renderComponent->SetMeshComponent(this->mesh);
 }
 
 Component::Transform *Object::GameObject::GetTransform()
@@ -18,16 +16,6 @@ Component::Transform *Object::GameObject::GetTransform()
     }
 
     return this->transform;
-}
-
-Component::GLMesh *Object::GameObject::GetMesh()
-{
-    if(this->mesh == nullptr) {
-        Debug::LogError("GameObject has no Mesh component!");
-        return nullptr;
-    }
-
-    return this->mesh;
 }
 
 Component::PhongMeshRender *Object::GameObject::GetRenderComponent()

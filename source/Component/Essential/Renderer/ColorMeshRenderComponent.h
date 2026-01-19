@@ -17,13 +17,8 @@ public:
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
-    BaseMesh* GetMesh() const { return mesh; }
-    ColorMeshRender* SetMeshComponent(BaseMesh* newMesh);
-
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 protected:
-    BaseMesh* mesh = nullptr;
-
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> verticiesBuffer;
     GL::VertexArray vertexArrayObject;
 
