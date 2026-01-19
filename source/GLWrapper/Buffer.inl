@@ -14,6 +14,9 @@ template <typename T, GLenum Target>
 inline Buffer<T, Target>::Buffer(std::string name)
 {
     glGenBuffers(1, &ID);
+
+    if(ID == 0) Debug::LogFatal("[" + this->name + "] Failed to generate Buffer");
+
     this->name = name;
     this->Bind();
     glObjectLabel(GL_BUFFER, ID, -1, this->name.c_str());

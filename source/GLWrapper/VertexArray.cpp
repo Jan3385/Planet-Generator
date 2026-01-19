@@ -23,7 +23,7 @@ GL::VertexArray::~VertexArray()
 void GL::VertexArray::Bind() const
 {
     if(ID == 0){
-        throw std::runtime_error("Attempt to bind uninitialized GLVertexArray: " + this->name);
+        Debug::LogFatal("Attempt to bind uninitialized GLVertexArray: " + this->name);
     }
     
     glBindVertexArray(ID);

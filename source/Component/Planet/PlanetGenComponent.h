@@ -2,7 +2,6 @@
 
 #include "Component/BaseComponent.h"
 #include "Component/Essential/TransformComponent.h"
-#include "Component/Essential/Mesh/GLMeshComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 
 namespace Component {

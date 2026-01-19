@@ -63,11 +63,12 @@ void GameEngine::Run()
     planetShader.Use();
     lighting->RegisterShaderLightUpdateCallback(&planetShader);
 
-    GL::Mesh cube = MeshGenerator::GenerateCubeMesh();
-    cube.UpdateMeshBuffers();
+    GL::Mesh cube;
+    cube = MeshGenerator::GenerateCubeMesh();
     
-    GL::Mesh spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
-    spherifiedCube.UpdateMeshBuffers();
+    GL::Mesh spherifiedCube;
+    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
+    GL::ColorMesh planetMesh(spherifiedCube);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
@@ -75,12 +76,10 @@ void GameEngine::Run()
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
     renderComp->SetRenderShader(&planetShader);
-    renderComp->SetMesh(&spherifiedCube);
+    renderComp->SetMesh(&planetMesh);
     //renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(42);
-
-    planet->Disable();
 
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
@@ -98,17 +97,15 @@ void GameEngine::Run()
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), colorShader);
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
-    lightObj->Disable();
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255), colorShader);
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
-    lightObj2->Disable();
 
     Object::BaseObject *lightObj3 = currentLevel->CreateLightObject(Math::RGB(51, 255, 51), colorShader);
     lightObj3->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
     lightObj3->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
-
+    
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.0f, 2.5f));
@@ -119,6 +116,8 @@ void GameEngine::Run()
     Input::SetCursorMode(Input::CursorMode::Trapped);
 
     this->lastFrameTime = glfwGetTime();
+
+    Debug::LogInfo("Starting main loop");
     while (!renderer->ShouldClose())
     {
         this->CalculateDeltaTime();

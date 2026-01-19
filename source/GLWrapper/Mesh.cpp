@@ -68,6 +68,11 @@ void GL::Mesh::UpdateMeshBuffers()
 
 void GL::Mesh::SetupMeshBuffers()
 {
+    if(this->buffersInitialized){
+        Debug::LogError("Mesh buffers are already initialized!");
+        return;
+    }
+
     this->vertexBuffer = GL::Buffer<GL::VertexObj, GL::BufferTarget::ArrayBuffer>("Mesh Vertex Buffer");
     this->vertexBuffer.SetData(this->vertices, GL_STATIC_DRAW);
     this->indexBuffer = GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer>("Mesh Index Buffer");

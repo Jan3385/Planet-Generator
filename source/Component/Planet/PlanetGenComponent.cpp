@@ -5,18 +5,24 @@
 
 void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 {
-    std::vector<GL::VertexObj> vertices = renderComponent->GetMesh()->vertices;
+    GL::ColorMesh *mesh = renderComponent->GetMesh();
+    std::vector<GL::VertexObj> vertices = mesh->vertices;
+    std::vector<glm::vec3> colors(vertices.size());
 
     Generator::ValueNoise noise(seed);
 
-    for(auto& vertex : vertices){
-        glm::vec3 normal = glm::normalize(vertex.position);
+    for(size_t i = 0; i < vertices.size(); ++i) {
+        glm::vec3 normal = glm::normalize(vertices[i].position);
         float height = noise.GetNoise(normal* 3.0f) * 0.1f;
+
+        colors[i] = glm::vec3(0.2f, 0.7f, 0.2f) + glm::vec3(height * 5.0f);
             
-        vertex.position += normal * height;
+        vertices[i].position += normal * height;
     }
 
-    renderComponent->GetMesh()->vertices = vertices;
+    mesh->vertices = std::move(vertices);
+    mesh->vertexColors = std::move(colors);
+    mesh->UpdateMeshBuffers();
 }
 
 void Component::PlanetGen::Awake()

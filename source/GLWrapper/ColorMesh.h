@@ -7,6 +7,7 @@ class ColorMesh : public Mesh{
 public:
     std::vector<glm::vec3> vertexColors;
     ColorMesh() = default;
+    ColorMesh(GL::Mesh mesh);
     ColorMesh(std::vector<GL::VertexObj> vertices, std::vector<unsigned int> indices, std::vector<GL::TextureObj> textures, std::vector<glm::vec3> vertexColors);
     ~ColorMesh() = default;
 

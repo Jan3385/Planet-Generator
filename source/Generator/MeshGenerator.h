@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component/Essential/Mesh/GLMeshComponent.h"
+#include "GLWrapper/Mesh.h"
 
 namespace MeshGenerator {
 GL::Mesh GenerateMeshFromVerticesValues(const std::vector<float>& verticesValues);

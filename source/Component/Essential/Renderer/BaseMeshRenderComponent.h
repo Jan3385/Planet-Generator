@@ -3,7 +3,6 @@
 #include "Engine/Renderer.h"
 
 #include "Component/BaseComponent.h"
-#include "Component/Essential/Mesh/SimpleMeshComponent.h"
 #include "Component/Essential/TransformComponent.h"
 
 #include "GLWrapper/Buffer.h"
@@ -23,8 +22,6 @@ public:
     ~BaseMeshRender() override = default;
 
     BaseMeshRender* SetRenderShader(GL::Shader* shader) { this->renderShader = shader; return this; }
-    BaseMeshRender* SetMesh(GL::Mesh* mesh) { this->mesh = mesh; return this; }
-    GL::Mesh* GetMesh() const { return this->mesh; }
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
@@ -41,8 +38,6 @@ protected:
     GL::Shader *renderShader;
 
     Transform* transform = nullptr;
-
-    GL::Mesh *mesh = nullptr;
 
     friend class Object::BaseObject;
 };

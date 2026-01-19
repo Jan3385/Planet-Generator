@@ -3,7 +3,6 @@
 #include "Object/Material.h"
 
 #include "Component/Essential/Renderer/BaseMeshRenderComponent.h"
-#include "Component/Essential/Mesh/GLMeshComponent.h"
 
 namespace Component {
 /**
@@ -19,7 +18,9 @@ public:
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     PhongMeshRender* SetMaterial(Material* newMaterial) { this->material = newMaterial; return this; }
-    PhongMeshRender* SetMeshComponent(Component::GLMesh* newMesh);
+
+    void SetMesh(GL::Mesh* mesh) { this->mesh = mesh; }
+    GL::Mesh* GetMesh() const { return this->mesh; }
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
@@ -28,6 +29,8 @@ protected:
     
     void Awake() override;
 private:
+    GL::Mesh *mesh = nullptr;
+
     friend class Object::BaseObject;
 };
 }

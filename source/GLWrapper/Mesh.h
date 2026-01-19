@@ -36,9 +36,10 @@ public:
     virtual void Bind() const;
     virtual void Draw() const { glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0); };
 
+    virtual void SetupMeshBuffers();
     virtual void UpdateMeshBuffers();
 protected:
-    virtual void SetupMeshBuffers();
+    bool buffersInitialized = false;
 
     GL::Buffer<GL::VertexObj, GL::BufferTarget::ArrayBuffer> vertexBuffer;
     GL::Buffer<unsigned int, GL::BufferTarget::ElementArrayBuffer> indexBuffer;
