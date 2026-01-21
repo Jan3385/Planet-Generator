@@ -71,6 +71,11 @@ Renderer::Renderer()
 
     ImGui_ImplGlfw_InitForOpenGL(this->window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
+
+    this->defaultLightShader = std::move(GL::BasicShaderProgram("LightedShader"));
+    GameEngine::lighting->RegisterShaderLightUpdateCallback(&this->defaultLightShader);
+    
+    this->defaultColorShader = std::move(GL::BasicShaderProgram("BasicShader.vert", "ColorShader.frag", "Color Shader"));
 }
 
 Renderer::~Renderer()

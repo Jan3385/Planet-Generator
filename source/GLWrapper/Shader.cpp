@@ -56,6 +56,27 @@ GL::Shader::~Shader()
     }
 }
 
+GL::Shader::Shader(Shader &&other) noexcept
+{
+    Debug::LogSpam("Moved GL::Shader");
+    this->ID = other.ID;
+    this->name = std::move(other.name);
+    other.ID = 0;
+    other.name = "MOVED_SHADER";
+}
+
+Shader &GL::Shader::operator=(Shader &&other) noexcept
+{
+    Debug::LogSpam("Moved GL::Shader");
+    if (this != &other) {
+        this->ID = other.ID;
+        this->name = std::move(other.name);
+        other.ID = 0;
+        other.name = "MOVED_SHADER";
+    }
+    return *this;
+}
+
 /// @brief Loads a shader file with support for includes
 /// @param filePath The path to the shader file (must include extension and directory)
 /// @param shaderName The name of the shader

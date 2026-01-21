@@ -59,3 +59,14 @@ BasicShaderProgram::BasicShaderProgram(const char* vertexPath, const char* fragm
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
+
+GL::BasicShaderProgram::BasicShaderProgram(BasicShaderProgram &&other) noexcept
+    : Shader(std::move(other))
+{
+}
+
+BasicShaderProgram &GL::BasicShaderProgram::operator=(BasicShaderProgram &&other) noexcept
+{
+    Shader::operator=(std::move(other));
+    return *this;
+}

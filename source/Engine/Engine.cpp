@@ -39,10 +39,10 @@ void GameEngine::Run()
 
     InitializeGLFW();
 
+    lighting = new Lighting();
     renderer = new Renderer();
     currentLevel = new Level();
     input = new Input();
-    lighting = new Lighting();
     lighting->SetDirectionalLightSource(
         glm::vec3(-0.2f, 1.0f, -0.3f),
         glm::vec3(0.5f, 0.5f, 0.5f),
@@ -52,15 +52,7 @@ void GameEngine::Run()
     Renderer::SetVSYNC(true);
 
     // temp ----
-    GL::BasicShaderProgram lightShader("LightedShader");
-    lightShader.Use();
-    lighting->RegisterShaderLightUpdateCallback(&lightShader);
-
-    GL::BasicShaderProgram colorShader("BasicShader.vert", "ColorShader.frag", "Color Shader");
-    colorShader.Use();
-
     GL::BasicShaderProgram planetShader("PlanetShader");
-    planetShader.Use();
     lighting->RegisterShaderLightUpdateCallback(&planetShader);
 
     GL::Mesh cube;
@@ -88,22 +80,21 @@ void GameEngine::Run()
         ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
         ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
-    floorRenderComp->SetRenderShader(&lightShader);
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
     floorRenderComp->SetMesh(&cube);
 
     floor->Disable();
 
 
-    Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), colorShader);
+    Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
 
-    Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255), colorShader);
+    Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
 
-    Object::BaseObject *lightObj3 = currentLevel->CreateLightObject(Math::RGB(51, 255, 51), colorShader);
+    Object::BaseObject *lightObj3 = currentLevel->CreateLightObject(Math::RGB(51, 255, 51));
     lightObj3->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
     lightObj3->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
     

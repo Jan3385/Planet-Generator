@@ -27,11 +27,13 @@ public:
     Shader() = default;
     ~Shader();
 
-    // disable copy and move semantics
+    // disable copy semantics
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;
-    Shader(Shader&&) = delete;
-    Shader& operator=(Shader&&) = delete;
+
+    // move semantics
+    Shader(Shader&&other) noexcept;
+    Shader& operator=(Shader&&other) noexcept;
 
     std::string LoadFileWithShaderPreprocessor(const std::string& filePath, const std::string& shaderName);
 

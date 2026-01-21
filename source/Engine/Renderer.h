@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "GLWrapper/BasicShaderProgram.h"
+
 #include <vector>
 
 class Input;
@@ -37,9 +39,15 @@ public:
     void BackfaceCulling(bool enabled);
 
     void StoreWindowSize(int width, int height);
+
+    GL::BasicShaderProgram& GetDefaultLightShader() { return this->defaultLightShader; }
+    GL::BasicShaderProgram& GetDefaultColorShader() { return this->defaultColorShader; }
 private:
     bool isWireframeMode = false;
     bool isBackfaceCullingEnabled = true;
+
+    GL::BasicShaderProgram defaultLightShader;
+    GL::BasicShaderProgram defaultColorShader;
 
     void DrawImGuiWindows();
     GLFWwindow* window = nullptr;

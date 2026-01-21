@@ -12,7 +12,7 @@ namespace Component {
  */
 class ColorMeshRender : public Component::BaseMeshRender {
 public:
-    ColorMeshRender(Object::BaseObject* owner) : BaseMeshRender(owner) {};
+    ColorMeshRender(Object::BaseObject* owner);
     ~ColorMeshRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;

@@ -12,7 +12,7 @@ namespace Component {
  */
 class PhongMeshRender : public Component::BaseMeshRender {
 public:
-    PhongMeshRender(Object::BaseObject* owner) : BaseMeshRender(owner) {};
+    PhongMeshRender(Object::BaseObject* owner);
     ~PhongMeshRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;

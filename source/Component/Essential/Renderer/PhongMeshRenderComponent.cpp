@@ -4,6 +4,12 @@
 #include "Engine/Lighting.h"
 #include "Debug/Logger.h"
 
+Component::PhongMeshRender::PhongMeshRender(Object::BaseObject *owner)
+    : BaseMeshRender(owner)
+{
+    this->SetRenderShader(&GameEngine::renderer->GetDefaultLightShader());
+}
+
 void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
     glm::mat4 model = this->RenderSetBasics(projection, view);

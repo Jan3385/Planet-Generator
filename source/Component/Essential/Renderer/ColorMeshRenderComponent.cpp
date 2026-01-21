@@ -1,6 +1,13 @@
 #include "ColorMeshRenderComponent.h"
 
 #include "Object/BaseObject.h"
+#include "Engine/Engine.h"
+
+Component::ColorMeshRender::ColorMeshRender(Object::BaseObject *owner)
+    : BaseMeshRender(owner)
+{
+    this->SetRenderShader(&GameEngine::renderer->GetDefaultColorShader());
+}
 
 void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
