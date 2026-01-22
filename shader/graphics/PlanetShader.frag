@@ -35,9 +35,9 @@ vec3 GetColorAtHeight(float height){
     if(height < 0.04f){
         color = mix(deepOcean, shallowOcean, height/0.04f);
     }
-    else if(height < 0.06f) color = sand;
-    else if(height < 0.08f) color = grass;
-    else if(height < 0.10f) color = rock;
+    else if(height < 0.05f) color = sand;
+    else if(height < 0.09f) color = grass;
+    else if(height < 0.12f) color = rock;
     else color = snow;
 
     return color.rgb;
