@@ -2,6 +2,12 @@
 
 #include "Engine/Engine.h"
 
+Component::PlanetMeshRender::PlanetMeshRender(Object::BaseObject *owner)
+     : BaseMeshRender(owner)
+{
+    this->paletteBuffer = GL::Buffer<planetPalette, GL::BufferTarget::UniformBuffer>("PlanetPaletteBuffer");
+}
+
 void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
     glm::mat4 model = this->RenderSetBasics(projection, view);
@@ -23,12 +29,19 @@ void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->renderShader->SetVec3("viewPos", 
         GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
 
+    this->paletteBuffer.BindBufferBase(0);
+
     if(!mesh) {
         Debug::LogWarn("PhongMeshRender: No mesh set");
     }
 
     this->mesh->Bind();
     this->mesh->Draw();
+}
+
+void Component::PlanetMeshRender::SetColorPalette(const planetPalette &palette)
+{
+    this->paletteBuffer.SetData(palette, GL_STATIC_DRAW);
 }
 
 void Component::PlanetMeshRender::Awake()

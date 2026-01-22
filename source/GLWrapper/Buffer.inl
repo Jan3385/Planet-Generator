@@ -79,7 +79,7 @@ template <typename T, GLenum Target>
 inline void Buffer<T, Target>::SetData(const T &data, GLenum usage)
 {
     this->Bind();
-    BufferData(Target, sizeof(T), &data, usage);
+    glBufferData(Target, sizeof(T), &data, usage);
     this->bufferSize = 1;
 }
 

@@ -9,6 +9,15 @@ uniform vec3 viewPos;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
+layout(std140, binding = 0) uniform palette {
+    vec4 deepOcean;
+    vec4 shallowOcean;
+    vec4 sand;
+    vec4 grass;
+    vec4 rock;
+    vec4 snow;
+};
+
 #get MAX_POINT_LIGHTS
 
 #include "LightTypes.glsl"
@@ -20,10 +29,35 @@ uniform DirectionLight directionalLight;
 
 #include "LightFunctions.glsl"
 
+vec3 GetColorAtHeight(float height){
+    vec4 color;
+
+    if(height < 0.04f){
+        color = mix(deepOcean, shallowOcean, height/0.04f);
+    }
+    else if(height < 0.06f) color = sand;
+    else if(height < 0.08f) color = grass;
+    else if(height < 0.10f) color = rock;
+    else color = snow;
+
+    return color.rgb;
+}
+
+float fMod(float num, float mod){
+    while(num > mod){
+        num -= mod;
+    }
+    return num;
+}
+
 void main()
 {
     vec3 result = vec3(0.0f);
     vec3 viewDir = normalize(viewPos - FragPos);
+
+    float height = length(FragPos)-1;
+
+    vec3 color = GetColorAtHeight(height);
 
     Material mat;
     mat.ambient = color;

@@ -35,6 +35,8 @@ GameEngine::~GameEngine()
 
 void GameEngine::Run()
 {
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     Debug::Logger::Instance().minLogLevel = Debug::Logger::Level::SPAM;
 
     InitializeGLFW();
@@ -59,8 +61,7 @@ void GameEngine::Run()
     cube = MeshGenerator::GenerateCubeMesh();
     
     GL::Mesh spherifiedCube;
-    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(50);
-    GL::ColorMesh planetMesh(spherifiedCube);
+    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
@@ -69,10 +70,18 @@ void GameEngine::Run()
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
     renderComp->SetRenderShader(&planetShader);
-    renderComp->SetMesh(&planetMesh);
-    //renderComp->SetMaterial(GetMaterial(MatIndex::Ruby));
+    renderComp->SetMesh(&spherifiedCube);
+    Component::PlanetMeshRender::planetPalette palette{
+        glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
+        glm::vec4(0.0f, 0.5f, 1.0f, 1.0f),
+        glm::vec4(0.76f, 0.70f, 0.50f, 1.0f),
+        glm::vec4(0.1f, 0.6f, 0.1f, 1.0f),
+        glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+    };
+    renderComp->SetColorPalette(palette);
 
-    planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(42);
+    planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());
 
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
