@@ -10,13 +10,21 @@ namespace Component {
  */
 class PlanetMeshRender : public Component::BaseMeshRender{
 public:
-    struct planetPalette{
-        glm::vec4 deepOcean;
-        glm::vec4 shallowOcean;
-        glm::vec4 sand;
-        glm::vec4 grass;
-        glm::vec4 rock;
-        glm::vec4 snow;
+    struct alignas(16) MaterialSTD140{
+        glm::vec4 ambient;
+        glm::vec4 diffuse;
+        glm::vec4 specular;
+        glm::vec4 shininess; // alignas 16. Only use x component 
+        MaterialSTD140(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess)
+            : ambient(ambient, 1), diffuse(diffuse, 1), specular(specular, 1), shininess(shininess, 1, 1, 1) {}
+    };
+    struct alignas(16) planetPalette{
+        MaterialSTD140 deepOcean;
+        MaterialSTD140 shallowOcean;
+        MaterialSTD140 sand;
+        MaterialSTD140 grass;
+        MaterialSTD140 rock;
+        MaterialSTD140 snow;
     };
 
     PlanetMeshRender(Object::BaseObject* owner);

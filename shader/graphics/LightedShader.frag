@@ -37,7 +37,7 @@ void main()
     result += CalculateDirLight(directionalLight, Normal, viewDir, material);
 
     // ambient lighting
-    result += (ambientColor * material.ambient) * ambientIntensity;
+    result += (ambientColor * material.ambient.xyz) * ambientIntensity;
 
     FragColor = vec4(result, 1.0f);
 } 

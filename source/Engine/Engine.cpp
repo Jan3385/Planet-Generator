@@ -71,14 +71,42 @@ void GameEngine::Run(const Config& config)
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
     renderComp->SetRenderShader(&planetShader);
     renderComp->SetMesh(&spherifiedCube);
-    Component::PlanetMeshRender::planetPalette palette{
-        glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
-        glm::vec4(0.04f, 0.55f, 1.0f, 1.0f),
-        glm::vec4(0.76f, 0.70f, 0.50f, 1.0f),
-        glm::vec4(0.1f, 0.6f, 0.1f, 1.0f),
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
-        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+
+    using Component::PlanetMeshRender;
+
+    PlanetMeshRender::planetPalette palette{
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(0.0f, 0.3f, 1.0f) * 0.5f,
+            glm::vec3(0.0f, 0.3f, 1.0f),
+            glm::vec3(0.6f, 0.6f, 0.6f),
+            0.5f),
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(0.04f, 0.55f, 1.0f) * 0.5f,
+            glm::vec3(0.04f, 0.55f, 1.0f),
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            0.375f),
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(0.76f, 0.70f, 0.50f) * 0.5f,
+            glm::vec3(0.76f, 0.70f, 0.50f),
+            glm::vec3(0.15f, 0.15f, 0.15f),
+            0.0625f),
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(0.1f, 0.6f, 0.1f) * 0.5f,
+            glm::vec3(0.1f, 0.6f, 0.1f),
+            glm::vec3(0.05f, 0.05f, 0.05f),
+            0.03125f),
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(0.5f, 0.5f, 0.5f) * 0.5f,
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(0.2f, 0.2f, 0.2f),
+            0.125f),
+        PlanetMeshRender::MaterialSTD140(
+            glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f,
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.4f, 0.4f, 0.4f),
+            0.25f)
     };
+
     renderComp->SetColorPalette(palette);
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());

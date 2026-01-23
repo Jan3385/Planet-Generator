@@ -9,18 +9,33 @@ uniform vec3 viewPos;
 uniform vec3 ambientColor;
 uniform float ambientIntensity;
 
+#include "LightTypes.glsl"
+
+Material multMaterial(Material a, float factor) {
+    a.ambient  *= factor;
+    a.diffuse  *= factor;
+    a.specular *= factor;
+    return a;
+}
+Material mixMaterial(Material a, Material b, float t) {
+    Material result;
+    result.ambient  = mix(a.ambient,  b.ambient,  t);
+    result.diffuse  = mix(a.diffuse,  b.diffuse,  t);
+    result.specular = mix(a.specular, b.specular, t);
+    result.shininess = mix(a.shininess, b.shininess, t);
+    return result;
+}
+
 layout(std140, binding = 0) uniform palette {
-    vec4 deepOcean;
-    vec4 shallowOcean;
-    vec4 sand;
-    vec4 grass;
-    vec4 rock;
-    vec4 snow;
+    Material deepOcean;
+    Material shallowOcean;
+    Material sand;
+    Material grass;
+    Material rock;
+    Material snow;
 };
 
 #get MAX_POINT_LIGHTS
-
-#include "LightTypes.glsl"
 
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
@@ -30,24 +45,27 @@ uniform DirectionLight directionalLight;
 #include "LightFunctions.glsl"
 #include "Noise.glsl"
 
-vec3 GetColorAtHeight(float height){
-    vec4 color;
+Material GetColorAtHeight(float height){
+    Material mat;
 
     if(height < 0.04f){
-        color = mix(deepOcean, shallowOcean, height/0.04f);
+        mat = mixMaterial(deepOcean, shallowOcean, height/0.04f);
     }
-    else if(height < 0.05f) color = sand;
+    else if(height < 0.05f) mat = sand;
     else if(height < 0.11f){
         float t = valNoise(normalize(Pos) * 70.0f);
-        color = mix(grass * 0.95f, grass * 1.05f, t);
+        mat = mixMaterial(multMaterial(grass, 0.95f), multMaterial(grass, 1.05f), t);
 
         float greenModifier = valNoise(normalize(Pos) * 2.0f);
-        color.g *= mix(0.8f, 1.2f, greenModifier);
+        mat.ambient.g *= mix(0.8f, 1.2f, greenModifier);
+        mat.diffuse.g *= mix(0.8f, 1.2f, greenModifier);
+        mat.specular.g *= mix(0.8f, 1.2f, greenModifier);
     }
-    else if(height < 0.13f) color = rock;
-    else color = snow;
+    else if(height < 0.13f) mat = rock;
+    else mat = snow;
 
-    return color.rgb;
+
+    return mat;
 }
 
 float fMod(float num, float mod){
@@ -64,13 +82,7 @@ void main()
 
     float height = length(Pos)-1;
 
-    vec3 color = GetColorAtHeight(height);
-
-    Material mat;
-    mat.ambient = color;
-    mat.diffuse = color;
-    mat.specular = color;
-    mat.shininess = 0.2f;
+    Material mat = GetColorAtHeight(height);
 
     // Point lights
     vec3 diffuse = vec3(0.0f);
@@ -83,7 +95,7 @@ void main()
     result += CalculateDirLight(directionalLight, Normal, viewDir, mat);
 
     // ambient lighting
-    result += (ambientColor * mat.ambient) * ambientIntensity;
+    result += (ambientColor * mat.ambient.xyz) * ambientIntensity;
 
     FragColor = vec4(result, 1.0f);
 } 
