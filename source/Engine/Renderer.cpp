@@ -37,9 +37,9 @@ void Renderer::DrawImGuiWindows()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-Renderer::Renderer()
+Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
 {
-    this->window = glfwCreateWindow(800, 600, "Planet renderer", nullptr, nullptr);
+    this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
     if(!this->window) {
         Debug::LogFatal("Failed to create GLFW window");
@@ -61,8 +61,10 @@ Renderer::Renderer()
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); //GL_LINE
-    glPointSize(7.0f);
+    if(multiSample) glEnable(GL_MULTISAMPLE);
+
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); //GL_LINE
+    // glPointSize(7.0f);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -80,14 +82,14 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     if(this->window != nullptr) {
         glfwDestroyWindow(this->window);
         this->window = nullptr;
     }
-
-    ImGui_ImplGlfw_Shutdown();
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui::DestroyContext();
 }
 
 void Renderer::SetVSYNC(bool enabled)

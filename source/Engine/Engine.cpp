@@ -27,22 +27,22 @@ GameEngine::GameEngine()
 
 GameEngine::~GameEngine()
 {
-    delete renderer;
     delete currentLevel;
     delete input;
     delete lighting;
+    delete renderer;
+
+    glfwTerminate();
 }
 
-void GameEngine::Run()
+void GameEngine::Run(const Config& config)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    Debug::Logger::Instance().minLogLevel = Debug::Logger::Level::SPAM;
-
-    InitializeGLFW();
+    InitializeGLFW(config);
 
     lighting = new Lighting();
-    renderer = new Renderer();
+    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples > 1);
     currentLevel = new Level();
     input = new Input();
     lighting->SetDirectionalLightSource(
@@ -51,7 +51,7 @@ void GameEngine::Run()
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
 
-    Renderer::SetVSYNC(true);
+    Renderer::SetVSYNC(config.VSync);
 
     // temp ----
     GL::BasicShaderProgram planetShader("PlanetShader");
@@ -127,8 +127,6 @@ void GameEngine::Run()
 
         input->EndFrame();
     }
-
-    glfwTerminate();
 }
 
 void GameEngine::CalculateDeltaTime()
@@ -138,20 +136,20 @@ void GameEngine::CalculateDeltaTime()
     this->lastFrameTime = currentFrameTime;
 }
 
-void GameEngine::InitializeGLFW()
+void GameEngine::InitializeGLFW(const Config& config)
 {
-    if (glfwPlatformSupported(GLFW_PLATFORM_WAYLAND)){
-      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
-    }
-    else if (glfwPlatformSupported(GLFW_PLATFORM_X11)){
-      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-    }
-    else if (glfwPlatformSupported(GLFW_PLATFORM_WIN32)){
-      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WIN32);
-    }
-    else { // fallback
-      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_NULL);
-    }
+    glfwSetErrorCallback([](int error, const char* description) {
+        Debug::LogError(std::format("GLFW Error ({0}): {1}", error, description));
+    });
+
+    if(glfwPlatformSupported(GLFW_PLATFORM_WIN32)) 
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WIN32);
+    else if(glfwPlatformSupported(GLFW_PLATFORM_WAYLAND)) 
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
+    else if(glfwPlatformSupported(GLFW_PLATFORM_X11)) 
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+    else glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_NULL);
+
 
     if (!glfwInit())
     {
@@ -162,4 +160,7 @@ void GameEngine::InitializeGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    if(config.MSAA_Samples > 1)
+        glfwWindowHint(GLFW_SAMPLES, config.MSAA_Samples);
 }

@@ -7,6 +7,14 @@
 
 class GameEngine{
 public:
+    struct Config{
+        uint16_t windowWidth = 800;
+        uint16_t windowHeight = 600;
+
+        uint8_t MSAA_Samples = 8; // 1 means no MSAA
+        bool VSync = true;
+    };
+
     static GameEngine* instance;
     static Renderer* renderer;
     static Level* currentLevel;
@@ -18,10 +26,10 @@ public:
     GameEngine();
     ~GameEngine();
 
-    void Run();
+    void Run(const Config& config);
 private:
     void CalculateDeltaTime();
     double lastFrameTime = 0.0;
     float deltaTime = 0.166f;
-    void InitializeGLFW();
+    void InitializeGLFW(const Config& config);
 };

@@ -20,7 +20,7 @@ public:
         friend class Renderer;
     };
 
-    Renderer();
+    Renderer(uint16_t width, uint16_t height, bool multiSample);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {
