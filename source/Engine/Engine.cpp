@@ -73,7 +73,7 @@ void GameEngine::Run()
     renderComp->SetMesh(&spherifiedCube);
     Component::PlanetMeshRender::planetPalette palette{
         glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
-        glm::vec4(0.0f, 0.5f, 1.0f, 1.0f),
+        glm::vec4(0.08f, 0.7f, 1.0f, 1.0f),
         glm::vec4(0.76f, 0.70f, 0.50f, 1.0f),
         glm::vec4(0.1f, 0.6f, 0.1f, 1.0f),
         glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
