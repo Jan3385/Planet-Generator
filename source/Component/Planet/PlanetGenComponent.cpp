@@ -61,7 +61,7 @@ void Component::PlanetGen::OnDisable()
 
 void Component::PlanetGen::Update()
 {
-    this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
+    //this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 }
 
 void Component::PlanetGen::FixedUpdate()

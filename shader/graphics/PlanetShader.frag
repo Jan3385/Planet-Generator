@@ -28,6 +28,7 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform DirectionLight directionalLight;
 
 #include "LightFunctions.glsl"
+#include "Noise.glsl"
 
 vec3 GetColorAtHeight(float height){
     vec4 color;
@@ -36,7 +37,13 @@ vec3 GetColorAtHeight(float height){
         color = mix(deepOcean, shallowOcean, height/0.04f);
     }
     else if(height < 0.05f) color = sand;
-    else if(height < 0.11f) color = grass;
+    else if(height < 0.11f){
+        float t = valNoise(normalize(Pos) * 70.0f);
+        color = mix(grass * 0.95f, grass * 1.05f, t);
+
+        float greenModifier = valNoise(normalize(Pos) * 2.0f);
+        color.g *= mix(0.8f, 1.2f, greenModifier);
+    }
     else if(height < 0.13f) color = rock;
     else color = snow;
 
