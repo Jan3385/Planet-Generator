@@ -61,7 +61,7 @@ void GameEngine::Run()
     cube = MeshGenerator::GenerateCubeMesh();
     
     GL::Mesh spherifiedCube;
-    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(20);
+    spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(60);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();

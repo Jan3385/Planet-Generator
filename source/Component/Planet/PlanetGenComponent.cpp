@@ -15,9 +15,11 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
         glm::vec3 pos = vertices[i].position;
         pos *= noise.GetNoise(pos * 0.5f) + 1.0f;
 
-        float height = noise.GetNoise(pos * 1.0f) * 0.12f;
-        height += noise.GetNoise(pos * 5.0f) * 0.04f;
-        height += noise.GetNoise(pos * 25.0f) * 0.008f;
+        float height = noise.GetNoise(pos * 1.0f) * 1.0f;
+        height = log2f(height + 1.2f)/8.0f;
+
+        height += noise.GetNoise(pos * 5.0f) * 0.05f;
+        height += noise.GetNoise(pos * 25.0f) * 0.03f;
 
         if(height < 0.02f) height = 0.02f;
             

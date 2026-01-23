@@ -1,6 +1,6 @@
 in vec3 Normal;
 in vec3 FragPos;
-in vec3 color;
+in vec3 Pos;
 
 out vec4 FragColor;
 
@@ -55,7 +55,7 @@ void main()
     vec3 result = vec3(0.0f);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    float height = length(FragPos)-1;
+    float height = length(Pos)-1;
 
     vec3 color = GetColorAtHeight(height);
 
