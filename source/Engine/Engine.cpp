@@ -73,7 +73,7 @@ void GameEngine::Run()
     renderComp->SetMesh(&spherifiedCube);
     Component::PlanetMeshRender::planetPalette palette{
         glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
-        glm::vec4(0.08f, 0.7f, 1.0f, 1.0f),
+        glm::vec4(0.04f, 0.55f, 1.0f, 1.0f),
         glm::vec4(0.76f, 0.70f, 0.50f, 1.0f),
         glm::vec4(0.1f, 0.6f, 0.1f, 1.0f),
         glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
@@ -102,10 +102,6 @@ void GameEngine::Run()
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
-
-    Object::BaseObject *lightObj3 = currentLevel->CreateLightObject(Math::RGB(51, 255, 51));
-    lightObj3->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.4f, 0.8f, -0.8f));
-    lightObj3->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
     
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
