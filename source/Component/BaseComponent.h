@@ -2,6 +2,9 @@
 
 #include <typeindex>
 #include <vector>
+#include "Engine/Renderer.h"
+
+#include "imgui.h"
 
 namespace Object {
     class BaseObject;
@@ -50,5 +53,12 @@ protected:
     virtual ~IUpdatable() = default;
 
     friend class Object::BaseObject;
+};
+class IImGuiUpdatable {
+public:
+    virtual void ImGuiUpdate() = 0;
+protected:
+    IImGuiUpdatable();
+    ~IImGuiUpdatable();
 };
 }

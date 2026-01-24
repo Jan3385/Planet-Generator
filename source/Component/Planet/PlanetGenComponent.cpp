@@ -34,11 +34,22 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
     Debug::LogSpam("HeighScale for planet: " + std::to_string(heightScale));
 
     for(size_t i = 0; i < vertices.size(); ++i) {
-        vertices[i].position += vertices[i].position * (heights[i] * heightScale);
+        vertices[i].position = glm::normalize(vertices[i].position) * (heights[i] * heightScale + 1.0f);
     }
 
     mesh->vertices = std::move(vertices);
     mesh->UpdateMeshBuffers();
+}
+
+void Component::PlanetGen::ImGuiUpdate()
+{
+    ImGui::Begin("Planet Generator");
+    if(ImGui::Button("Planetify Mesh")) {
+        uint32_t seed = rand();
+        this->PlanetifyMesh(seed);
+    }
+    ImGui::Checkbox("rotate", &rotatePlanet);
+    ImGui::End();
 }
 
 void Component::PlanetGen::Awake()
@@ -61,7 +72,7 @@ void Component::PlanetGen::OnDisable()
 
 void Component::PlanetGen::Update()
 {
-    //this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
+    if(this->rotatePlanet) this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
 }
 
 void Component::PlanetGen::FixedUpdate()

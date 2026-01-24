@@ -9,7 +9,7 @@ namespace Component {
 /**
  * 
  */
-class PlanetGen : public BaseComponent, public Component::IUpdatable {
+class PlanetGen : public BaseComponent, public Component::IUpdatable, public Component::IImGuiUpdatable{
 public:
     PlanetGen(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PlanetGen() override = default;
@@ -18,6 +18,8 @@ public:
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform), typeid(Component::PlanetMeshRender)}; }
+
+    void ImGuiUpdate() override;
 private:
     void Awake() override;
     void OnDestroy() override;
@@ -30,6 +32,8 @@ private:
 
     Transform* transform = nullptr;
     PlanetMeshRender* renderComponent = nullptr;
+
+    bool rotatePlanet = true;
 
     friend class Object::BaseObject;
 };

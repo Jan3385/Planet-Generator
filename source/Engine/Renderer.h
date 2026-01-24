@@ -10,6 +10,10 @@
 
 class Input;
 
+namespace Component {
+    class IImGuiUpdatable;
+};
+
 class Renderer{
 public:
     struct IRendererCallback{
@@ -42,6 +46,13 @@ public:
 
     GL::BasicShaderProgram& GetDefaultLightShader() { return this->defaultLightShader; }
     GL::BasicShaderProgram& GetDefaultColorShader() { return this->defaultColorShader; }
+
+    void AddImGuiCallback(Component::IImGuiUpdatable* callback) {
+        imguiCallbacks.push_back(callback);
+    }
+    void RemoveImGuiCallback(Component::IImGuiUpdatable* callback) {
+        std::erase(imguiCallbacks, callback);
+    }
 private:
     bool isWireframeMode = false;
     bool isBackfaceCullingEnabled = true;
@@ -52,6 +63,8 @@ private:
     void DrawImGuiWindows();
     GLFWwindow* window = nullptr;
     std::vector<IRendererCallback*> renderCallbacks;
+
+    std::vector<Component::IImGuiUpdatable*> imguiCallbacks;
 
     int windowWidth = 800;
     int windowHeight = 600;

@@ -5,6 +5,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include "Debug/Logger.h"
 #include "Engine/Engine.h"
+#include "Component/BaseComponent.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
@@ -20,10 +21,6 @@ void Renderer::StoreWindowSize(int width, int height)
 
 void Renderer::DrawImGuiWindows()
 {
-    ImGui_ImplGlfw_NewFrame();
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui::NewFrame();
-
     ImGui::Begin("Basic Window");
     if(ImGui::Button("Toggle Wireframe")){
         this->WireframeMode(!this->isWireframeMode);
@@ -32,9 +29,6 @@ void Renderer::DrawImGuiWindows()
         this->BackfaceCulling(!this->isBackfaceCullingEnabled);
     }
     ImGui::End();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
@@ -113,9 +107,21 @@ void Renderer::Update()
         callback->Render(projection, view);
     }
 
+    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
+
     if(Input::GetCursorMode() == Input::CursorMode::Normal) {
         this->DrawImGuiWindows();
     }
+
+    for (auto callback : imguiCallbacks)
+    {
+        callback->ImGuiUpdate();
+    }
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
     glfwSwapBuffers(window);
 }
