@@ -46,7 +46,7 @@ void GameEngine::Run(const Config& config)
     currentLevel = new Level();
     input = new Input();
     lighting->SetDirectionalLightSource(
-        glm::vec3(-0.2f, 1.0f, -0.3f),
+        glm::vec3(-0.2f, 0.3f, -0.9f),
         glm::vec3(0.5f, 0.5f, 0.5f),
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
