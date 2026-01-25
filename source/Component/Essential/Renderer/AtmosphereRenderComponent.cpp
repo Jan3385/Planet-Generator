@@ -18,7 +18,7 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->renderShader->SetMat4("view", view);
 
     glm::mat4 model = this->transform->GetMatrixTransform();
-    model = glm::scale(model, this->transform->GetScale() + PlanetGen::PLANET_SCALE * 0.11f);
+    model = glm::scale(model, glm::vec3(1.0f) + PlanetGen::PLANET_SCALE * 0.11f);
     this->renderShader->SetMat4("transform", model);
     // ---
 
