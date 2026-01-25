@@ -2,6 +2,7 @@
 
 #include "Debug/Logger.h"
 #include "Engine/Lighting.h"
+#include "Component/Planet/PlanetGenComponent.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -25,7 +26,9 @@ const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
 
 const std::unordered_map<std::string, std::string> shaderConstants = {
     {"SHADER_VERSION", "460"},
-    {"MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS)}
+    {"MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS)},
+    {"LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0"},
+    {"PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE)}
 };
 
 GLuint GL::Shader::activeShaderID = 0;

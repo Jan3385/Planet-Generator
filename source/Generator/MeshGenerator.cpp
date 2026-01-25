@@ -127,9 +127,9 @@ void DeduplicateVertices(
 }
 // end of deduplication
 
-GL::Mesh MeshGenerator::GenerateMeshFromVerticesValues(const std::vector<float> &verticesValues)
+std::shared_ptr<GL::Mesh> MeshGenerator::GenerateMeshFromVerticesValues(const std::vector<float> &verticesValues)
 {
-    GL::Mesh mesh;
+    std::shared_ptr<GL::Mesh> mesh = std::make_shared<GL::Mesh>();
 
     for (size_t i = 0; i < verticesValues.size(); i += 9) {
         // three points forming a triangle
@@ -146,16 +146,16 @@ GL::Mesh MeshGenerator::GenerateMeshFromVerticesValues(const std::vector<float> 
             vertex.normal = normal;
             vertex.uv = CalculateUVCube(positions[j], normal);
 
-            mesh.vertices.push_back(vertex);
+            mesh->vertices.push_back(vertex);
         }
     }
 
     // removing duplicate vertices
     std::vector<GL::VertexObj> dedupedVertices;
-    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
-    mesh.vertices = std::move(dedupedVertices);
+    DeduplicateVertices(mesh->vertices, dedupedVertices, mesh->indices);
+    mesh->vertices = std::move(dedupedVertices);
 
-    mesh.SetupMeshBuffers();
+    mesh->SetupMeshBuffers();
 
     return mesh;
 }
@@ -211,7 +211,7 @@ std::vector<float> MeshGenerator::GenerateCubeVerticesValues()
     };
 }
 
-std::vector<float> MeshGenerator::GenerateSpherifiedCudeVerticesValues(int subdivisions)
+std::vector<float> MeshGenerator::GenerateSpherifiedCubeVerticesValues(int subdivisions)
 {
     const double step = 1.0 / static_cast<double>(subdivisions);
     std::vector<float> vertices;
@@ -301,7 +301,7 @@ std::vector<float> MeshGenerator::GenerateSpherifiedCudeVerticesValues(int subdi
  * Generates a cube mesh with vertices, normals, UVs, and indices
  * @return A GL::Mesh object representing a cube
  */
-GL::Mesh MeshGenerator::GenerateCubeMesh()
+std::shared_ptr<GL::Mesh> MeshGenerator::GenerateCubeMesh()
 {
     std::vector<float> vertices = MeshGenerator::GenerateCubeVerticesValues();
 
@@ -312,11 +312,11 @@ GL::Mesh MeshGenerator::GenerateCubeMesh()
  * Generates a spherified cube mesh with vertices, normals, UVs, and indices
  * @return A GL::Mesh object representing a sphere
  */
-GL::Mesh MeshGenerator::GenerateSpherifiedCubeMesh(int subdivisions)
+std::shared_ptr<GL::Mesh> MeshGenerator::GenerateSpherifiedCubeMesh(int subdivisions)
 {
-    GL::Mesh mesh;
+    std::shared_ptr<GL::Mesh> mesh = std::make_shared<GL::Mesh>();
 
-    std::vector<float> vertices = MeshGenerator::GenerateSpherifiedCudeVerticesValues(subdivisions);
+    std::vector<float> vertices = MeshGenerator::GenerateSpherifiedCubeVerticesValues(subdivisions);
 
     for (size_t i = 0; i < vertices.size(); i += 9) {
         // three points forming a triangle
@@ -333,16 +333,16 @@ GL::Mesh MeshGenerator::GenerateSpherifiedCubeMesh(int subdivisions)
             vertex.normal = normal;
             vertex.uv = CalculateUVSpherical(positions[j]);
 
-            mesh.vertices.push_back(vertex);
+            mesh->vertices.push_back(vertex);
         }
     }
 
     // removing duplicate vertices
     std::vector<GL::VertexObj> dedupedVertices;
-    DeduplicateVertices(mesh.vertices, dedupedVertices, mesh.indices);
-    mesh.vertices = std::move(dedupedVertices);
+    DeduplicateVertices(mesh->vertices, dedupedVertices, mesh->indices);
+    mesh->vertices = std::move(dedupedVertices);
 
-    mesh.SetupMeshBuffers();
+    mesh->SetupMeshBuffers();
 
     return mesh;
 }

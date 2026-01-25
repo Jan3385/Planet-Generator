@@ -33,6 +33,12 @@ public:
     void RemoveRenderCallback(IRendererCallback* callback) {
         std::erase(renderCallbacks, callback);
     }
+    void AddTransparentRenderCallback(IRendererCallback* callback) {
+        transparentRenderCallbacks.push_back(callback);
+    }
+    void RemoveTransparentRenderCallback(IRendererCallback* callback) {
+        std::erase(transparentRenderCallbacks, callback);
+    }
 
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
 
@@ -63,6 +69,7 @@ private:
     void DrawImGuiWindows();
     GLFWwindow* window = nullptr;
     std::vector<IRendererCallback*> renderCallbacks;
+    std::vector<IRendererCallback*> transparentRenderCallbacks;
 
     std::vector<Component::IImGuiUpdatable*> imguiCallbacks;
 

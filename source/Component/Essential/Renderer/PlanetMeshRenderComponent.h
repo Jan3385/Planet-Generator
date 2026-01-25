@@ -32,9 +32,9 @@ public:
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
-    void SetMesh(GL::Mesh* mesh) { this->mesh = mesh; }
+    void SetMesh(std::shared_ptr<GL::Mesh> mesh) { this->mesh = mesh; }
     void SetColorPalette(const planetPalette& palette);
-    GL::Mesh* GetMesh() const { return this->mesh; }
+    std::shared_ptr<GL::Mesh> GetMesh() const { return this->mesh; }
 protected:
     void Awake() override;
     void OnDestroy() override;
@@ -42,7 +42,7 @@ protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
 private:
-    GL::Mesh *mesh = nullptr;
+    std::shared_ptr<GL::Mesh> mesh = nullptr;
     GL::Buffer<planetPalette, GL::BufferTarget::UniformBuffer> paletteBuffer;
 
     friend class Object::BaseObject;

@@ -57,6 +57,9 @@ Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
 
     if(multiSample) glEnable(GL_MULTISAMPLE);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); //GL_LINE
     // glPointSize(7.0f);
 
@@ -103,7 +106,28 @@ void Renderer::Update()
     glm::mat4 projection = camera->GetProjection();
     glm::mat4 view = camera->GetView();
 
+    // sort transparent objects
+    glm::vec3 camPos = camera->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+    std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
+        [camPos](IRendererCallback* a, IRendererCallback* b) {
+            Component::BaseMeshRender* renderA = dynamic_cast<Component::BaseMeshRender*>(a);
+            Component::BaseMeshRender* renderB = dynamic_cast<Component::BaseMeshRender*>(b);
+
+            glm::vec3 posA = renderA->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+            glm::vec3 posB = renderB->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+
+            float distA = glm::dot(camPos - posA, camPos - posA);
+            float distB = glm::dot(camPos - posB, camPos - posB);
+
+            return distA > distB; // farthest first
+        }
+    );
+
     for(auto& callback : renderCallbacks) {
+        callback->Render(projection, view);
+    }
+
+    for(auto& callback : transparentRenderCallbacks) {
         callback->Render(projection, view);
     }
 

@@ -7,9 +7,9 @@
 void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 {
     Debug::LogTrace("PlanetGen: Planetifying mesh with seed " + std::to_string(seed));
-    constexpr float desiredAvgHeight = 0.03f;
+    constexpr float desiredAvgHeight = 0.010f * PLANET_SCALE;
 
-    GL::Mesh *mesh = renderComponent->GetMesh();
+    std::shared_ptr<GL::Mesh> mesh = renderComponent->GetMesh();
     std::vector<GL::VertexObj> vertices = mesh->vertices;
 
     Generator::ValueNoise noise(seed);
@@ -25,7 +25,7 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
         height += noise.GetNoise(pos * 10.0f) * 0.05f;
         height += noise.GetNoise(pos * 25.0f) * 0.04f;
 
-        if(height < 0.02f) height = 0.02f;
+        if(height < 0.002f) height = 0.002f;
         heights[i] = height;
         heightSum += height;
     }

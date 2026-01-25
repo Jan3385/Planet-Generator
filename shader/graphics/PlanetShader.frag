@@ -36,6 +36,7 @@ layout(std140, binding = 0) uniform palette {
 };
 
 #get MAX_POINT_LIGHTS
+#get PLANET_SCALE
 
 uniform int numPointLights;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
@@ -48,11 +49,11 @@ uniform DirectionLight directionalLight;
 Material GetColorAtHeight(float height){
     Material mat;
 
-    if(height < 0.04f){
-        mat = mixMaterial(deepOcean, shallowOcean, height/0.04f);
+    if(height < 0.013f * PLANET_SCALE){
+        mat = mixMaterial(deepOcean, shallowOcean, height/(0.013f * PLANET_SCALE));
     }
-    else if(height < 0.05f) mat = sand;
-    else if(height < 0.11f){
+    else if(height < 0.016f * PLANET_SCALE) mat = sand;
+    else if(height < 0.036f * PLANET_SCALE){
         float t = valNoise(normalize(Pos) * 70.0f);
         mat = mixMaterial(multMaterial(grass, 0.95f), multMaterial(grass, 1.05f), t);
 
@@ -61,7 +62,7 @@ Material GetColorAtHeight(float height){
         mat.diffuse.g *= mix(0.8f, 1.2f, greenModifier);
         mat.specular.g *= mix(0.8f, 1.2f, greenModifier);
     }
-    else if(height < 0.13f) mat = rock;
+    else if(height < 0.043f * PLANET_SCALE) mat = rock;
     else mat = snow;
 
 

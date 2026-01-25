@@ -3,6 +3,7 @@
 #include "Component/BaseComponent.h"
 #include "Component/Essential/TransformComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
+#include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
 #include "Math/Color.h"
 
 namespace Component {
@@ -11,6 +12,8 @@ namespace Component {
  */
 class PlanetGen : public BaseComponent, public Component::IUpdatable, public Component::IImGuiUpdatable{
 public:
+    static constexpr float PLANET_SCALE = 1.0f;
+
     PlanetGen(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PlanetGen() override = default;
 

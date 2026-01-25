@@ -7,6 +7,7 @@
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
+#include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
 #include "Component/Player/MovementComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
@@ -57,10 +58,13 @@ void GameEngine::Run(const Config& config)
     GL::BasicShaderProgram planetShader("PlanetShader");
     lighting->RegisterShaderLightUpdateCallback(&planetShader);
 
-    GL::Mesh cube;
+    GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
+    lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
+
+    std::shared_ptr<GL::Mesh> cube;
     cube = MeshGenerator::GenerateCubeMesh();
     
-    GL::Mesh spherifiedCube;
+    std::shared_ptr<GL::Mesh> spherifiedCube;
     spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(60);
 
     // Normal obj
@@ -70,7 +74,7 @@ void GameEngine::Run(const Config& config)
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
     renderComp->SetRenderShader(&planetShader);
-    renderComp->SetMesh(&spherifiedCube);
+    renderComp->SetMesh(spherifiedCube);
 
     using Component::PlanetMeshRender;
 
@@ -109,6 +113,10 @@ void GameEngine::Run(const Config& config)
 
     renderComp->SetColorPalette(palette);
 
+    Component::AtmosphereRender *atmosphereRenderComp = planet->AddComponent<Component::AtmosphereRender>();
+    atmosphereRenderComp->SetRenderShader(&atmosphereShader);
+    atmosphereRenderComp->SetColorPalette({ glm::vec4(0.2f, 0.5f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.5f, 1.0f) });
+
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());
 
     // floor
@@ -118,18 +126,18 @@ void GameEngine::Run(const Config& config)
         ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
-    floorRenderComp->SetMesh(&cube);
+    floorRenderComp->SetMesh(cube);
 
     floor->Disable();
 
 
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
-    lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
+    lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
-    lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(&cube);
+    lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
     
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();

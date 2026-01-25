@@ -19,8 +19,8 @@ public:
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    void SetMesh(GL::Mesh* mesh) { this->mesh = mesh; }
-    GL::Mesh* GetMesh() const { return this->mesh; }
+    void SetMesh(std::shared_ptr<GL::Mesh> mesh) { this->mesh = mesh; }
+    std::shared_ptr<GL::Mesh> GetMesh() const { return this->mesh; }
 protected:
     GL::Buffer<float, GL::BufferTarget::ArrayBuffer> verticiesBuffer;
     GL::VertexArray vertexArrayObject;
@@ -32,7 +32,7 @@ protected:
         { return {typeid(Component::Transform)}; }
 private:
 
-    GL::Mesh *mesh = nullptr;
+    std::shared_ptr<GL::Mesh> mesh = nullptr;
 
     friend class Object::BaseObject;
 };
