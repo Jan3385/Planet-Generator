@@ -32,6 +32,7 @@ void main()
 
     float intensity = pow(horizon, 1.5f);
     intensity *= max(sunAmount, 0.5f);
+    intensity = intensity * 0.6f;
 
     float t = smoothstep(0.0, 1.0, horizon);
     vec3 atmColor = mix(zenithColor.xyz, horizonColor.xyz, t);
