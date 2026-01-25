@@ -7,7 +7,7 @@
 void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 {
     Debug::LogTrace("PlanetGen: Planetifying mesh with seed " + std::to_string(seed));
-    constexpr float desiredAvgHeight = 0.010f * PLANET_SCALE;
+    constexpr float desiredAvgHeight = 0.030f * PLANET_SCALE;
 
     std::shared_ptr<GL::Mesh> mesh = renderComponent->GetMesh();
     std::vector<GL::VertexObj> vertices = mesh->vertices;
@@ -30,7 +30,7 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
         heightSum += height;
     }
     float avgHeight = heightSum / static_cast<float>(vertices.size());
-    float heightScale = desiredAvgHeight / avgHeight;
+    float heightScale = log10(desiredAvgHeight / avgHeight + 1.0f);
     Debug::LogSpam("HeighScale for planet: " + std::to_string(heightScale));
 
     for(size_t i = 0; i < vertices.size(); ++i) {
