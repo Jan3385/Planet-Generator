@@ -53,7 +53,7 @@ Material GetColorAtHeight(float height){
         mat = mixMaterial(deepOcean, shallowOcean, height/(0.013f * PLANET_SCALE));
     }
     else if(height < 0.016f * PLANET_SCALE) mat = sand;
-    else if(height < 0.036f * PLANET_SCALE){
+    else if(height < 0.040f * PLANET_SCALE){
         float t = valNoise(normalize(Pos) * 70.0f);
         mat = mixMaterial(multMaterial(grass, 0.95f), multMaterial(grass, 1.05f), t);
 
@@ -62,7 +62,7 @@ Material GetColorAtHeight(float height){
         mat.diffuse.g *= mix(0.8f, 1.2f, greenModifier);
         mat.specular.g *= mix(0.8f, 1.2f, greenModifier);
     }
-    else if(height < 0.043f * PLANET_SCALE) mat = rock;
+    else if(height < 0.052f * PLANET_SCALE) mat = rock;
     else mat = snow;
 
 
