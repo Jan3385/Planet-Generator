@@ -8,12 +8,12 @@ namespace Component {
 /**
  * 
  */
-class Movement : public BaseComponent, public Component::IUpdatable {
+class Movement : public BaseComponent, public Component::IUpdatable, public Component::IImGuiUpdatable {
 public:
     Movement(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Movement() override = default;
 protected:
-    static constexpr float SPEED = 4.8f;
+    float speed = 4.8f;
 
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Camera), typeid(Component::Transform)}; }
@@ -26,6 +26,8 @@ private:
 
     void Update() override;
     void FixedUpdate() override;
+
+    void ImGuiUpdate() override;
 
     Transform* transform = nullptr;
     Camera* camera = nullptr;

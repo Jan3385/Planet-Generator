@@ -57,6 +57,7 @@ public:
     void AddPointLightSource(PointLightSource* pointLight);
     void RemovePointLightSource(PointLightSource* pointLight);
 
+    void SetDirectionalLightSourceDirection(const glm::vec3& direction);
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
     void SetDirectionalLightSource(const glm::vec3& direction,
                                    const glm::vec3& diffuse,

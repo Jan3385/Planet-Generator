@@ -46,13 +46,13 @@ void Component::Movement::Update()
         right = glm::normalize(right);
 
         moveVector = forward * input.y + right * input.x;
-        moveVector = glm::normalize(moveVector) * SPEED;
+        moveVector = glm::normalize(moveVector) * this->speed;
     }
 
     if(Input::IsKeyDown(GLFW_KEY_SPACE))
-        moveVector.y += SPEED;
+        moveVector.y += this->speed;
     if(Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
-        moveVector.y -= SPEED;
+        moveVector.y -= this->speed;
 
     moveVector *= GameEngine::instance->DeltaTime();
 
@@ -64,4 +64,11 @@ void Component::Movement::Update()
 
 void Component::Movement::FixedUpdate()
 {
+}
+
+void Component::Movement::ImGuiUpdate()
+{
+    ImGui::Begin("Player controller");
+    ImGui::DragFloat("Speed", &this->speed, 0.1f, 0.1f, 20.0f);
+    ImGui::End();
 }

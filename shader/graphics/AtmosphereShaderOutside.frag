@@ -30,12 +30,12 @@ void main()
 
     float sunAmount = max(dot(-directionalLight.direction, normalSample), 0.0) * 1.5f;
 
-    float intensity = pow(horizon, 1.5f);
+    float intensity = pow(horizon, 0.25f);
     intensity *= max(sunAmount, 0.5f);
     intensity = intensity * 0.6f;
 
     float distanceFromPixel = length(viewPos - FragPos);
-    intensity *= clamp(mix(0.0f, 1.0f, distanceFromPixel*2.0f), 0, 1.0f);
+    intensity *= clamp(mix(0.0f, 1.0f, distanceFromPixel*0.2f), 0, 1.0f);
 
     float t = smoothstep(0.0, 1.0, horizon);
     vec3 atmColor = mix(zenithColor.xyz, horizonColor.xyz, t);

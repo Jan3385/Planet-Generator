@@ -47,7 +47,7 @@ void GameEngine::Run(const Config& config)
     currentLevel = new Level();
     input = new Input();
     lighting->SetDirectionalLightSource(
-        glm::vec3(-0.2f, 0.3f, -0.9f),
+        glm::vec3(-0.8f, 0.3f, 0.3f),
         glm::vec3(0.5f, 0.5f, 0.5f),
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
@@ -60,6 +60,8 @@ void GameEngine::Run(const Config& config)
 
     GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
     lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
+    GL::BasicShaderProgram atmosphereOutsideShader("AtmosphereShaderOutside");
+    lighting->RegisterShaderLightUpdateCallback(&atmosphereOutsideShader);
 
     std::shared_ptr<GL::Mesh> cube;
     cube = MeshGenerator::GenerateCubeMesh();
@@ -69,7 +71,7 @@ void GameEngine::Run(const Config& config)
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    constexpr float planetScale = 1.0f;
+    constexpr float planetScale = 10.0f;
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
@@ -114,7 +116,8 @@ void GameEngine::Run(const Config& config)
     renderComp->SetColorPalette(palette);
 
     Component::AtmosphereRender *atmosphereRenderComp = planet->AddComponent<Component::AtmosphereRender>();
-    atmosphereRenderComp->SetRenderShader(&atmosphereShader);
+    atmosphereRenderComp->SetRenderShader(&atmosphereOutsideShader);
+    atmosphereRenderComp->SetRenderShaderInside(&atmosphereShader);
     atmosphereRenderComp->SetColorPalette({ glm::vec4(0.2f, 0.5f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.5f, 1.0f) });
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());

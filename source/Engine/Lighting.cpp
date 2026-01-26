@@ -87,6 +87,12 @@ void Lighting::RemovePointLightSource(PointLightSource *pointLight)
         this->pointLightSources.end());
 }
 
+void Lighting::SetDirectionalLightSourceDirection(const glm::vec3 &direction)
+{
+    this->directionalLightSource.direction = direction;
+    this->TriggerShaderLightUpdateCallback();
+}
+
 void Lighting::SetDirectionalLightSource(const DirectionLightSource &directionalLight)
 {
     this->directionalLightSource = directionalLight;

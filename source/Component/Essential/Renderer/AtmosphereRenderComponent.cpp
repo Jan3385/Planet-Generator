@@ -12,30 +12,22 @@ Component::AtmosphereRender::AtmosphereRender(Object::BaseObject *owner)
 
 void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
-    // custom basic matrix setup
-    this->renderShader->Use();
-    this->renderShader->SetMat4("projection", projection);
-    this->renderShader->SetMat4("view", view);
-
     glm::mat4 model = this->transform->GetMatrixTransform();
     model = glm::scale(model, glm::vec3(1.0f) + PlanetGen::PLANET_SCALE * 0.11f);
-    this->renderShader->SetMat4("transform", model);
-    // ---
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-    this->renderShader->SetMat3("normalMatrix", normalMatrix);
-
-    this->renderShader->SetVec3("viewPos", 
-        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
 
     this->paletteBuffer.BindBufferBase(0);
 
-    if(!mesh) {
-        Debug::LogWarn("AtmosphereRender: No mesh set");
-    }
+    bool isInsideSphere = glm::length(
+        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos()
+        - this->transform->GetPos()
+    ) < PlanetGen::PLANET_SCALE + this->transform->GetScale().x + 0.1f;
 
-    this->mesh->Bind();
-    this->mesh->Draw();
+    if(isInsideSphere)
+        this->RenderInside(projection, view, model, normalMatrix);
+    else
+        this->RenderOutside(projection, view, model, normalMatrix);
 }
 
 void Component::AtmosphereRender::SetColorPalette(const atmospherePalette &palette)
@@ -66,4 +58,48 @@ void Component::AtmosphereRender::OnEnable()
 void Component::AtmosphereRender::OnDisable()
 {
     GameEngine::renderer->RemoveTransparentRenderCallback(this);
+}
+
+void Component::AtmosphereRender::RenderInside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix)
+{
+    Renderer::SetFaceCulling(true);
+    this->renderShaderInside->Use();
+    this->renderShaderInside->SetMat4("projection", projection);
+    this->renderShaderInside->SetMat4("view", view);
+    this->renderShaderInside->SetMat4("transform", model);
+    this->renderShaderInside->SetMat3("normalMatrix", normalMatrix);
+
+    glm::vec3 viewPos = 
+        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+    this->renderShaderInside->SetVec3("viewPos", viewPos);
+
+    if(!mesh) {
+        Debug::LogWarn("AtmosphereRender: No mesh set");
+    }
+
+    this->mesh->Bind();
+    this->mesh->Draw();
+    Renderer::SetFaceCulling(false);
+}
+
+void Component::AtmosphereRender::RenderOutside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix)
+{
+    Renderer::SetFaceCulling(true);
+    this->renderShader->Use();
+    this->renderShader->SetMat4("projection", projection);
+    this->renderShader->SetMat4("view", view);
+    this->renderShader->SetMat4("transform", model);
+    this->renderShader->SetMat3("normalMatrix", normalMatrix);
+
+    glm::vec3 viewPos = 
+        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+    this->renderShader->SetVec3("viewPos", viewPos);
+
+    if(!mesh) {
+        Debug::LogWarn("AtmosphereRender: No mesh set");
+    }
+
+    this->mesh->Bind();
+    this->mesh->Draw();
+    Renderer::SetFaceCulling(false);
 }

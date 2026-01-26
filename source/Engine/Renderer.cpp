@@ -28,6 +28,10 @@ void Renderer::DrawImGuiWindows()
     if(ImGui::Button("Toggle Backface Culling")){
         this->BackfaceCulling(!this->isBackfaceCullingEnabled);
     }
+    static float sunDir[3] = {-0.8f, 0.3f, 0.3f};
+    if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
+        GameEngine::lighting->SetDirectionalLightSourceDirection(glm::vec3(sunDir[0], sunDir[1], sunDir[2]));
+    }
     ImGui::End();
 }
 
@@ -93,6 +97,12 @@ void Renderer::SetVSYNC(bool enabled)
 {
     if(!enabled) glfwSwapInterval(0);
     else glfwSwapInterval(1);
+}
+
+void Renderer::SetFaceCulling(bool reversed)
+{
+    if(reversed) glFrontFace(GL_CW);
+    else glFrontFace(GL_CCW);
 }
 
 void Renderer::Update()

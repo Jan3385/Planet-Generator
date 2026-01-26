@@ -43,6 +43,7 @@ public:
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
 
     static void SetVSYNC(bool enabled);
+    static void SetFaceCulling(bool reversed);
 
     void Update();
     void WireframeMode(bool enabled);
