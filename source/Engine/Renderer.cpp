@@ -25,8 +25,15 @@ void Renderer::DrawImGuiWindows()
     if(ImGui::Button("Toggle Wireframe")){
         this->WireframeMode(!this->isWireframeMode);
     }
+    static bool isBackfaceCullingEnabled = true;
     if(ImGui::Button("Toggle Backface Culling")){
-        this->BackfaceCulling(!this->isBackfaceCullingEnabled);
+        this->BackfaceCulling(!isBackfaceCullingEnabled);
+        isBackfaceCullingEnabled = !isBackfaceCullingEnabled;
+    }
+    static bool isGammaCorrectionEnabled = false;
+    if(ImGui::Button("Toggle Gamma Correction")){
+        this->SetGammaCorrection(!isGammaCorrectionEnabled);
+        isGammaCorrectionEnabled = !isGammaCorrectionEnabled;
     }
     static float sunDir[3] = {-0.8f, 0.3f, 0.3f};
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
@@ -55,9 +62,11 @@ Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
 
     glEnable(GL_DEPTH_TEST);
     
-    glEnable(GL_CULL_FACE);
+    this->BackfaceCulling(true);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    this->SetReverseFaceCulling(false);
+
+    this->SetGammaCorrection(false);
 
     if(multiSample) glEnable(GL_MULTISAMPLE);
 
@@ -96,13 +105,19 @@ Renderer::~Renderer()
 void Renderer::SetVSYNC(bool enabled)
 {
     if(!enabled) glfwSwapInterval(0);
-    else glfwSwapInterval(1);
+    else         glfwSwapInterval(1);
 }
 
-void Renderer::SetFaceCulling(bool reversed)
+void Renderer::SetReverseFaceCulling(bool reversed)
 {
     if(reversed) glFrontFace(GL_CW);
-    else glFrontFace(GL_CCW);
+    else         glFrontFace(GL_CCW);
+}
+
+void Renderer::SetGammaCorrection(bool enabled)
+{
+    if(enabled) glEnable(GL_FRAMEBUFFER_SRGB);
+    else        glDisable(GL_FRAMEBUFFER_SRGB);
 }
 
 void Renderer::Update()
@@ -171,6 +186,4 @@ void Renderer::BackfaceCulling(bool enabled)
 {
     if(enabled) glEnable(GL_CULL_FACE);
     else        glDisable(GL_CULL_FACE);
-
-    this->isBackfaceCullingEnabled = enabled;
 }

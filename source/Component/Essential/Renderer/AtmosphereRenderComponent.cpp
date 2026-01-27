@@ -62,7 +62,7 @@ void Component::AtmosphereRender::OnDisable()
 
 void Component::AtmosphereRender::RenderInside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix)
 {
-    Renderer::SetFaceCulling(true);
+    Renderer::SetReverseFaceCulling(true);
     this->renderShaderInside->Use();
     this->renderShaderInside->SetMat4("projection", projection);
     this->renderShaderInside->SetMat4("view", view);
@@ -79,12 +79,12 @@ void Component::AtmosphereRender::RenderInside(glm::mat4 &projection, glm::mat4 
 
     this->mesh->Bind();
     this->mesh->Draw();
-    Renderer::SetFaceCulling(false);
+    Renderer::SetReverseFaceCulling(false);
 }
 
 void Component::AtmosphereRender::RenderOutside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix)
 {
-    Renderer::SetFaceCulling(true);
+    Renderer::SetReverseFaceCulling(true);
     this->renderShader->Use();
     this->renderShader->SetMat4("projection", projection);
     this->renderShader->SetMat4("view", view);
@@ -101,5 +101,5 @@ void Component::AtmosphereRender::RenderOutside(glm::mat4 &projection, glm::mat4
 
     this->mesh->Bind();
     this->mesh->Draw();
-    Renderer::SetFaceCulling(false);
+    Renderer::SetReverseFaceCulling(false);
 }

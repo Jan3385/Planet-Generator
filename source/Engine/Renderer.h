@@ -43,7 +43,8 @@ public:
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
 
     static void SetVSYNC(bool enabled);
-    static void SetFaceCulling(bool reversed);
+    static void SetReverseFaceCulling(bool reversed);
+    static void SetGammaCorrection(bool enabled);
 
     void Update();
     void WireframeMode(bool enabled);
@@ -62,7 +63,6 @@ public:
     }
 private:
     bool isWireframeMode = false;
-    bool isBackfaceCullingEnabled = true;
 
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;
