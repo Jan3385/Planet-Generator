@@ -20,7 +20,7 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->paletteBuffer.BindBufferBase(0);
 
     bool isInsideSphere = glm::length(
-        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos()
+        GameEngine::currentLevel->GetCamera()->GetPosition()
         - this->transform->GetPos()
     ) < PlanetGen::PLANET_SCALE + this->transform->GetScale().x + 0.1f;
 
@@ -70,7 +70,7 @@ void Component::AtmosphereRender::RenderInside(glm::mat4 &projection, glm::mat4 
     this->renderShaderInside->SetMat3("normalMatrix", normalMatrix);
 
     glm::vec3 viewPos = 
-        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+        GameEngine::currentLevel->GetCamera()->GetPosition();
     this->renderShaderInside->SetVec3("viewPos", viewPos);
 
     if(!mesh) {
@@ -92,7 +92,7 @@ void Component::AtmosphereRender::RenderOutside(glm::mat4 &projection, glm::mat4
     this->renderShader->SetMat3("normalMatrix", normalMatrix);
 
     glm::vec3 viewPos = 
-        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+        GameEngine::currentLevel->GetCamera()->GetPosition();
     this->renderShader->SetVec3("viewPos", viewPos);
 
     if(!mesh) {

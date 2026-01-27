@@ -31,7 +31,7 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->renderShader->SetInt("numPointLights", pointLightCount);
     
     this->renderShader->SetVec3("viewPos", 
-        GameEngine::currentLevel->GetCamera()->GetOwner()->GetComponent<Component::Transform>()->GetPos());
+        GameEngine::currentLevel->GetCamera()->GetPosition());
 
     if(!mesh) {
         Debug::LogWarn("PhongMeshRender: No mesh set");

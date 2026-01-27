@@ -17,6 +17,8 @@ public:
     Camera* SetClipPlanes(float newNearClip, float newFarClip);
     glm::mat4 GetProjection() const { return projection; }
     glm::mat4 GetView() const;
+
+    glm::vec3 GetPosition() const { return this->transform->GetPos(); }
 protected:
     float fov = 45.0f;
     float aspectRatio = 16.0f / 9.0f;
