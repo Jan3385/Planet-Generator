@@ -110,7 +110,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
 
     this->quadShader = new GL::BasicShaderProgram("TextureQuadShader");
 
-    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferType::RenderBuffer, GL::FrameBufferType::RenderBuffer>(MSAA_Samples);
+    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferType::Texture, GL::FrameBufferType::RenderBuffer>(MSAA_Samples);
     this->framebuffer->clearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 }
 
@@ -151,6 +151,7 @@ void Renderer::SetGammaCorrection(bool enabled)
 
 void Renderer::Update()
 {
+    framebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
     framebuffer->BindAndClear();
 
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
