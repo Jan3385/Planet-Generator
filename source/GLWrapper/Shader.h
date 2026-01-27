@@ -22,8 +22,6 @@ extern const std::unordered_map<ShaderType, std::string> ShaderTypeToString;
 class Shader{
 public:
     // Shader program or Compute shader based on context
-    GLuint ID = 0;
-
     Shader() = default;
     ~Shader();
 
@@ -54,6 +52,8 @@ public:
     void SetVec3(const std::string &name, glm::vec3 value);
     void SetVec4(const std::string &name, glm::vec4 value);
 protected:
+    GLuint ID = 0;
+
     bool preprocessorAtFirstLine = true;
     static const std::string SHADER_DEFAULT_DIRECTORY;
     std::string name;

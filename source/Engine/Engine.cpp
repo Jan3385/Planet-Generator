@@ -43,7 +43,7 @@ void GameEngine::Run(const Config& config)
     InitializeGLFW(config);
 
     lighting = new Lighting();
-    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples > 1);
+    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples);
     currentLevel = new Level();
     input = new Input();
     lighting->SetDirectionalLightSource(
@@ -71,7 +71,7 @@ void GameEngine::Run(const Config& config)
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    constexpr float planetScale = 10.0f;
+    constexpr float planetScale = 1.0f;
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
@@ -199,7 +199,4 @@ void GameEngine::InitializeGLFW(const Config& config)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    if(config.MSAA_Samples > 1)
-        glfwWindowHint(GLFW_SAMPLES, config.MSAA_Samples);
 }

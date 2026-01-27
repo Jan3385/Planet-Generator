@@ -64,9 +64,19 @@ public:
     }
 
     template<typename AttribType, typename T>
-    void AddAttribute(GLuint layoutIndex, GLint size, const Buffer<T, GL_ARRAY_BUFFER>& buffer, GLboolean normalized, size_t offset, GLuint divisor = 0) const;
+    void AddAttribute(
+        GLuint layoutIndex, GLint size, 
+        const Buffer<T, GL_ARRAY_BUFFER>& buffer, 
+        GLboolean normalized, size_t offset,
+         GLuint divisor = 0, size_t strideOverride = 0
+    ) const;
+
     template<typename AttribType, typename T>
-    void AddIntAttribute(GLuint layoutIndex, GLint size, const Buffer<T, GL_ARRAY_BUFFER>& buffer, size_t offset, GLuint divisor = 0) const;
+    void AddIntAttribute(
+        GLuint layoutIndex, GLint size, 
+        const Buffer<T, GL_ARRAY_BUFFER>& buffer, 
+        size_t offset, GLuint divisor = 0
+    ) const;
 
 private:
     GLuint ID;

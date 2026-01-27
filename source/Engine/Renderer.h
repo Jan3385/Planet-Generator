@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "GLWrapper/BasicShaderProgram.h"
+#include "GLWrapper/FrameBuffer.h"
 
 #include <vector>
 
@@ -24,7 +25,7 @@ public:
         friend class Renderer;
     };
 
-    Renderer(uint16_t width, uint16_t height, bool multiSample);
+    Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {
@@ -61,6 +62,12 @@ public:
     void RemoveImGuiCallback(Component::IImGuiUpdatable* callback) {
         std::erase(imguiCallbacks, callback);
     }
+protected:
+    GL::VertexArray *quadVAO;
+    GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
+    GL::BasicShaderProgram *quadShader;
+
+    GL::FrameBuffer<GL::FrameBufferType::RenderBuffer, GL::FrameBufferType::RenderBuffer> *framebuffer;
 private:
     bool isWireframeMode = false;
 

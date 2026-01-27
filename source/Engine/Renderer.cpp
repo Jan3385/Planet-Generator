@@ -42,7 +42,7 @@ void Renderer::DrawImGuiWindows()
     ImGui::End();
 }
 
-Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
+Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
 {
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
@@ -68,7 +68,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
 
     this->SetGammaCorrection(false);
 
-    if(multiSample) glEnable(GL_MULTISAMPLE);
+    if(MSAA_Samples > 1) glEnable(GL_MULTISAMPLE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -88,6 +88,30 @@ Renderer::Renderer(uint16_t width, uint16_t height, bool multiSample)
     GameEngine::lighting->RegisterShaderLightUpdateCallback(&this->defaultLightShader);
     
     this->defaultColorShader = std::move(GL::BasicShaderProgram("BasicShader.vert", "ColorShader.frag", "Color Shader"));
+
+    this->quadVBO = new GL::Buffer<float, GL_ARRAY_BUFFER>("Quad VBO");
+    this->quadVBO->SetData(
+        std::vector<float>{
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    }, GL_STATIC_DRAW);
+    this->quadVAO = new GL::VertexArray("Quad VAO");
+    this->quadVAO->Bind();
+    this->quadVBO->Bind();
+    this->quadVAO->AddAttribute<float, float>(0, 2, *this->quadVBO, GL_FALSE, 0, 0, 4 * sizeof(float));
+    this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
+    this->quadVAO->Unbind();
+
+    this->quadShader = new GL::BasicShaderProgram("TextureQuadShader");
+
+    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferType::RenderBuffer, GL::FrameBufferType::RenderBuffer>(MSAA_Samples);
+    this->framebuffer->clearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 }
 
 Renderer::~Renderer()
@@ -100,6 +124,11 @@ Renderer::~Renderer()
         glfwDestroyWindow(this->window);
         this->window = nullptr;
     }
+
+    delete this->quadVBO;
+    delete this->quadVAO;
+    delete this->quadShader;
+    delete this->framebuffer;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -122,8 +151,7 @@ void Renderer::SetGammaCorrection(bool enabled)
 
 void Renderer::Update()
 {
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    framebuffer->BindAndClear();
 
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
@@ -172,6 +200,11 @@ void Renderer::Update()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
+    bool wireframeMode = this->isWireframeMode;
+    if(wireframeMode) this->WireframeMode(false);
+    framebuffer->Render(this->quadShader, this->quadVAO);
+    if(wireframeMode) this->WireframeMode(true);
+
     glfwSwapBuffers(window);
 }
 
