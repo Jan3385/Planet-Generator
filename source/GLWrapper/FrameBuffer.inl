@@ -25,8 +25,13 @@ inline FrameBuffer<ColorType, DepthStencilType>::FrameBuffer(uint8_t MSAA_Sample
         glGenTextures(1, &attachmentColor);
         glBindTexture(GetTextureTarget(), attachmentColor);
 
-        if(GetTextureTarget() == GL_TEXTURE_2D_MULTISAMPLE)
+        if(GetTextureTarget() == GL_TEXTURE_2D_MULTISAMPLE){
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
             glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA_Samples, GL_RGB, size.x, size.y, GL_TRUE);
+        }
         else
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr); 
         
@@ -78,6 +83,7 @@ inline FrameBuffer<ColorType, DepthStencilType>::~FrameBuffer()
             glDeleteRenderbuffers(1, &attachmentColor);
         } else{
             glDeleteTextures(1, &attachmentColor);
+            if(renderedTexture != 0) glDeleteTextures(1, &renderedTexture);
         }
     }
     if(attachmentDepthStencil != 0) {
@@ -107,7 +113,7 @@ inline void FrameBuffer<ColorType, DepthStencilType>::Unbind() const
 
 /// @brief Renders the framebuffer on a quad or directly on screen based on ColorType
 /// @param quadShader shader to render a screen quad (optional for RenderBuffer color type)
-/// @param quadVAO vertex array object for the screen quad (optional for RenderBuffer color type or when using MSAA)
+/// @param quadVAO vertex array object for the screen quad (optional for RenderBuffer color type)
 template <FrameBufferType ColorType, FrameBufferType DepthStencilType>
 inline void FrameBuffer<ColorType, DepthStencilType>::Render(GL::Shader *quadShader, GL::VertexArray *quadVAO) const
 {
@@ -118,9 +124,14 @@ inline void FrameBuffer<ColorType, DepthStencilType>::Render(GL::Shader *quadSha
 
     if constexpr (ColorType == FrameBufferType::Texture) {
         if(MSAA_Samples > 1){
-            // TODO: MSAA textures dont support post-processing yet because im lazy
+            if(!quadShader || !quadVAO) {
+                Debug::LogError("FrameBuffer::Render called with multisampled Texture color attachment but quadShader or quadVAO is null!");
+                return;
+            }
+
             glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
             glBlitFramebuffer(
                 0, 0, 
                 size.x, size.y, 
@@ -128,7 +139,14 @@ inline void FrameBuffer<ColorType, DepthStencilType>::Render(GL::Shader *quadSha
                 size.x, size.y, 
                 GL_COLOR_BUFFER_BIT, GL_NEAREST
             );
-            glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
+            quadShader->Use();
+            quadVAO->Bind();
+            
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         }else{
             if(!quadShader || !quadVAO) {
                 Debug::LogError("FrameBuffer::Render called with Texture color attachment but quadShader or quadVAO is null!");

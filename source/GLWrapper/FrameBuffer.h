@@ -41,6 +41,9 @@ protected:
 
     GLuint attachmentColor = 0;
     GLuint attachmentDepthStencil = 0;
+
+    // Used for multisampled texture ColorType
+    GLuint renderedTexture = 0;
 private:
     GLuint GetTextureTarget() const { return MSAA_Samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D; }
 };
