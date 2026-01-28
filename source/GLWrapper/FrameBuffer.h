@@ -7,12 +7,16 @@
 
 namespace GL
 {
-enum class FrameBufferType{
+enum class FrameBufferColorType{
     RenderBuffer,
     Texture
 };
+enum class FrameBufferDepthStencilType{
+    None,
+    Texture
+};
 
-template<FrameBufferType ColorType, FrameBufferType DepthStencilType>
+template<FrameBufferColorType ColorType, FrameBufferDepthStencilType DepthStencilType>
 class FrameBuffer{
 public:
     FrameBuffer(uint8_t MSAA_Samples = 0);
@@ -39,13 +43,13 @@ protected:
     glm::uvec2 size = glm::uvec2(800, 600);
     uint8_t MSAA_Samples = 0;
 
-    GLuint attachmentColor = 0;
-    GLuint attachmentDepthStencil = 0;
+    GLuint rboColor = 0;
+    GLuint rboDepthStencil = 0;
 
     // Used for multisampled texture ColorType
+    GLuint postFBO = 0;
     GLuint renderedTexture = 0;
-private:
-    GLuint GetTextureTarget() const { return MSAA_Samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D; }
+    GLuint renderedDepthStencilTexture = 0;
 };
 }
 

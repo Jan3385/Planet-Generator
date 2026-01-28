@@ -67,7 +67,7 @@ protected:
     GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
     GL::BasicShaderProgram *quadShader;
 
-    GL::FrameBuffer<GL::FrameBufferType::Texture, GL::FrameBufferType::RenderBuffer> *framebuffer;
+    GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None> *framebuffer;
 private:
     bool isWireframeMode = false;
 

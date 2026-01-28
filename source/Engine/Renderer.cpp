@@ -109,8 +109,10 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     this->quadVAO->Unbind();
 
     this->quadShader = new GL::BasicShaderProgram("TextureQuadShader");
+    this->quadShader->Use();
+    this->quadShader->SetInt("screenTexture", 0);
 
-    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferType::Texture, GL::FrameBufferType::RenderBuffer>(MSAA_Samples);
+    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None>(MSAA_Samples);
     this->framebuffer->clearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 }
 
