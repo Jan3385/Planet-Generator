@@ -30,9 +30,6 @@ protected:
     void OnEnable() override;
     void OnDisable() override;
 
-    void RenderInside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix);
-    void RenderOutside(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model, glm::mat3 &normalMatrix);
-
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
 private:

@@ -7,6 +7,7 @@ layout(std140, binding = 0) uniform palette {
     vec4 zenithColor;
 };
 
+uniform vec3 originPos;
 uniform vec3 viewPos;
 
 #include "LightTypes.glsl"
@@ -25,7 +26,7 @@ void main()
     #if LOW_POLY_FEEL == 1
         vec3 normalSample = normalize(Normal);
     #else
-        vec3 normalSample = normalize(FragPos);
+        vec3 normalSample = normalize(FragPos - originPos);
     #endif
     
     vec3 viewDir = normalize(viewPos - FragPos);
