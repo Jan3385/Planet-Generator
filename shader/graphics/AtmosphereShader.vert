@@ -1,10 +1,11 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
-#var mat4 projection
-#var mat4 view
 uniform mat4 transform;
 uniform mat3 normalMatrix;
+
+#var mat4 projection
+#var mat4 view
 
 out vec3 Normal;
 out vec3 FragPos;

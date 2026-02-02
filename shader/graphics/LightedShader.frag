@@ -1,27 +1,25 @@
 in vec3 Normal;
 in vec3 FragPos;
 
-out vec4 FragColor;
-
-#var vec3 viewPos
-
 #include "LightTypes.glsl"
+
+#get MAX_POINT_LIGHTS
+uniform int numPointLights;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform DirectionLight directionalLight;
 
 uniform Material material;
 
 #var vec3 ambientColor
 #var float ambientIntensity
 
-#get MAX_POINT_LIGHTS
-
-uniform int numPointLights;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-
-uniform DirectionLight directionalLight;
+#var vec3 viewPos
 
 #get LOW_POLY_FEEL
 
 #include "LightFunctions.glsl"
+
+out vec4 FragColor;
 
 void main()
 {

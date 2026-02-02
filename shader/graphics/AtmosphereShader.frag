@@ -6,20 +6,20 @@ layout(std140, binding = 0) uniform palette {
     vec4 horizonColor;
     vec4 zenithColor;
 };
-
 uniform vec3 originPos;
-#var vec3 viewPos
 
 #include "LightTypes.glsl"
 uniform DirectionLight directionalLight;
 
-out vec4 FragColor;
+#var vec3 viewPos
 
 #get LOW_POLY_FEEL
 
 #define HORIZON_INTENSITY_EXPONENT 1.5f
 #define SUN_INTENSITY 1.5f
 #define CAMERA_CLEAR_DISTANCE_FACTOR 2.0f
+
+out vec4 FragColor;
 
 void main()
 {

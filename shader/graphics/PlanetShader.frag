@@ -2,29 +2,12 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec3 Pos;
 
-out vec4 FragColor;
-
-#var vec3 viewPos
-
-#var vec3 ambientColor
-#var float ambientIntensity
-
 #include "LightTypes.glsl"
 
-Material multMaterial(Material a, float factor) {
-    a.ambient  *= factor;
-    a.diffuse  *= factor;
-    a.specular *= factor;
-    return a;
-}
-Material mixMaterial(Material a, Material b, float t) {
-    Material result;
-    result.ambient  = mix(a.ambient,  b.ambient,  t);
-    result.diffuse  = mix(a.diffuse,  b.diffuse,  t);
-    result.specular = mix(a.specular, b.specular, t);
-    result.shininess = mix(a.shininess, b.shininess, t);
-    return result;
-}
+#get MAX_POINT_LIGHTS
+uniform int numPointLights;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform DirectionLight directionalLight;
 
 layout(std140, binding = 0) uniform palette {
     Material deepOcean;
@@ -35,16 +18,32 @@ layout(std140, binding = 0) uniform palette {
     Material snow;
 };
 
-#get MAX_POINT_LIGHTS
+#var vec3 viewPos
+#var vec3 ambientColor
+#var float ambientIntensity
+
 #get PLANET_SCALE
-
-uniform int numPointLights;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-
-uniform DirectionLight directionalLight;
 
 #include "LightFunctions.glsl"
 #include "Noise.glsl"
+
+out vec4 FragColor;
+
+Material multMaterial(Material a, float factor) {
+    a.ambient  *= factor;
+    a.diffuse  *= factor;
+    a.specular *= factor;
+    return a;
+}
+
+Material mixMaterial(Material a, Material b, float t) {
+    Material result;
+    result.ambient  = mix(a.ambient,  b.ambient,  t);
+    result.diffuse  = mix(a.diffuse,  b.diffuse,  t);
+    result.specular = mix(a.specular, b.specular, t);
+    result.shininess = mix(a.shininess, b.shininess, t);
+    return result;
+}
 
 Material GetColorAtHeight(float height){
     Material mat;
