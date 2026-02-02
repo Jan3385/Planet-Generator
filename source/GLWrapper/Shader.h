@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
+#include <variant>
 
 namespace GL
 {
@@ -36,13 +37,18 @@ public:
     std::string LoadFileWithShaderPreprocessor(const std::string& filePath, const std::string& shaderName);
 
     static void UnsetActiveShaderCache();
-    void Use() const;
+    void Use();
 
     GLint GetUniformLocation(const std::string &name);
 
+    using uniformValue = 
+        std::variant<bool, unsigned int, int, float, 
+            glm::mat3, glm::mat4, glm::vec2, glm::ivec2, glm::vec3, glm::vec4>;
+
+
     static void AddShaderConstant(const std::string& key, const std::string& value);
-    static void AddShaderVariable(const std::string& key, const std::string& value);
-    static void UpdateShaderVariable(const std::string& key, const std::string& value);
+    static void AddShaderVariable(const std::string& key, const uniformValue& value);
+    static void UpdateShaderVariable(const std::string& key, const uniformValue& value);
 
     // Uniform setters
     void SetBool(const std::string &name, bool value);
@@ -55,6 +61,10 @@ public:
     void SetIVec2(const std::string &name, glm::ivec2 value);
     void SetVec3(const std::string &name, glm::vec3 value);
     void SetVec4(const std::string &name, glm::vec4 value);
+
+    template<typename T>
+    void SetUniformAny(const std::string &name, const T &value);
+    void SetUniform(const std::string &name, const uniformValue &value);
 protected:
     GLuint ID = 0;
 
@@ -62,19 +72,53 @@ protected:
     static const std::string SHADER_DEFAULT_DIRECTORY;
     std::string name;
     GLuint CompileShader(const char* shaderSource, const std::string& shaderName, ShaderType shaderType);
+
+    std::string PreprocessorVarToUniform(const std::string& variableName);
+    std::unordered_map<std::string, uniformValue> localShaderVariables;
+
+    static GLuint activeShaderID;
 private:
     //format: ###
     static const std::string SHADER_VERSION;
     static const std::string SHADER_INCLUDE_EXTENSION;
     static const std::string SHADER_INCLUDE_DIRECTORY;
+
     static std::unordered_map<std::string, std::string> shaderConstants;
-    static std::unordered_map<std::string, std::string> shaderVariables;
-    std::unordered_map<std::string, std::string> localShaderVariables;
+    static std::unordered_map<std::string, uniformValue> shaderVariables;
+
     std::unordered_set<std::string> includedFiles;
     std::unordered_map<std::string, GLint> uniformLocationCache;
-    static GLuint activeShaderID;
 
+    void PreprocessorHandleInclude(const std::string& line, std::stringstream& source, const std::string& shaderName);
     void PreprocessorHandleGet(const std::string& line, std::stringstream& source, const std::string& shaderName);
     void PreprocessorHandleVar(const std::string& line, std::stringstream& source, const std::string& shaderName);
 };
+}
+
+template<typename T>
+void GL::Shader::SetUniformAny(const std::string &name, const T &value)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        this->SetBool(name, value);
+    } else if constexpr (std::is_same_v<T, unsigned int>) {
+        this->SetUnsignedInt(name, value);
+    } else if constexpr (std::is_same_v<T, int>) {
+        this->SetInt(name, value);
+    } else if constexpr (std::is_same_v<T, float>) {
+        this->SetFloat(name, value);
+    } else if constexpr (std::is_same_v<T, glm::mat3>) {
+        this->SetMat3(name, value);
+    } else if constexpr (std::is_same_v<T, glm::mat4>) {
+        this->SetMat4(name, value);
+    } else if constexpr (std::is_same_v<T, glm::vec2>) {
+        this->SetVec2(name, value);
+    } else if constexpr (std::is_same_v<T, glm::ivec2>) {
+        this->SetIVec2(name, value);
+    } else if constexpr (std::is_same_v<T, glm::vec3>) {
+        this->SetVec3(name, value);
+    } else if constexpr (std::is_same_v<T, glm::vec4>) {
+        this->SetVec4(name, value);
+    } else {
+        static_assert(!std::is_same_v<T, T>, "Unsupported uniform type in SetUniformAny");
+    }
 }

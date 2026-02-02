@@ -28,8 +28,6 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     Renderer::SetReverseFaceCulling(true);
     s->Use();
-    s->SetMat4("projection", projection);
-    s->SetMat4("view", view);
     s->SetMat4("transform", model);
     s->SetMat3("normalMatrix", normalMatrix);
 

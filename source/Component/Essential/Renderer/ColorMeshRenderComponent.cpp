@@ -13,7 +13,7 @@ void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
     if(!this->mesh) return;
     
-    this->RenderSetBasics(projection, view);
+    this->RenderSetTransform();
 
     this->renderShader->SetVec3("objectColor", this->color);
 

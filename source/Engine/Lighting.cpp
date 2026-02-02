@@ -29,10 +29,9 @@ void Lighting::SetAmbientIntensity(float intensity)
  */
 void Lighting::RegisterShaderLightUpdateCallback(GL::Shader *shader)
 {
+    //TODO: something different like with variables this is too silly
     this->shaderLightUpdateCallbackList.push_back(shader);
     shader->Use();
-    shader->SetVec3("ambientColor", this->ambientColor);
-    shader->SetFloat("ambientIntensity", this->ambientIntensity);
     shader->SetVec3("directionalLight.direction", this->directionalLightSource.direction);
     shader->SetVec3("directionalLight.diffuse", this->directionalLightSource.diffuse);
     shader->SetVec3("directionalLight.specular", this->directionalLightSource.specular);
@@ -109,10 +108,11 @@ void Lighting::SetDirectionalLightSource(const glm::vec3 &direction, const glm::
 
 void Lighting::TriggerShaderLightUpdateCallback()
 {
+    GL::Shader::UpdateShaderVariable("vec3 ambientColor", this->ambientColor);
+    GL::Shader::UpdateShaderVariable("float ambientIntensity", this->ambientIntensity);
+
     for (GL::Shader* shader : this->shaderLightUpdateCallbackList) {
         shader->Use();
-        shader->SetVec3("ambientColor", this->ambientColor);
-        shader->SetFloat("ambientIntensity", this->ambientIntensity);
         shader->SetVec3("directionalLight.direction", this->directionalLightSource.direction);
         shader->SetVec3("directionalLight.diffuse", this->directionalLightSource.diffuse);
         shader->SetVec3("directionalLight.specular", this->directionalLightSource.specular);

@@ -12,7 +12,7 @@ Component::PhongMeshRender::PhongMeshRender(Object::BaseObject *owner)
 
 void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
-    glm::mat4 model = this->RenderSetBasics(projection, view);
+    glm::mat4 model = this->RenderSetTransform();
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     this->renderShader->SetMat3("normalMatrix", normalMatrix);

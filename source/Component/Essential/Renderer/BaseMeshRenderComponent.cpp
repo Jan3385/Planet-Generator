@@ -29,16 +29,11 @@ void Component::BaseMeshRender::OnDisable()
 
 /**
  * @brief Sets up basic rendering uniforms
- * @param projection Projection matrix
- * @param view View matrix
  * @return Model matrix
  */
-glm::mat4 Component::BaseMeshRender::RenderSetBasics(glm::mat4 &projection, glm::mat4 &view)
+glm::mat4 Component::BaseMeshRender::RenderSetTransform()
 {
     this->renderShader->Use();
-
-    this->renderShader->SetMat4("projection", projection);
-    this->renderShader->SetMat4("view", view);
 
     glm::mat4 model = this->transform->GetMatrixTransform();
     this->renderShader->SetMat4("transform", model);

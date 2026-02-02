@@ -40,6 +40,11 @@ void Renderer::DrawImGuiWindows()
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
         GameEngine::lighting->SetDirectionalLightSourceDirection(glm::vec3(sunDir[0], sunDir[1], sunDir[2]));
     }
+    glm::vec3 ambientColor = GameEngine::lighting->GetAmbientColor();
+    float ambientColorArr[3] = {ambientColor.r, ambientColor.g, ambientColor.b};
+    if(ImGui::ColorEdit3("Ambient Color", ambientColorArr)){
+        GameEngine::lighting->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
+    }
     ImGui::End();
 }
 
@@ -49,6 +54,9 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
     GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
     GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
+
+    GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
+    GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
 
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
@@ -93,7 +101,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     this->defaultLightShader = std::move(GL::BasicShaderProgram("LightedShader"));
     GameEngine::lighting->RegisterShaderLightUpdateCallback(&this->defaultLightShader);
     
-    this->defaultColorShader = std::move(GL::BasicShaderProgram("BasicShader.vert", "ColorShader.frag", "Color Shader"));
+    this->defaultColorShader = std::move(GL::BasicShaderProgram("ColorShader"));
 
     this->quadVBO = new GL::Buffer<float, GL_ARRAY_BUFFER>("Quad VBO");
     this->quadVBO->SetData(
@@ -167,6 +175,8 @@ void Renderer::Update()
 
     glm::mat4 projection = camera->GetProjection();
     glm::mat4 view = camera->GetView();
+    GL::Shader::UpdateShaderVariable("mat4 projection", projection);
+    GL::Shader::UpdateShaderVariable("mat4 view", view);
 
     // sort transparent objects
     glm::vec3 camPos = camera->GetOwner()->GetComponent<Component::Transform>()->GetPos();

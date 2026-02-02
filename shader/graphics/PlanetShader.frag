@@ -6,8 +6,8 @@ out vec4 FragColor;
 
 uniform vec3 viewPos;
 
-uniform vec3 ambientColor;
-uniform float ambientIntensity;
+#var vec3 ambientColor
+#var float ambientIntensity
 
 #include "LightTypes.glsl"
 

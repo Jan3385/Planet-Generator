@@ -17,7 +17,7 @@ const std::string GL::Shader::SHADER_INCLUDE_EXTENSION = ".glsl";
 const std::string GL::Shader::SHADER_INCLUDE_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "Includes/";
 
 std::unordered_map<std::string, std::string> GL::Shader::shaderConstants = {};
-std::unordered_map<std::string, std::string> GL::Shader::shaderVariables = {};
+std::unordered_map<std::string, GL::Shader::uniformValue> GL::Shader::shaderVariables = {};
 
 const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
     {ShaderType::Vertex, "Vertex Shader"},
@@ -30,7 +30,7 @@ const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
 
 GLuint GL::Shader::activeShaderID = 0;
 
-void GL::Shader::Use() const
+void GL::Shader::Use()
 {
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
@@ -46,6 +46,18 @@ void GL::Shader::Use() const
 
     Shader::activeShaderID = ID;
     glUseProgram(ID);
+
+    // Update all local shader variables
+    for(auto& var : this->localShaderVariables) {
+        // find global equivalent
+        auto globalVar = GL::Shader::shaderVariables.find(var.first);
+
+        // if global variable changed update local and uniform
+        if(globalVar != GL::Shader::shaderVariables.end() && var.second != globalVar->second) {
+            this->SetUniform(this->PreprocessorVarToUniform(var.first), globalVar->second);
+            var.second = uniformValue(globalVar->second);
+        }
+    }
 }
 
 GL::Shader::~Shader()
@@ -58,19 +70,23 @@ GL::Shader::~Shader()
 
 GL::Shader::Shader(Shader &&other) noexcept
 {
-    Debug::LogSpam("Moved GL::Shader");
+    Debug::LogSpam("Moved GL::Shader " + other.name);
     this->ID = other.ID;
     this->name = std::move(other.name);
+    this->localShaderVariables = std::move(other.localShaderVariables);
+    this->uniformLocationCache = std::move(other.uniformLocationCache);
     other.ID = 0;
     other.name = "MOVED_SHADER";
 }
 
 Shader &GL::Shader::operator=(Shader &&other) noexcept
 {
-    Debug::LogSpam("Moved GL::Shader");
+    Debug::LogSpam("Moved GL::Shader " + other.name);
     if (this != &other) {
         this->ID = other.ID;
         this->name = std::move(other.name);
+        this->localShaderVariables = std::move(other.localShaderVariables);
+        this->uniformLocationCache = std::move(other.uniformLocationCache);
         other.ID = 0;
         other.name = "MOVED_SHADER";
     }
@@ -105,32 +121,22 @@ std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePa
 
         while (std::getline(shaderFile, line))
         {
-            // if line starts with #include
+            // handle #include including
+            // #include "filename.glsl"
             if (line.rfind("#include", 0) == 0) {
-                size_t firstQuote = line.find('"');
-                size_t lastQuote = line.find_last_of('"');
-
-                // if quotes are valid and found
-                if (firstQuote != std::string::npos && 
-                    lastQuote != std::string::npos && 
-                    firstQuote < lastQuote) {
-
-                    // Load the included file into the shader source
-                    std::string includePath = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
-                    if(includedFiles.count(includePath) <= 0) {
-                        includedFiles.insert(includePath);
-
-                        includePath = Shader::SHADER_INCLUDE_DIRECTORY + includePath;
-                        source << this->LoadFileWithShaderPreprocessor(includePath, shaderName) << "\n";
-                    }
-                }else{
-                    Debug::LogWarn(shaderName + " Warning: Invalid include (skipped): " + line);
-                }
+                PreprocessorHandleInclude(line, source, shaderName);
             }
             // handle #get to define constants
+            // #get SKY_COLOR
             else if(line.rfind("#get", 0) == 0){
                 PreprocessorHandleGet(line, source, shaderName);         
-            } else {
+            }
+            // handle #var to declare uniform variables
+            // #var mat4 projection
+            else if(line.rfind("#var", 0) == 0){
+                PreprocessorHandleVar(line, source, shaderName);         
+            }
+            else {
                 source << line << "\n";
             }
         }   
@@ -164,7 +170,7 @@ GLint GL::Shader::GetUniformLocation(const std::string &name)
     // Search for uniform location
     GLint location = glGetUniformLocation(ID, name.c_str());
     if (location == -1) {
-        Debug::LogWarn("Uniform '" + name + "' not found in shader program.");
+        Debug::LogTrace("Uniform '" + name + "' not found in shader program [" + this->name + "]");
     }
     uniformLocationCache[name] = location;
     return location;
@@ -175,12 +181,12 @@ void GL::Shader::AddShaderConstant(const std::string &key, const std::string &va
     shaderConstants[key] = value;
 }
 
-void GL::Shader::AddShaderVariable(const std::string &key, const std::string &value)
+void GL::Shader::AddShaderVariable(const std::string &key, const uniformValue &value)
 {
     shaderVariables[key] = value;
 }
 
-void GL::Shader::UpdateShaderVariable(const std::string &key, const std::string &value)
+void GL::Shader::UpdateShaderVariable(const std::string &key, const uniformValue &value)
 {
     shaderVariables[key] = value;
 }
@@ -234,6 +240,11 @@ void GL::Shader::SetVec4(const std::string &name, glm::vec4 value)
     glUniform4fv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
 }
 
+void GL::Shader::SetUniform(const std::string &name, const uniformValue &value)
+{
+    std::visit([&](auto&& v) { SetUniformAny(name, v); }, value);
+}
+
 GLuint GL::Shader::CompileShader(const char *shaderSource, const std::string &shaderName, ShaderType shaderType)
 {
     GLuint shaderID = glCreateShader(shaderType);
@@ -251,6 +262,29 @@ GLuint GL::Shader::CompileShader(const char *shaderSource, const std::string &sh
     }
 
     return shaderID;
+}
+
+void GL::Shader::PreprocessorHandleInclude(const std::string &line, std::stringstream &source, const std::string &shaderName)
+{
+    size_t firstQuote = line.find('"');
+    size_t lastQuote = line.find_last_of('"');
+
+    // if quotes are valid and found
+    if (firstQuote != std::string::npos && 
+        lastQuote != std::string::npos && 
+        firstQuote < lastQuote) {
+
+        // Load the included file into the shader source
+        std::string includePath = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+        if(includedFiles.count(includePath) <= 0) {
+            includedFiles.insert(includePath);
+
+            includePath = Shader::SHADER_INCLUDE_DIRECTORY + includePath;
+            source << this->LoadFileWithShaderPreprocessor(includePath, shaderName) << "\n";
+        }
+    }else{
+        Debug::LogWarn(shaderName + ": Invalid include (skipped): " + line);
+    }
 }
 
 void GL::Shader::PreprocessorHandleGet(const std::string &line, std::stringstream &source, const std::string &shaderName)
@@ -279,10 +313,31 @@ void GL::Shader::PreprocessorHandleVar(const std::string &line, std::stringstrea
     if (spacePos != std::string::npos) {
         std::string variableName = line.substr(spacePos + 1);
 
-        source << "uniform ";
+        if(shaderVariables.find(variableName) == shaderVariables.end()){
+            Debug::LogWarn(shaderName + ": Unknown variable requested with #var: " + variableName);
+            Debug::LogTrace("Available variables:");
+            for(auto& var : shaderVariables){
+                Debug::LogTrace(var.first);
+            }
+            return;
+        }
 
-        //TODO:
+        source << "uniform " << variableName << ";\n";
+
+        uniformValue val = shaderVariables.at(variableName);
+        
+        this->localShaderVariables[variableName] = val;
     }else{
         Debug::LogWarn(shaderName + ": Invalid #var directive (skipped): " + line);
     }
+}
+
+std::string GL::Shader::PreprocessorVarToUniform(const std::string &variableName)
+{
+    // ex. mat4 projection -> projection
+    size_t spacePos = variableName.find(' ');
+    if (spacePos != std::string::npos) {
+        return variableName.substr(spacePos + 1);
+    }
+    return variableName;
 }

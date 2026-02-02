@@ -33,7 +33,7 @@ protected:
     void OnEnable() override;
     void OnDisable() override;
 
-    glm::mat4 RenderSetBasics(glm::mat4 &projection, glm::mat4 &view);
+    glm::mat4 RenderSetTransform();
 
     GL::Shader *renderShader;
 

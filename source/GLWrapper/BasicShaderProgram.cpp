@@ -58,6 +58,13 @@ BasicShaderProgram::BasicShaderProgram(const char* vertexPath, const char* fragm
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    // Update all local shader uniforms
+    Shader::activeShaderID = ID;
+    glUseProgram(ID);
+    for(auto& var : this->localShaderVariables) {
+        this->SetUniform(this->PreprocessorVarToUniform(var.first), var.second);
+    }
 }
 
 GL::BasicShaderProgram::BasicShaderProgram(BasicShaderProgram &&other) noexcept

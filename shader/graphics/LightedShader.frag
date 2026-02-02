@@ -9,8 +9,8 @@ uniform vec3 viewPos;
 
 uniform Material material;
 
-uniform vec3 ambientColor;
-uniform float ambientIntensity;
+#var vec3 ambientColor
+#var float ambientIntensity
 
 #get MAX_POINT_LIGHTS
 

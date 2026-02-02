@@ -10,7 +10,7 @@ Component::PlanetMeshRender::PlanetMeshRender(Object::BaseObject *owner)
 
 void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
-    glm::mat4 model = this->RenderSetBasics(projection, view);
+    glm::mat4 model = this->RenderSetTransform();
 
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     this->renderShader->SetMat3("normalMatrix", normalMatrix);
@@ -32,7 +32,7 @@ void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->paletteBuffer.BindBufferBase(0);
 
     if(!mesh) {
-        Debug::LogWarn("PhongMeshRender: No mesh set");
+        Debug::LogWarn("PlanetMeshRender: No mesh set");
     }
 
     this->mesh->Bind();

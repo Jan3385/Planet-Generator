@@ -43,21 +43,21 @@ void GameEngine::Run(const Config& config)
     InitializeGLFW(config);
 
     lighting = new Lighting();
-    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples);
-    currentLevel = new Level();
-    input = new Input();
     lighting->SetDirectionalLightSource(
         glm::vec3(-0.8f, 0.3f, 0.3f),
         glm::vec3(0.5f, 0.5f, 0.5f),
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
 
+    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples);
+    currentLevel = new Level();
+    input = new Input();
+
     Renderer::SetVSYNC(config.VSync);
 
     // temp ----
     GL::BasicShaderProgram planetShader("PlanetShader");
     lighting->RegisterShaderLightUpdateCallback(&planetShader);
-
     GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
     lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
     GL::BasicShaderProgram atmosphereOutsideShader("AtmosphereShaderOutside");
