@@ -3,7 +3,7 @@ in vec3 FragPos;
 
 out vec4 FragColor;
 
-uniform vec3 viewPos;
+#var vec3 viewPos
 
 #include "LightTypes.glsl"
 

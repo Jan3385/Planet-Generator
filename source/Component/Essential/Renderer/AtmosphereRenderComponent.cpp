@@ -31,9 +31,6 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
     s->SetMat4("transform", model);
     s->SetMat3("normalMatrix", normalMatrix);
 
-    glm::vec3 viewPos = 
-        GameEngine::currentLevel->GetCamera()->GetPosition();
-    s->SetVec3("viewPos", viewPos);
     s->SetVec3("originPos", this->transform->GetPos());
 
     if(!mesh) {

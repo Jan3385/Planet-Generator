@@ -4,7 +4,7 @@ in vec3 Pos;
 
 out vec4 FragColor;
 
-uniform vec3 viewPos;
+#var vec3 viewPos
 
 #var vec3 ambientColor
 #var float ambientIntensity

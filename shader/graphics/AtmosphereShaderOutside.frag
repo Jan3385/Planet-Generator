@@ -8,7 +8,7 @@ layout(std140, binding = 0) uniform palette {
 };
 
 uniform vec3 originPos;
-uniform vec3 viewPos;
+#var vec3 viewPos
 
 #include "LightTypes.glsl"
 uniform DirectionLight directionalLight;

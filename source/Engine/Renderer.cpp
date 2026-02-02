@@ -57,6 +57,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
 
     GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
+    GL::Shader::AddShaderVariable("vec3 viewPos", glm::vec3(0.0f));
 
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
@@ -177,9 +178,11 @@ void Renderer::Update()
     glm::mat4 view = camera->GetView();
     GL::Shader::UpdateShaderVariable("mat4 projection", projection);
     GL::Shader::UpdateShaderVariable("mat4 view", view);
+    
+    glm::vec3 camPos = camera->GetPosition();
+    GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
 
     // sort transparent objects
-    glm::vec3 camPos = camera->GetOwner()->GetComponent<Component::Transform>()->GetPos();
     std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
         [camPos](IRendererCallback* a, IRendererCallback* b) {
             Component::BaseMeshRender* renderA = dynamic_cast<Component::BaseMeshRender*>(a);
