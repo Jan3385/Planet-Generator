@@ -15,6 +15,10 @@ const std::string GL::Shader::SHADER_VERSION = "460";
 const std::string GL::Shader::SHADER_DEFAULT_DIRECTORY = "Shaders/";
 const std::string GL::Shader::SHADER_INCLUDE_EXTENSION = ".glsl";
 const std::string GL::Shader::SHADER_INCLUDE_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "Includes/";
+
+std::unordered_map<std::string, std::string> GL::Shader::shaderConstants = {};
+std::unordered_map<std::string, std::string> GL::Shader::shaderVariables = {};
+
 const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
     {ShaderType::Vertex, "Vertex Shader"},
     {ShaderType::Fragment, "Fragment Shader"},
@@ -22,13 +26,6 @@ const std::unordered_map<ShaderType, std::string> GL::ShaderTypeToString = {
     {ShaderType::Compute, "Compute Shader"},
     {ShaderType::TessControl, "Tessellation Control Shader"},
     {ShaderType::TessEvaluation, "Tessellation Evaluation Shader"}
-};
-
-const std::unordered_map<std::string, std::string> shaderConstants = {
-    {"SHADER_VERSION", "460"},
-    {"MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS)},
-    {"LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0"},
-    {"PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE)}
 };
 
 GLuint GL::Shader::activeShaderID = 0;
@@ -98,7 +95,11 @@ std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePa
 
         // Add version at the start of each shader
         if(this->preprocessorAtFirstLine){
-            source << "#version " << SHADER_VERSION << " core" << "\n";
+            if(Shader::shaderConstants.find("SHADER_VERSION") != Shader::shaderConstants.end())
+                source << "#version " << Shader::shaderConstants.at("SHADER_VERSION") << " core" << "\n";
+            else
+                source << "#version 460 core" << "\n";
+
             this->preprocessorAtFirstLine = false;    
         }
 
@@ -128,21 +129,7 @@ std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePa
             }
             // handle #get to define constants
             else if(line.rfind("#get", 0) == 0){
-                // Handle #get directive
-                size_t spacePos = line.find(' ');
-                if (spacePos != std::string::npos) {
-                    std::string variableName = line.substr(spacePos + 1);
-
-                    source << "#define ";
-
-                    if(shaderConstants.find(variableName) != shaderConstants.end()) {
-                        source << variableName << " " << shaderConstants.at(variableName) << "\n";
-                    }
-                    else{
-                        source << "UNKNOWN_VARIABLE " << variableName << "\n";
-                        Debug::LogWarn(shaderName + " Warning: Unknown variable requested with #get: " + variableName);
-                    }
-                }
+                PreprocessorHandleGet(line, source, shaderName);         
             } else {
                 source << line << "\n";
             }
@@ -181,6 +168,21 @@ GLint GL::Shader::GetUniformLocation(const std::string &name)
     }
     uniformLocationCache[name] = location;
     return location;
+}
+
+void GL::Shader::AddShaderConstant(const std::string &key, const std::string &value)
+{
+    shaderConstants[key] = value;
+}
+
+void GL::Shader::AddShaderVariable(const std::string &key, const std::string &value)
+{
+    shaderVariables[key] = value;
+}
+
+void GL::Shader::UpdateShaderVariable(const std::string &key, const std::string &value)
+{
+    shaderVariables[key] = value;
 }
 
 void GL::Shader::SetBool(const std::string &name, bool value)
@@ -249,4 +251,38 @@ GLuint GL::Shader::CompileShader(const char *shaderSource, const std::string &sh
     }
 
     return shaderID;
+}
+
+void GL::Shader::PreprocessorHandleGet(const std::string &line, std::stringstream &source, const std::string &shaderName)
+{
+    size_t spacePos = line.find(' ');
+    if (spacePos != std::string::npos) {
+        std::string variableName = line.substr(spacePos + 1);
+
+        source << "#define ";
+
+        if(shaderConstants.find(variableName) != shaderConstants.end()) {
+            source << variableName << " " << shaderConstants.at(variableName) << "\n";
+        }
+        else{
+            source << "UNKNOWN_VARIABLE " << variableName << "\n";
+            Debug::LogWarn(shaderName + ": Unknown variable requested with #get: " + variableName);
+        }
+    }else{
+        Debug::LogWarn(shaderName + ": Invalid #get directive (skipped): " + line);
+    }
+}
+
+void GL::Shader::PreprocessorHandleVar(const std::string &line, std::stringstream &source, const std::string &shaderName)
+{
+    size_t spacePos = line.find(' ');
+    if (spacePos != std::string::npos) {
+        std::string variableName = line.substr(spacePos + 1);
+
+        source << "uniform ";
+
+        //TODO:
+    }else{
+        Debug::LogWarn(shaderName + ": Invalid #var directive (skipped): " + line);
+    }
 }

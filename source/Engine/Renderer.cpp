@@ -6,6 +6,7 @@
 #include "Debug/Logger.h"
 #include "Engine/Engine.h"
 #include "Component/BaseComponent.h"
+#include "Component/Planet/PlanetGenComponent.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
@@ -44,6 +45,11 @@ void Renderer::DrawImGuiWindows()
 
 Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
 {
+    GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
+    GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
+    GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
+    GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
+
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
     if(!this->window) {

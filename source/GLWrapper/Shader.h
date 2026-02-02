@@ -40,6 +40,10 @@ public:
 
     GLint GetUniformLocation(const std::string &name);
 
+    static void AddShaderConstant(const std::string& key, const std::string& value);
+    static void AddShaderVariable(const std::string& key, const std::string& value);
+    static void UpdateShaderVariable(const std::string& key, const std::string& value);
+
     // Uniform setters
     void SetBool(const std::string &name, bool value);
     void SetUnsignedInt(const std::string &name, unsigned int value);
@@ -63,8 +67,14 @@ private:
     static const std::string SHADER_VERSION;
     static const std::string SHADER_INCLUDE_EXTENSION;
     static const std::string SHADER_INCLUDE_DIRECTORY;
+    static std::unordered_map<std::string, std::string> shaderConstants;
+    static std::unordered_map<std::string, std::string> shaderVariables;
+    std::unordered_map<std::string, std::string> localShaderVariables;
     std::unordered_set<std::string> includedFiles;
     std::unordered_map<std::string, GLint> uniformLocationCache;
     static GLuint activeShaderID;
+
+    void PreprocessorHandleGet(const std::string& line, std::stringstream& source, const std::string& shaderName);
+    void PreprocessorHandleVar(const std::string& line, std::stringstream& source, const std::string& shaderName);
 };
 }
