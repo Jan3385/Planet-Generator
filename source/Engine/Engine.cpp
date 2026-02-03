@@ -137,11 +137,13 @@ void GameEngine::Run(const Config& config)
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
+    lightObj->Disable();
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
-    
+    lightObj2->Disable();
+
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.0f, 2.5f));

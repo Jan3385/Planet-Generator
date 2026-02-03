@@ -1,6 +1,31 @@
 # Planet renderer
 
+![Procedural planet](images/planet.png)
+
 A procedural planet generator powered by OpenGL build in C++. Uses the GLAD and GLFW libraries for OpenGL functions and window creation
+
+## Planet generation
+
+The planets are generated using several value noises overlayed on top of each other which then offset the height of each vertex
+
+The color is then decided with a palette of materials based on height. Each material has its own ambient, specular and diffuse color along with reflectivity
+
+Each planet can also have an atmosphere which reacts to lighting and player proximity
+
+![Procedural planet rotating](images/planet.gif)
+
+## Made with OpenGL
+
+The entire rendering pipeline is made from custom OpenGL wrappers which were designed to be flexible in almost any scenario
+
+They can streamline manipulating with OpenGL buffers, shaders, framebuffers, vertex arrays and more
+
+## List of used libraries
+ - glfw
+ - glad
+ - glm
+ - OpenGL
+ - Dear ImGui
 
 ## Compiling & Building
 
