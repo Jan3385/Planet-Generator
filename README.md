@@ -1,6 +1,6 @@
 # Planet renderer
 
-![Procedural planet](images/planet.png)
+<img src="images/planet.png" alt="Procedural planet" width="256">
 
 A procedural planet generator powered by OpenGL build in C++. Uses the GLAD and GLFW libraries for OpenGL functions and window creation
 
@@ -12,7 +12,7 @@ The color is then decided with a palette of materials based on height. Each mate
 
 Each planet can also have an atmosphere which reacts to lighting and player proximity
 
-![Procedural planet rotating](images/planet.gif)
+<img src="images/planet.gif" alt="Procedural planet rotating" width="256">
 
 ## Made with OpenGL
 
