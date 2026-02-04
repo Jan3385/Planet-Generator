@@ -31,10 +31,13 @@ void Renderer::DrawImGuiWindows()
         this->BackfaceCulling(!isBackfaceCullingEnabled);
         isBackfaceCullingEnabled = !isBackfaceCullingEnabled;
     }
-    static bool isGammaCorrectionEnabled = false;
-    if(ImGui::Button("Toggle Gamma Correction")){
-        this->SetGammaCorrection(!isGammaCorrectionEnabled);
-        isGammaCorrectionEnabled = !isGammaCorrectionEnabled;
+    static float gammaValue = 1.0f;
+    if(ImGui::DragFloat("Gamma", &gammaValue, 0.1f, 0.1f, 10.0f)){
+        this->SetGammaCorrection(gammaValue);
+    }
+    static float exposureValue = 1.0f;
+    if(ImGui::DragFloat("Exposure", &exposureValue, 0.1f, 0.1f, 10.0f)){
+        GL::Shader::UpdateShaderVariable("float exposure", exposureValue);
     }
     static float sunDir[3] = {-0.8f, 0.3f, 0.3f};
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
@@ -48,7 +51,7 @@ void Renderer::DrawImGuiWindows()
     ImGui::End();
 }
 
-Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
+Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float gamma)
 {
     GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
     GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
@@ -58,6 +61,9 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("vec3 viewPos", glm::vec3(0.0f));
+
+    GL::Shader::AddShaderVariable("float gamma", 2.2f);
+    GL::Shader::AddShaderVariable("float exposure", 1.0f);
 
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
@@ -81,7 +87,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     glCullFace(GL_BACK);
     this->SetReverseFaceCulling(false);
 
-    this->SetGammaCorrection(false);
+    this->SetGammaCorrection(gamma);
 
     if(MSAA_Samples > 1) glEnable(GL_MULTISAMPLE);
 
@@ -123,11 +129,11 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples)
     this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
     this->quadVAO->Unbind();
 
-    this->quadShader = new GL::BasicShaderProgram("TextureQuadShader");
-    this->quadShader->Use();
-    this->quadShader->SetInt("screenTexture", 0);
+    this->postProcessShader = new GL::BasicShaderProgram("PostProcessShader");
+    this->postProcessShader->Use();
+    this->postProcessShader->SetInt("screenTexture", 0);
 
-    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None>(MSAA_Samples);
+    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None>(true, MSAA_Samples);
     this->framebuffer->clearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 }
 
@@ -144,7 +150,7 @@ Renderer::~Renderer()
 
     delete this->quadVBO;
     delete this->quadVAO;
-    delete this->quadShader;
+    delete this->postProcessShader;
     delete this->framebuffer;
 }
 
@@ -160,10 +166,9 @@ void Renderer::SetReverseFaceCulling(bool reversed)
     else         glFrontFace(GL_CCW);
 }
 
-void Renderer::SetGammaCorrection(bool enabled)
+void Renderer::SetGammaCorrection(float value)
 {
-    if(enabled) glEnable(GL_FRAMEBUFFER_SRGB);
-    else        glDisable(GL_FRAMEBUFFER_SRGB);
+    GL::Shader::UpdateShaderVariable("float gamma", value);
 }
 
 void Renderer::Update()
@@ -205,6 +210,11 @@ void Renderer::Update()
     for(auto& callback : transparentRenderCallbacks) {
         callback->Render(projection, view);
     }
+    
+    bool wireframeMode = this->isWireframeMode;
+    if(wireframeMode) this->WireframeMode(false);
+    framebuffer->Render(this->postProcessShader, this->quadVAO);
+    if(wireframeMode) this->WireframeMode(true);
 
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
@@ -221,11 +231,6 @@ void Renderer::Update()
     
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
-    bool wireframeMode = this->isWireframeMode;
-    if(wireframeMode) this->WireframeMode(false);
-    framebuffer->Render(this->quadShader, this->quadVAO);
-    if(wireframeMode) this->WireframeMode(true);
 
     glfwSwapBuffers(window);
 }

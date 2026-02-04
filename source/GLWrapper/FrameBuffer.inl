@@ -5,8 +5,8 @@
 namespace GL
 {
 template<FrameBufferColorType ColorType, FrameBufferDepthStencilType DepthStencilType>
-inline FrameBuffer<ColorType, DepthStencilType>::FrameBuffer(uint8_t MSAA_Samples)
-    : MSAA_Samples(MSAA_Samples)
+inline FrameBuffer<ColorType, DepthStencilType>::FrameBuffer(bool clamped, uint8_t MSAA_Samples)
+    : MSAA_Samples(MSAA_Samples), clamped(clamped)
 {
     // make FBO and RBOs
     glGenFramebuffers(1, &FBO);
@@ -17,10 +17,13 @@ inline FrameBuffer<ColorType, DepthStencilType>::FrameBuffer(uint8_t MSAA_Sample
 
     // Color RBO
     glBindRenderbuffer(GL_RENDERBUFFER, rboColor);
+
+    GLuint colorFromat = clamped ? GL_RGB16F : GL_RGB;
+
     if(MSAA_Samples > 1)
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_Samples, GL_RGB, size.x, size.y);
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA_Samples, colorFromat, size.x, size.y);
     else
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, size.x, size.y);
+        glRenderbufferStorage(GL_RENDERBUFFER, colorFromat, size.x, size.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rboColor);
 
     // DepthStencil RBO
@@ -37,7 +40,7 @@ inline FrameBuffer<ColorType, DepthStencilType>::FrameBuffer(uint8_t MSAA_Sample
 
         glGenTextures(1, &renderedTexture);
         glBindTexture(GL_TEXTURE_2D, renderedTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, colorFromat, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

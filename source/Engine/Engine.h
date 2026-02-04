@@ -12,6 +12,7 @@ public:
         uint16_t windowHeight = 600;
 
         uint8_t MSAA_Samples = 8; // 1 means no MSAA
+        float gamma = 2.2f;
         bool VSync = true;
     };
 

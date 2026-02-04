@@ -49,7 +49,7 @@ void GameEngine::Run(const Config& config)
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
 
-    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples);
+    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples, config.gamma);
     currentLevel = new Level();
     input = new Input();
 

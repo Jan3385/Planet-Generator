@@ -19,7 +19,7 @@ enum class FrameBufferDepthStencilType{
 template<FrameBufferColorType ColorType, FrameBufferDepthStencilType DepthStencilType>
 class FrameBuffer{
 public:
-    FrameBuffer(uint8_t MSAA_Samples = 0);
+    FrameBuffer(bool clamped = false, uint8_t MSAA_Samples = 0);
     ~FrameBuffer();
 
     void BindAndClear() const;
@@ -35,6 +35,7 @@ public:
     FrameBuffer& operator=(FrameBuffer&&other) noexcept;
 
     void UpdateSize(const glm::uvec2& newSize);
+    bool isClamped() const { return clamped; }
 
     glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 protected:
@@ -50,6 +51,8 @@ protected:
     GLuint postFBO = 0;
     GLuint renderedTexture = 0;
     GLuint renderedDepthStencilTexture = 0;
+private:
+    bool clamped;
 };
 }
 

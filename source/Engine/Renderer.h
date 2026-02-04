@@ -25,7 +25,7 @@ public:
         friend class Renderer;
     };
 
-    Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples);
+    Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float gamma);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {
@@ -45,7 +45,7 @@ public:
 
     static void SetVSYNC(bool enabled);
     static void SetReverseFaceCulling(bool reversed);
-    static void SetGammaCorrection(bool enabled);
+    static void SetGammaCorrection(float value);
 
     void Update();
     void WireframeMode(bool enabled);
@@ -65,7 +65,7 @@ public:
 protected:
     GL::VertexArray *quadVAO;
     GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
-    GL::BasicShaderProgram *quadShader;
+    GL::BasicShaderProgram *postProcessShader;
 
     GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None> *framebuffer;
 private:
