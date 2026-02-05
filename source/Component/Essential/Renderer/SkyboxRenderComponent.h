@@ -14,8 +14,11 @@ public:
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 protected:
-    void Awake() override;
-    void OnDestroy() override;
+    void Awake() override     {};
+    void OnDestroy() override {};
+
+    void OnEnable() override  {};
+    void OnDisable() override {};
 
     std::vector<std::type_index> GetDependencies() const override 
         { return {/*typeid(Component::Transform)*/}; }

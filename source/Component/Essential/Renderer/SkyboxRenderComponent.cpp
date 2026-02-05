@@ -8,6 +8,12 @@ Component::SkyboxRender::SkyboxRender(Object::BaseObject *owner)
 {
     this->SetRenderShader(&GameEngine::renderer->GetSkyboxShader());
     this->cubeMesh = MeshGenerator::GenerateCubeMesh();
+
+    if(!GameEngine::currentLevel->GetSkybox())
+        GameEngine::currentLevel->SetSkybox(this);
+    else{
+        Debug::LogWarn("Multiple SkyboxRender components exist! Only one skybox should be present");
+    }
 }
 
 /**
@@ -26,8 +32,8 @@ void Component::SkyboxRender::Render(glm::mat4 &projection, glm::mat4 &view)
     if(!this->cubemap.isInitialized()) return;
 
     Renderer::SetReverseFaceCulling(true);
+    glDepthFunc(GL_LEQUAL);
 
-    glDepthMask(GL_FALSE);
     this->renderShader->Use();
     glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(view));
     this->renderShader->SetMat4("view", viewNoTranslation);
@@ -37,19 +43,7 @@ void Component::SkyboxRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->cubemap.Bind();
 
     this->cubeMesh->Draw();
+    
     Renderer::SetReverseFaceCulling(false);
-    glDepthMask(GL_TRUE);
-}
-
-void Component::SkyboxRender::Awake()
-{
-    //if(!this->transform)
-    //    this->transform = this->GetOwner()->GetComponent<Component::Transform>();
-
-    GameEngine::renderer->AddRenderCallback(this);
-}
-
-void Component::SkyboxRender::OnDestroy()
-{
-    GameEngine::renderer->RemoveRenderCallback(this);
+    glDepthFunc(GL_LESS);
 }

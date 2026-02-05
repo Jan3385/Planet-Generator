@@ -208,6 +208,9 @@ void Renderer::Update()
         callback->Render(projection, view);
     }
 
+    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
+    if(skybox) skybox->Render(projection, view);
+
     for(auto& callback : transparentRenderCallbacks) {
         callback->Render(projection, view);
     }
