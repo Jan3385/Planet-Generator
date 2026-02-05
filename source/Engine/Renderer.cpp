@@ -109,6 +109,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     GameEngine::lighting->RegisterShaderLightUpdateCallback(&this->defaultLightShader);
     
     this->defaultColorShader = std::move(GL::BasicShaderProgram("ColorShader"));
+    this->skyboxShader = std::move(GL::BasicShaderProgram("SkyboxShader"));
 
     this->quadVBO = new GL::Buffer<float, GL_ARRAY_BUFFER>("Quad VBO");
     this->quadVBO->SetData(

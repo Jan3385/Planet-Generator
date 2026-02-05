@@ -6,9 +6,6 @@
 
 void Component::BaseMeshRender::Awake()
 {
-    if(!this->transform)
-        this->transform = this->GetOwner()->GetComponent<Component::Transform>();
-
     GameEngine::renderer->AddRenderCallback(this);
 }
 

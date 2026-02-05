@@ -131,6 +131,18 @@ void GL::Texture::BindToUnit(uint8_t unit)
 /// @return raw pixel data
 unsigned char *GL::Texture::LoadImageFromPath(std::string filePath, int &width, int &height, int &nrChannels, bool flip)
 {
+    // check if file exists
+    std::ifstream file(filePath);
+    if(!file.good()) {
+        Debug::LogError(std::format("Failed to load image from path: {0} (file does not exist)", filePath));
+        width = 0;
+        height = 0;
+        nrChannels = 0;
+        file.close();
+        return nullptr;
+    }
+    file.close();
+
     stbi_set_flip_vertically_on_load(flip);
     return stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
 }

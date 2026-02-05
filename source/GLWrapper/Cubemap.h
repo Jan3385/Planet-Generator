@@ -24,6 +24,7 @@ public:
     static void Unbind() { glBindTexture(GL_TEXTURE_CUBE_MAP, 0); };
 
     bool isBlurred()  { return this->blurred; };
+    bool isInitialized() { return this->ID != 0; };
 protected:
     GLuint ID = 0;
 

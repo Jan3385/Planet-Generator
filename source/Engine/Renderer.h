@@ -55,6 +55,7 @@ public:
 
     GL::BasicShaderProgram& GetDefaultLightShader() { return this->defaultLightShader; }
     GL::BasicShaderProgram& GetDefaultColorShader() { return this->defaultColorShader; }
+    GL::BasicShaderProgram& GetSkyboxShader() { return this->skyboxShader; }
 
     void AddImGuiCallback(Component::IImGuiUpdatable* callback) {
         imguiCallbacks.push_back(callback);
@@ -73,6 +74,7 @@ private:
 
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;
+    GL::BasicShaderProgram skyboxShader;
 
     void DrawImGuiWindows();
     GLFWwindow* window = nullptr;

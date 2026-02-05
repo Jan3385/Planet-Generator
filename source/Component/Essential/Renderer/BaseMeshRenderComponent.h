@@ -24,7 +24,7 @@ public:
     BaseMeshRender* SetRenderShader(GL::Shader* shader) { this->renderShader = shader; return this; }
 protected:
     std::vector<std::type_index> GetDependencies() const override 
-        { return {typeid(Component::Transform)}; }
+        { return { }; }
 
 
     void Awake() override;

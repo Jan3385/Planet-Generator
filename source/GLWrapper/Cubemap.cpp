@@ -2,6 +2,10 @@
 
 GL::Cubemap::Cubemap() : ID(0) { }
 
+/// @brief Creates a cubemap texture from 6 image files
+/// @param filePaths array of 6 file paths with file names (ex. ["/images/banana.png", ..])
+/// @param blurred if the textures should be blurred
+/// @note Order of images: right, left, bottom, top, front, back
 GL::Cubemap::Cubemap(const std::string filePaths[6], bool blurred) 
     : blurred(blurred)
 {
@@ -40,6 +44,7 @@ void GL::Cubemap::Bind()
 
 /// @brief Loads all 6 cubemap faces from 6 image files
 /// @param filePaths array of 6 file paths with file names (ex. ["/images/banana.png", ..])
+/// @note Order of images: right, left, bottom, top, front, back
 void GL::Cubemap::LoadCubemapFaces(const std::string filePaths[6])
 {
     this->Bind();

@@ -4,11 +4,11 @@
 
 #include "Debug/Logger.h"
 #include "GLWrapper/BasicShaderProgram.h"
-#include "GLWrapper/Cubemap.h"
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 #include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
+#include "Component/Essential/Renderer/SkyboxRenderComponent.h"
 #include "Component/Player/MovementComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
@@ -69,6 +69,19 @@ void GameEngine::Run(const Config& config)
     
     std::shared_ptr<GL::Mesh> spherifiedCube;
     spherifiedCube = MeshGenerator::GenerateSpherifiedCubeMesh(60);
+
+    // Skybox
+    Object::BaseObject *skyboxObj = currentLevel->CreateObject();
+    Component::SkyboxRender *skyboxRenderComp = skyboxObj->AddComponent<Component::SkyboxRender>();
+    std::vector<std::string> cubemapPaths{
+        "Images/Skybox/skybox-right.jpg",
+        "Images/Skybox/skybox-left.jpg",
+        "Images/Skybox/skybox-bottom.jpg",
+        "Images/Skybox/skybox-top.jpg",
+        "Images/Skybox/skybox-front.jpg",
+        "Images/Skybox/skybox-back.jpg"
+    };
+    skyboxRenderComp->LoadCubemap(cubemapPaths.data(), false);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();

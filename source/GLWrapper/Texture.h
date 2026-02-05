@@ -59,6 +59,7 @@ public:
     
     bool hasMipmaps() { return this->mipmapsGenerated; };
     bool isBlurred()  { return this->blurred; };
+    bool isInitialized() { return this->ID != 0; };
     TextureWrapMode wrapMode() { return this->currentWrapMode; };
 
     static unsigned char *LoadImageFromPath(std::string filePath, int &width, int &height, int &nrChannels, bool flip = true);
