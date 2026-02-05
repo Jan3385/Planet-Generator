@@ -1,0 +1,34 @@
+#pragma once
+
+#include <glad/glad.h>
+#include <string>
+#include "GLWrapper/Texture.h"
+
+namespace GL
+{
+class Cubemap{
+public:
+    Cubemap();
+    Cubemap(const std::string filePaths[6], bool blurred);
+    ~Cubemap();
+
+    // disable copy semantics
+    Cubemap(const Cubemap&) = delete;
+    Cubemap& operator=(const Cubemap&) = delete;
+
+    // move semantics
+    Cubemap(Cubemap&&other) noexcept;
+    Cubemap& operator=(Cubemap&&other) noexcept;
+
+    void Bind();
+    static void Unbind() { glBindTexture(GL_TEXTURE_CUBE_MAP, 0); };
+
+    bool isBlurred()  { return this->blurred; };
+protected:
+    GLuint ID = 0;
+
+    virtual void LoadCubemapFaces(const std::string filePaths[6]);
+private:
+    bool blurred;
+};
+}

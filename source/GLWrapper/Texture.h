@@ -60,6 +60,9 @@ public:
     bool hasMipmaps() { return this->mipmapsGenerated; };
     bool isBlurred()  { return this->blurred; };
     TextureWrapMode wrapMode() { return this->currentWrapMode; };
+
+    static unsigned char *LoadImageFromPath(std::string filePath, int &width, int &height, int &nrChannels, bool flip = true);
+    static void FreeImageData(unsigned char *data);
 protected:
     GLuint ID = 0;
     static GLuint GetTextureFiltering(MipmapMode mipmap, bool blurred);
