@@ -4,6 +4,7 @@
 
 #include "Debug/Logger.h"
 #include "GLWrapper/BasicShaderProgram.h"
+#include "GLWrapper/Texture.h"
 #include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"

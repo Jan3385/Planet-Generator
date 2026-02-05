@@ -26,6 +26,7 @@ They can streamline manipulating with OpenGL buffers, shaders, framebuffers, ver
  - glad       - access to OpenGL functions
  - glm        - OpenGL math library
  - Dear ImGui - testing UI
+ - stb image  - image decoding
 
 ## Compiling & Building
 
