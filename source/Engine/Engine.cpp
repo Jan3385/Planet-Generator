@@ -85,7 +85,7 @@ void GameEngine::Run(const Config& config)
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    constexpr float planetScale = 1.0f;
+    constexpr float planetScale = 5.0f;
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
@@ -160,7 +160,7 @@ void GameEngine::Run(const Config& config)
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
-    camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.0f, 2.5f));
+    camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.5f, 2.5f));
     camObj->AddComponent<Component::Camera>();
     camObj->AddComponent<Component::Movement>();
     // ---------

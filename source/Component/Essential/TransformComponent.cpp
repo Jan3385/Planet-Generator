@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 Component::Transform* Component::Transform::SetPos(const glm::vec3 &newPos)
 {
@@ -22,7 +23,7 @@ Component::Transform* Component::Transform::SetRot(const glm::vec2 &newRot)
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
     
-    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+    this->UpdateRotationQuaternion();
 
     return this;
 }
@@ -35,7 +36,7 @@ Component::Transform* Component::Transform::SetRot(const glm::vec3 &newRot)
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = newRot.z;
 
-    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+    this->UpdateRotationQuaternion();
 
     return this;
 }
@@ -68,7 +69,7 @@ Component::Transform* Component::Transform::RotateBy(const glm::vec2 &deltaRot)
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll = 0.0f;
     
-    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+    this->UpdateRotationQuaternion();
 
     return this;
 }
@@ -82,7 +83,42 @@ Component::Transform* Component::Transform::RotateBy(const glm::vec3 &deltaRot)
     this->pitch += deltaRot.x;
     if(this->lockPitchRange) this->pitch = glm::clamp(pitch, -89.0f, 89.0f);
     this->roll += deltaRot.z;
-    this->rotation = glm::yawPitchRoll(glm::radians(yaw), glm::radians(pitch), glm::radians(roll));
+
+    this->UpdateRotationQuaternion();
+
+    return this;
+}
+
+void Component::Transform::UpdateRotationQuaternion()
+{
+    glm::quat gravityAlign = glm::rotation(glm::vec3(0, 1, 0), modelUp);
+    glm::quat yawRotation = glm::angleAxis(glm::radians(yaw), modelUp);
+
+    modelForward = yawRotation * gravityAlign * glm::vec3(0.0f, 0.0f, -1.0f);
+    modelForward = glm::normalize(modelForward);
+
+    modelRight = glm::normalize(glm::cross(modelForward, modelUp));
+    glm::quat pitchRotation = glm::angleAxis(glm::radians(pitch), modelRight);
+
+    modelForward = pitchRotation * modelForward;
+
+    glm::quat rollRotation = glm::angleAxis(glm::radians(roll), modelForward);
+
+    this->rotation = rollRotation * pitchRotation * yawRotation * gravityAlign;
+
+    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
+}
+
+Component::Transform* Component::Transform::SetUpDirection(glm::vec3 newUp)
+{
+    newUp = glm::normalize(newUp);
+    if(this->modelUp == newUp) return this;
+    
+    dirtyTransform = true;
+    this->modelUp = newUp;
+
+    this->UpdateRotationQuaternion();
 
     return this;
 }

@@ -25,6 +25,10 @@ void Component::Movement::OnDisable()
 
 void Component::Movement::Update()
 {
+    glm::vec3 gravDir = glm::normalize(nearestPlanetPos - transform->GetPos());
+    glm::vec3 upDir = -gravDir;
+    transform->SetUpDirection(upDir);
+
     if(Input::GetCursorMode() == Input::CursorMode::Trapped)
         transform->RotateBy(
             glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
@@ -38,10 +42,6 @@ void Component::Movement::Update()
         glm::vec3 forward = transform->GetForwardVector();
         glm::vec3 right = transform->GetRightVector();
 
-        // ignore tilt
-        forward.y = 0.0f;
-        right.y = 0.0f;
-
         forward = glm::normalize(forward);
         right = glm::normalize(right);
 
@@ -50,9 +50,9 @@ void Component::Movement::Update()
     }
 
     if(Input::IsKeyDown(GLFW_KEY_SPACE))
-        moveVector.y += this->speed;
+        moveVector += this->speed * upDir;
     if(Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
-        moveVector.y -= this->speed;
+        moveVector -= this->speed * upDir;
 
     moveVector *= GameEngine::instance->DeltaTime();
 

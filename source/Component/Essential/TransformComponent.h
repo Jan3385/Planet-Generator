@@ -20,10 +20,6 @@ public:
     glm::vec3 GetPos() const { return position; }
     glm::quat GetRotQuaternion() const { return rotation; }
     glm::vec3 GetRot() const { return glm::eulerAngles(rotation); }
-    
-    glm::vec3 GetForwardVector() const { return rotation * glm::vec3(0.0f, 0.0f, -1.0f); }
-    glm::vec3 GetRightVector() const { return rotation * glm::vec3(1.0f, 0.0f, 0.0f); }
-    glm::vec3 GetUpVector() const { return rotation * glm::vec3(0.0f, 1.0f, 0.0f); }
 
     glm::vec3 GetScale() const { return scale; }
 
@@ -42,6 +38,11 @@ public:
     Transform* RotateBy(const glm::vec2& deltaRot);
     // euler angles
     Transform* RotateBy(const glm::vec3& deltaRot);
+
+    Transform* SetUpDirection(glm::vec3 newUp);
+
+    glm::vec3 GetForwardVector() const { return modelForward; }
+    glm::vec3 GetRightVector() const { return modelRight; }
 
     /**
      * @brief Sets whether to lock the pitch rotation between -89 and 89 degrees
@@ -62,7 +63,12 @@ private:
     bool lockPitchRange = false;
 
     // quaternion angle
+    glm::vec3 modelUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 modelForward = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 modelRight = glm::vec3(1.0f, 0.0f, 0.0f);
+
     glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+    void UpdateRotationQuaternion();
     float yaw = 0.0f;
     float pitch = 0.0f;
     float roll = 0.0f;

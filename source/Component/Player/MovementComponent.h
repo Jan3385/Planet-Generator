@@ -13,6 +13,7 @@ public:
     Movement(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Movement() override = default;
 protected:
+    glm::vec3 nearestPlanetPos = glm::vec3(0.0f);
     float speed = 4.8f;
 
     std::vector<std::type_index> GetDependencies() const override 
