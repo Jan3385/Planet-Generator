@@ -140,10 +140,11 @@ void GameEngine::Run(const Config& config)
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
         ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
-        ->SetPos(glm::vec3(0.0f, -0.7f, 0.0f));
+        ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
     floorRenderComp->SetMesh(cube);
+    floor->Disable();
 
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
@@ -167,6 +168,7 @@ void GameEngine::Run(const Config& config)
     Debug::LogInfo("Starting main loop");
     while (!renderer->ShouldClose())
     {
+        //TODO: move anywhere else asap
         auto closestPLights = GameEngine::lighting->GetClosestPointLights(glm::vec3(0.0f));
         int pointLightCount = 0;
         renderer->GetLightPassShader().Use();
