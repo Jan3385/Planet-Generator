@@ -64,6 +64,11 @@ public:
         std::erase(imguiCallbacks, callback);
     }
 protected:
+    void ObjectsRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
+    void ImGuiRenderPass();
+
+    void SetupShaderValues();
+
     GL::VertexArray *quadVAO;
     GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
     GL::BasicShaderProgram *postProcessShader;

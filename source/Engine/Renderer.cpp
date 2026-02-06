@@ -20,6 +20,60 @@ void Renderer::StoreWindowSize(int width, int height)
     this->windowHeight = height;
 }
 
+void Renderer::ObjectsRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
+{
+    // sort transparent objects
+    std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
+        [camPos](IRendererCallback* a, IRendererCallback* b) {
+            Component::BaseMeshRender* renderA = dynamic_cast<Component::BaseMeshRender*>(a);
+            Component::BaseMeshRender* renderB = dynamic_cast<Component::BaseMeshRender*>(b);
+
+            glm::vec3 posA = renderA->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+            glm::vec3 posB = renderB->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+
+            float distA = glm::dot(camPos - posA, camPos - posA);
+            float distB = glm::dot(camPos - posB, camPos - posB);
+
+            return distA > distB; // farthest first
+        }
+    );
+
+    for(auto& callback : renderCallbacks) {
+        callback->Render(projection, view);
+    }
+
+    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
+    if(skybox) skybox->Render(projection, view);
+
+    for(auto& callback : transparentRenderCallbacks) {
+        callback->Render(projection, view);
+    }
+    
+    bool wireframeMode = this->isWireframeMode;
+    if(wireframeMode) this->WireframeMode(false);
+    framebuffer->Render(this->postProcessShader, this->quadVAO);
+    if(wireframeMode) this->WireframeMode(true);
+}
+
+void Renderer::ImGuiRenderPass()
+{
+    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
+
+    if(Input::GetCursorMode() == Input::CursorMode::Normal) {
+        this->DrawImGuiWindows();
+    }
+
+    for (auto callback : imguiCallbacks)
+    {
+        callback->ImGuiUpdate();
+    }
+    
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 void Renderer::DrawImGuiWindows()
 {
     ImGui::Begin("Basic Window");
@@ -53,17 +107,7 @@ void Renderer::DrawImGuiWindows()
 
 Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float gamma)
 {
-    GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
-    GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
-    GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
-    GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
-
-    GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
-    GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
-    GL::Shader::AddShaderVariable("vec3 viewPos", glm::vec3(0.0f));
-
-    GL::Shader::AddShaderVariable("float gamma", 2.2f);
-    GL::Shader::AddShaderVariable("float exposure", 1.0f);
+    this->SetupShaderValues();
 
     this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
 
@@ -188,53 +232,9 @@ void Renderer::Update()
     glm::vec3 camPos = camera->GetPosition();
     GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
 
-    // sort transparent objects
-    std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
-        [camPos](IRendererCallback* a, IRendererCallback* b) {
-            Component::BaseMeshRender* renderA = dynamic_cast<Component::BaseMeshRender*>(a);
-            Component::BaseMeshRender* renderB = dynamic_cast<Component::BaseMeshRender*>(b);
+    this->ObjectsRenderPass(projection, view, camPos);
 
-            glm::vec3 posA = renderA->GetOwner()->GetComponent<Component::Transform>()->GetPos();
-            glm::vec3 posB = renderB->GetOwner()->GetComponent<Component::Transform>()->GetPos();
-
-            float distA = glm::dot(camPos - posA, camPos - posA);
-            float distB = glm::dot(camPos - posB, camPos - posB);
-
-            return distA > distB; // farthest first
-        }
-    );
-
-    for(auto& callback : renderCallbacks) {
-        callback->Render(projection, view);
-    }
-
-    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
-    if(skybox) skybox->Render(projection, view);
-
-    for(auto& callback : transparentRenderCallbacks) {
-        callback->Render(projection, view);
-    }
-    
-    bool wireframeMode = this->isWireframeMode;
-    if(wireframeMode) this->WireframeMode(false);
-    framebuffer->Render(this->postProcessShader, this->quadVAO);
-    if(wireframeMode) this->WireframeMode(true);
-
-    ImGui_ImplGlfw_NewFrame();
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui::NewFrame();
-
-    if(Input::GetCursorMode() == Input::CursorMode::Normal) {
-        this->DrawImGuiWindows();
-    }
-
-    for (auto callback : imguiCallbacks)
-    {
-        callback->ImGuiUpdate();
-    }
-    
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    this->ImGuiRenderPass();
 
     glfwSwapBuffers(window);
 }
@@ -250,4 +250,19 @@ void Renderer::BackfaceCulling(bool enabled)
 {
     if(enabled) glEnable(GL_CULL_FACE);
     else        glDisable(GL_CULL_FACE);
+}
+
+void Renderer::SetupShaderValues()
+{
+    GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
+    GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
+    GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
+    GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
+
+    GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
+    GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
+    GL::Shader::AddShaderVariable("vec3 viewPos", glm::vec3(0.0f));
+
+    GL::Shader::AddShaderVariable("float gamma", 2.2f);
+    GL::Shader::AddShaderVariable("float exposure", 1.0f);
 }
