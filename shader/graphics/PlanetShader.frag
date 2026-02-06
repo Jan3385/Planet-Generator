@@ -1,13 +1,10 @@
+#include "ShaderOutputs.glsl"
+
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 Pos;
 
 #include "LightTypes.glsl"
-
-#get MAX_POINT_LIGHTS
-uniform int numPointLights;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform DirectionLight directionalLight;
 
 layout(std140, binding = 0) uniform palette {
     Material deepOcean;
@@ -18,16 +15,9 @@ layout(std140, binding = 0) uniform palette {
     Material snow;
 };
 
-#var vec3 viewPos
-#var vec3 ambientColor
-#var float ambientIntensity
-
 #get PLANET_SCALE
 
-#include "LightFunctions.glsl"
 #include "Noise.glsl"
-
-out vec4 FragColor;
 
 Material multMaterial(Material a, float factor) {
     a.ambient  *= factor;
@@ -77,25 +67,13 @@ float fMod(float num, float mod){
 
 void main()
 {
-    vec3 result = vec3(0.0f);
-    vec3 viewDir = normalize(viewPos - FragPos);
-
     float height = length(Pos)-1;
 
     Material mat = GetColorAtHeight(height);
 
-    // Point lights
-    vec3 diffuse = vec3(0.0f);
-    vec3 specular = vec3(0.0f);
-    for(int i = 0; i < numPointLights; i++) {
-        result += CalculatePointLight(pointLights[i], Normal, FragPos, viewDir, mat);
-    }
-
-    // directional light
-    result += CalculateDirLight(directionalLight, Normal, viewDir, mat);
-
-    // ambient lighting
-    result += (ambientColor * mat.ambient.xyz) * ambientIntensity;
-
-    FragColor = vec4(result, 1.0f);
+    gPosition = vec4(FragPos, 1.0);
+    gNormal = vec4(normalize(Normal), 1.0);
+    
+    gAlbedoSpec.rgb = mat.diffuse.rgb;
+    gAlbedoSpec.a = mat.specular.r;
 } 

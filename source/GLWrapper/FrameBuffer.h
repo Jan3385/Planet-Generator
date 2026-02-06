@@ -4,27 +4,24 @@
 
 #include "GLWrapper/Shader.h"
 #include "GLWrapper/VertexArray.h"
+#include "GLWrapper/Texture.h"
 
 namespace GL
 {
-enum class FrameBufferColorType{
-    RenderBuffer,
-    Texture
-};
-enum class FrameBufferDepthStencilType{
-    None,
-    Texture
-};
 
-template<FrameBufferColorType ColorType, FrameBufferDepthStencilType DepthStencilType>
 class FrameBuffer{
 public:
-    FrameBuffer(bool clamped = false, uint8_t MSAA_Samples = 0);
+    FrameBuffer();
     ~FrameBuffer();
 
-    void BindAndClear() const;
-    void Unbind() const;
-    void Render(GL::Shader *quadShader = nullptr, GL::VertexArray *quadVAO = nullptr) const;
+    void AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type);
+    void CompleteSetup();
+
+    void BindShaderFBO() const;
+    void BindTextures() const;
+    void UnbindShaderFBO() const;
+
+    void CopyDepthToFBO(GLuint targetFBO) const;
 
     // disable copy semantics
     FrameBuffer(const FrameBuffer&) = delete;
@@ -35,25 +32,13 @@ public:
     FrameBuffer& operator=(FrameBuffer&&other) noexcept;
 
     void UpdateSize(const glm::uvec2& newSize);
-    bool isClamped() const { return clamped; }
-
-    glm::vec4 clearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 protected:
     GLuint FBO = 0;
 
+    GLuint DepthRBO = 0;
+
+    std::vector<GL::Texture*> attachments;
+
     glm::uvec2 size = glm::uvec2(800, 600);
-    uint8_t MSAA_Samples = 0;
-
-    GLuint rboColor = 0;
-    GLuint rboDepthStencil = 0;
-
-    // Used for multisampled texture ColorType
-    GLuint postFBO = 0;
-    GLuint renderedTexture = 0;
-    GLuint renderedDepthStencilTexture = 0;
-private:
-    bool clamped;
 };
 }
-
-#include "FrameBuffer.inl"

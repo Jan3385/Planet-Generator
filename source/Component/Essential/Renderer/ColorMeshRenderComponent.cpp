@@ -19,16 +19,27 @@ void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     this->mesh->Bind();
     this->mesh->Draw();
-    
-    //glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(this->mesh->vertices.size() / 3));
 }
 
 void Component::ColorMeshRender::Awake()
 {
-    BaseMeshRender::Awake();
+    GameEngine::renderer->AddNoLightRenderCallback(this);
+
+    if(!this->transform)
+        this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 }
 
 void Component::ColorMeshRender::OnDestroy()
 {
-    BaseMeshRender::OnDestroy();
+    GameEngine::renderer->RemoveNoLightRenderCallback(this);
+}
+
+void Component::ColorMeshRender::OnEnable()
+{
+    GameEngine::renderer->AddNoLightRenderCallback(this);
+}
+
+void Component::ColorMeshRender::OnDisable()
+{
+    GameEngine::renderer->RemoveNoLightRenderCallback(this);
 }

@@ -10,10 +10,10 @@ struct Material {
     float shininess;
 
     void Bind(GL::Shader& shader) const{
-        shader.SetVec3("material.ambient", this->ambient);
-        shader.SetVec3("material.diffuse", this->diffuse);
-        shader.SetVec3("material.specular", this->specular);
-        shader.SetFloat("material.shininess", this->shininess);
+        shader.SetVec4("material.ambient", glm::vec4(this->ambient, 1.0f));
+        shader.SetVec4("material.diffuse", glm::vec4(this->diffuse, 1.0f));
+        shader.SetVec4("material.specular", glm::vec4(this->specular, 1.0f));
+        shader.SetVec4("material.shininess", glm::vec4(this->shininess, this->shininess, this->shininess, 1.0f));
     }
 };
 

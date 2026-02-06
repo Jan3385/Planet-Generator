@@ -20,8 +20,22 @@ void Renderer::StoreWindowSize(int width, int height)
     this->windowHeight = height;
 }
 
-void Renderer::ObjectsRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
+void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
 {
+    for(auto& callback : renderCallbacks) {
+        callback->Render(projection, view);
+    }
+}
+
+void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
+{
+    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
+    if(skybox) skybox->Render(projection, view);
+
+    for(auto& callback : noLightRenderCallbacks) {
+        callback->Render(projection, view);
+    }
+
     // sort transparent objects
     std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
         [camPos](IRendererCallback* a, IRendererCallback* b) {
@@ -38,21 +52,9 @@ void Renderer::ObjectsRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::ve
         }
     );
 
-    for(auto& callback : renderCallbacks) {
-        callback->Render(projection, view);
-    }
-
-    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
-    if(skybox) skybox->Render(projection, view);
-
     for(auto& callback : transparentRenderCallbacks) {
         callback->Render(projection, view);
     }
-    
-    bool wireframeMode = this->isWireframeMode;
-    if(wireframeMode) this->WireframeMode(false);
-    framebuffer->Render(this->postProcessShader, this->quadVAO);
-    if(wireframeMode) this->WireframeMode(true);
 }
 
 void Renderer::ImGuiRenderPass()
@@ -150,7 +152,6 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     ImGui_ImplOpenGL3_Init("#version 460");
 
     this->defaultLightShader = std::move(GL::BasicShaderProgram("LightedShader"));
-    GameEngine::lighting->RegisterShaderLightUpdateCallback(&this->defaultLightShader);
     
     this->defaultColorShader = std::move(GL::BasicShaderProgram("ColorShader"));
     this->skyboxShader = std::move(GL::BasicShaderProgram("SkyboxShader"));
@@ -174,12 +175,25 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
     this->quadVAO->Unbind();
 
+    this->lightPassShader = new GL::BasicShaderProgram("LightPassShader");
+    GameEngine::lighting->RegisterShaderLightUpdateCallback(this->lightPassShader);
+    this->lightPassShader->Use();
+    this->lightPassShader->SetInt("gPosition", 0);
+    this->lightPassShader->SetInt("gNormal", 1);
+    this->lightPassShader->SetInt("gAlbedoSpec", 2);
+
     this->postProcessShader = new GL::BasicShaderProgram("PostProcessShader");
     this->postProcessShader->Use();
     this->postProcessShader->SetInt("screenTexture", 0);
 
-    this->framebuffer = new GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None>(true, MSAA_Samples);
-    this->framebuffer->clearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
+    this->framebuffer = new GL::FrameBuffer();
+    // position color buffer
+    this->framebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    // normal color buffer
+    this->framebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    // color + specular - albedo buffer
+    this->framebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->framebuffer->CompleteSetup();
 }
 
 Renderer::~Renderer()
@@ -196,6 +210,7 @@ Renderer::~Renderer()
     delete this->quadVBO;
     delete this->quadVAO;
     delete this->postProcessShader;
+    delete this->lightPassShader;
     delete this->framebuffer;
 }
 
@@ -218,9 +233,6 @@ void Renderer::SetGammaCorrection(float value)
 
 void Renderer::Update()
 {
-    framebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
-    framebuffer->BindAndClear();
-
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
@@ -232,10 +244,35 @@ void Renderer::Update()
     glm::vec3 camPos = camera->GetPosition();
     GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
 
-    this->ObjectsRenderPass(projection, view, camPos);
+    // 1. Geometry pass
+    glDisable(GL_BLEND);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    framebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
+    framebuffer->BindShaderFBO();
+    ObjectGeometryRenderPass(projection, view, camPos);
+    framebuffer->UnbindShaderFBO();
 
-    this->ImGuiRenderPass();
+    // 2. Light pass
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    lightPassShader->Use();
+    framebuffer->BindTextures();
+    quadVAO->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    // 2.5 No-light objects pass
+    glEnable(GL_BLEND);
+    this->framebuffer->CopyDepthToFBO(0);
+    ObjectsSpecialRenderPass(projection, view, camPos);
+
+    // 3. Post-processing pass
+    // postProcessShader->Use();
+    // quadVAO->Bind();
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // 4. Render ImGui
+    ImGuiRenderPass();
+
+    // 5. Swap buffers
     glfwSwapBuffers(window);
 }
 

@@ -1,49 +1,25 @@
+#include "ShaderOutputs.glsl"
+
 in vec3 Normal;
 in vec3 FragPos;
 
 #include "LightTypes.glsl"
 
-#get MAX_POINT_LIGHTS
-uniform int numPointLights;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform DirectionLight directionalLight;
-
 uniform Material material;
-
-#var vec3 ambientColor
-#var float ambientIntensity
-
-#var vec3 viewPos
 
 #get LOW_POLY_FEEL
 
-#include "LightFunctions.glsl"
-
-out vec4 FragColor;
-
 void main()
 {
-    vec3 result = vec3(0.0f);
-    vec3 viewDir = normalize(viewPos - FragPos);
-
     #if LOW_POLY_FEEL == 1
         vec3 normalSample = normalize(Normal);
     #else
         vec3 normalSample = normalize(FragPos);
     #endif
 
-    // Point lights
-    vec3 diffuse = vec3(0.0f);
-    vec3 specular = vec3(0.0f);
-    for(int i = 0; i < numPointLights; i++) {
-        result += CalculatePointLight(pointLights[i], normalSample, FragPos, viewDir, material);
-    }
+    gPosition = vec4(FragPos, 1.0);
+    gNormal = vec4(normalSample, 1.0);
 
-    // directional light
-    result += CalculateDirLight(directionalLight, normalSample, viewDir, material);
-
-    // ambient lighting
-    result += (ambientColor * material.ambient.xyz) * ambientIntensity;
-
-    FragColor = vec4(result, 1.0f);
+    gAlbedoSpec.rgb = material.diffuse.rgb;
+    gAlbedoSpec.a = material.specular.r;
 } 

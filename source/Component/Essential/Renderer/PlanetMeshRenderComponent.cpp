@@ -15,17 +15,6 @@ void Component::PlanetMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
     this->renderShader->SetMat3("normalMatrix", normalMatrix);
 
-    auto closestPLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
-    int pointLightCount = 0;
-
-    for (auto* pointLight : closestPLights) {
-        if (pointLight != nullptr) {
-            pointLight->Bind(*this->renderShader, pointLightCount);
-            pointLightCount++;
-        }
-    }
-    this->renderShader->SetInt("numPointLights", pointLightCount);
-
     this->paletteBuffer.BindBufferBase(0);
 
     if(!mesh) {

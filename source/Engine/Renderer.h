@@ -40,6 +40,12 @@ public:
     void RemoveTransparentRenderCallback(IRendererCallback* callback) {
         std::erase(transparentRenderCallbacks, callback);
     }
+    void AddNoLightRenderCallback(IRendererCallback* callback) {
+        noLightRenderCallbacks.push_back(callback);
+    }
+    void RemoveNoLightRenderCallback(IRendererCallback* callback) {
+        std::erase(noLightRenderCallbacks, callback);
+    }
 
     bool ShouldClose() const { return glfwWindowShouldClose(this->window); }
 
@@ -56,6 +62,7 @@ public:
     GL::BasicShaderProgram& GetDefaultLightShader() { return this->defaultLightShader; }
     GL::BasicShaderProgram& GetDefaultColorShader() { return this->defaultColorShader; }
     GL::BasicShaderProgram& GetSkyboxShader() { return this->skyboxShader; }
+    GL::BasicShaderProgram& GetLightPassShader() { return *this->lightPassShader; }
 
     void AddImGuiCallback(Component::IImGuiUpdatable* callback) {
         imguiCallbacks.push_back(callback);
@@ -64,16 +71,19 @@ public:
         std::erase(imguiCallbacks, callback);
     }
 protected:
-    void ObjectsRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
+    void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
+    void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
     void ImGuiRenderPass();
 
     void SetupShaderValues();
 
     GL::VertexArray *quadVAO;
     GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
+
+    GL::BasicShaderProgram *lightPassShader;
     GL::BasicShaderProgram *postProcessShader;
 
-    GL::FrameBuffer<GL::FrameBufferColorType::Texture, GL::FrameBufferDepthStencilType::None> *framebuffer;
+    GL::FrameBuffer *framebuffer;
 private:
     bool isWireframeMode = false;
 
@@ -85,6 +95,7 @@ private:
     GLFWwindow* window = nullptr;
     std::vector<IRendererCallback*> renderCallbacks;
     std::vector<IRendererCallback*> transparentRenderCallbacks;
+    std::vector<IRendererCallback*> noLightRenderCallbacks;
 
     std::vector<Component::IImGuiUpdatable*> imguiCallbacks;
 

@@ -19,17 +19,6 @@ void Component::PhongMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     this->material->Bind(*this->renderShader);
 
-    auto closestPLights = GameEngine::lighting->GetClosestPointLights(this->transform->GetPos());
-    int pointLightCount = 0;
-
-    for (auto* pointLight : closestPLights) {
-        if (pointLight != nullptr) {
-            pointLight->Bind(*this->renderShader, pointLightCount);
-            pointLightCount++;
-        }
-    }
-    this->renderShader->SetInt("numPointLights", pointLightCount);
-
     if(!mesh) {
         Debug::LogWarn("PhongMeshRender: No mesh set");
     }

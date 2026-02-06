@@ -33,6 +33,9 @@ GL::Texture::Texture(GL::Texture &&other) noexcept
     this->mipmapsGenerated = other.mipmapsGenerated;
     this->currentWrapMode = other.currentWrapMode;
     this->textureGenerated = other.textureGenerated;
+    this->format = other.format;
+    this->internalFormat = other.internalFormat;
+    this->type = other.type;
     other.ID = 0;
 }
 
@@ -45,6 +48,9 @@ GL::Texture &GL::Texture::operator=(GL::Texture &&other) noexcept
         this->mipmapsGenerated = other.mipmapsGenerated;
         this->currentWrapMode = other.currentWrapMode;
         this->textureGenerated = other.textureGenerated;
+        this->format = other.format;
+        this->internalFormat = other.internalFormat;
+        this->type = other.type;
         other.ID = 0;
     }
     return *this;
@@ -55,13 +61,17 @@ GL::Texture &GL::Texture::operator=(GL::Texture &&other) noexcept
 /// @param internalFormat internal format of the texture
 /// @param width width of the empty texture
 /// @param height height of the empty texture
-void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, int width, int height)
+void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, GLenum type, int width, int height)
 {
     this->Bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), type, nullptr);
     if(this->mipmapsGenerated) glGenerateMipmap(GL_TEXTURE_2D);
     
     this->textureGenerated = true;
+
+    this->format = format;
+    this->internalFormat = internalFormat;
+    this->type = type;
 }
 
 /// @brief Generates a texture based on an image file
@@ -82,6 +92,10 @@ void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, std::s
     Texture::FreeImageData(data);
 
     this->textureGenerated = true;
+
+    this->format = format;
+    this->internalFormat = internalFormat;
+    this->type = GL_UNSIGNED_BYTE;
 }
 
 /// @brief Generates a texture from passed data
@@ -90,13 +104,28 @@ void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, std::s
 /// @param data the raw pixel data for the texture
 /// @param width width of the texture
 /// @param height height of the texture 
-void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, unsigned char *data, int width, int height)
+void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, GLenum type, unsigned char *data, int width, int height)
 {
     this->Bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), type, data);
     if(this->mipmapsGenerated) glGenerateMipmap(GL_TEXTURE_2D);
 
     this->textureGenerated = true;
+
+    this->format = format;
+    this->internalFormat = internalFormat;
+    this->type = type;
+}
+
+void GL::Texture::Resize(int width, int height)
+{
+    if(!this->textureGenerated) [[unlikely]] {
+        Debug::LogError("Resizing a texture that is not generated!");
+        return;
+    }
+
+    this->Bind();
+    glTexImage2D(GL_TEXTURE_2D, 0, this->internalFormat, width, height, 0, static_cast<GLuint>(this->format), this->type, nullptr);
 }
 
 void GL::Texture::Bind()

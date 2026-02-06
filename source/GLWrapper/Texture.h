@@ -49,13 +49,17 @@ public:
     Texture(Texture&&other) noexcept;
     Texture& operator=(Texture&&other) noexcept;
 
-    void GenTexture(TextureFormat format, GLuint internalFormat, int width, int height);
+    void GenTexture(TextureFormat format, GLuint internalFormat, GLenum type, int width, int height);
     void GenTexture(TextureFormat format, GLuint internalFormat, std::string filePath, bool flip = true);
-    void GenTexture(TextureFormat format, GLuint internalFormat, unsigned char *data, int width, int height);
+    void GenTexture(TextureFormat format, GLuint internalFormat, GLenum type, unsigned char *data, int width, int height);
+
+    void Resize(int width, int height);
 
     void Bind();
     static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); };
     void BindToUnit(uint8_t unit);
+
+    GLuint GetID() const { return ID; };
     
     bool hasMipmaps() { return this->mipmapsGenerated; };
     bool isBlurred()  { return this->blurred; };
@@ -71,6 +75,10 @@ private:
     bool mipmapsGenerated;
     bool blurred;
     TextureWrapMode currentWrapMode;
+
+    TextureFormat format;
+    GLuint internalFormat;
+    GLenum type;
 
     bool textureGenerated = false;
 };

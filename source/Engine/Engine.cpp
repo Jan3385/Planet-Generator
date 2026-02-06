@@ -58,7 +58,7 @@ void GameEngine::Run(const Config& config)
 
     // temp ----
     GL::BasicShaderProgram planetShader("PlanetShader");
-    lighting->RegisterShaderLightUpdateCallback(&planetShader);
+
     GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
     lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
     GL::BasicShaderProgram atmosphereOutsideShader("AtmosphereShaderOutside");
@@ -85,7 +85,7 @@ void GameEngine::Run(const Config& config)
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    constexpr float planetScale = 5.0f;
+    constexpr float planetScale = 1.0f;
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
@@ -140,23 +140,18 @@ void GameEngine::Run(const Config& config)
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
         ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
-        ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
+        ->SetPos(glm::vec3(0.0f, -0.7f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
     floorRenderComp->SetMesh(cube);
 
-    floor->Disable();
-
-
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
-    lightObj->Disable();
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
-    lightObj2->Disable();
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
@@ -172,6 +167,17 @@ void GameEngine::Run(const Config& config)
     Debug::LogInfo("Starting main loop");
     while (!renderer->ShouldClose())
     {
+        auto closestPLights = GameEngine::lighting->GetClosestPointLights(glm::vec3(0.0f));
+        int pointLightCount = 0;
+        renderer->GetLightPassShader().Use();
+        for (auto* pointLight : closestPLights) {
+            if (pointLight != nullptr) {
+                pointLight->Bind(renderer->GetLightPassShader(), pointLightCount);
+                pointLightCount++;
+            }
+        }
+        renderer->GetLightPassShader().SetInt("numPointLights", pointLightCount);
+
         this->CalculateDeltaTime();
 
         input->Update();
