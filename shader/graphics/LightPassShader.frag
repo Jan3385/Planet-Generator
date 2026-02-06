@@ -33,11 +33,11 @@ void main()
     // point lights
     vec3 viewDir = normalize(viewPos - FragPos);
     for(int i = 0; i < numPointLights; i++){
-        lighting += CalculatePointLight(pointLights[i], Normal, FragPos, viewDir, Albedo, Specular);
+        lighting += CalculatePointLight(pointLights[i], Normal, FragPos, viewDir, Albedo, 1-Specular);
     }
 
     // directional light
-    lighting += CalculateDirLight(directionalLight, Normal, viewDir, Albedo, Specular);
+    lighting += CalculateDirLight(directionalLight, Normal, viewDir, Albedo, 1-Specular);
 
     //FragColor = vec4(Normal * 0.5 + 0.5, 1.0f);
     FragColor = vec4(lighting, 1.0);

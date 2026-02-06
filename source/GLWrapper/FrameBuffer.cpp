@@ -71,8 +71,6 @@ void FrameBuffer::BindShaderFBO() const
 
     glDrawBuffers(static_cast<GLsizei>(numAttachments), drawBuffers);
     delete[] drawBuffers;
-
-    glEnable(GL_DEPTH_TEST); // TODO: remove later and put elsewhere
 }
 
 void FrameBuffer::BindTextures() const
