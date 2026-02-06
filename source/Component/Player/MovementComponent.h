@@ -33,6 +33,8 @@ private:
     Transform* transform = nullptr;
     Camera* camera = nullptr;
 
+    bool orientTowardsGravity = false;
+
     friend class Object::BaseObject;
 };
 }

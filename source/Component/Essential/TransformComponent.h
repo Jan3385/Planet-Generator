@@ -41,6 +41,7 @@ public:
 
     Transform* SetUpDirection(glm::vec3 newUp);
 
+    glm::vec3 GetUpVector() const { return modelUp; }
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
 
@@ -69,9 +70,6 @@ private:
 
     glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
     void UpdateRotationQuaternion();
-    float yaw = 0.0f;
-    float pitch = 0.0f;
-    float roll = 0.0f;
 
     glm::vec3 scale    = glm::vec3(1.0f);
 
