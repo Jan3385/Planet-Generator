@@ -87,7 +87,7 @@ void Renderer::DrawImGuiWindows()
         this->BackfaceCulling(!isBackfaceCullingEnabled);
         isBackfaceCullingEnabled = !isBackfaceCullingEnabled;
     }
-    static float gammaValue = 1.0f;
+    static float gammaValue = 2.2f;
     if(ImGui::DragFloat("Gamma", &gammaValue, 0.1f, 0.1f, 10.0f)){
         this->SetGammaCorrection(gammaValue);
     }
@@ -196,7 +196,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     this->geometryFramebuffer->CompleteSetup();
 
     this->postProcessFramebuffer = new GL::FrameBuffer();
-    this->postProcessFramebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->postProcessFramebuffer->AddBufferTexture(GL_SRGB8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
     this->postProcessFramebuffer->CompleteSetup();
 }
 
@@ -253,17 +253,17 @@ void Renderer::Update()
     this->geometryFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
     this->geometryFramebuffer->BindShaderFBO();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     ObjectGeometryRenderPass(projection, view, camPos);
     this->geometryFramebuffer->UnbindShaderFBO();
 
     // 2. Light pass
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
     this->postProcessFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
     this->postProcessFramebuffer->BindShaderFBO();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     this->quadVAO->Bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
 

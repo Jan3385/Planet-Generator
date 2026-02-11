@@ -7,7 +7,6 @@ int main(int argc, char* argv[]) {
 
     GameEngine engine;
     GameEngine::Config config;
-    config.gamma = 1.0f;
 
     engine.Run(config);
 
