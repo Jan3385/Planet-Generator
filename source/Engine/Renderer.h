@@ -83,7 +83,8 @@ protected:
     GL::BasicShaderProgram *lightPassShader;
     GL::BasicShaderProgram *postProcessShader;
 
-    GL::FrameBuffer *framebuffer;
+    GL::FrameBuffer *geometryFramebuffer;
+    GL::FrameBuffer *postProcessFramebuffer;
 private:
     bool isWireframeMode = false;
 

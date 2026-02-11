@@ -22,6 +22,7 @@ public:
     void UnbindShaderFBO() const;
 
     void CopyDepthToFBO(GLuint targetFBO) const;
+    void CopyDepthToFBO(FrameBuffer &targetFBO) const;
 
     // disable copy semantics
     FrameBuffer(const FrameBuffer&) = delete;

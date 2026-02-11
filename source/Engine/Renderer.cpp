@@ -186,14 +186,18 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     this->postProcessShader->Use();
     this->postProcessShader->SetInt("screenTexture", 0);
 
-    this->framebuffer = new GL::FrameBuffer();
+    this->geometryFramebuffer = new GL::FrameBuffer();
     // position color buffer
-    this->framebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // normal color buffer
-    this->framebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // color + specular - albedo buffer
-    this->framebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
-    this->framebuffer->CompleteSetup();
+    this->geometryFramebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->geometryFramebuffer->CompleteSetup();
+
+    this->postProcessFramebuffer = new GL::FrameBuffer();
+    this->postProcessFramebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->postProcessFramebuffer->CompleteSetup();
 }
 
 Renderer::~Renderer()
@@ -211,7 +215,7 @@ Renderer::~Renderer()
     delete this->quadVAO;
     delete this->postProcessShader;
     delete this->lightPassShader;
-    delete this->framebuffer;
+    delete this->geometryFramebuffer;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -246,28 +250,35 @@ void Renderer::Update()
 
     // 1. Geometry pass
     glDisable(GL_BLEND);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    framebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
-    framebuffer->BindShaderFBO();
+    this->geometryFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
+    this->geometryFramebuffer->BindShaderFBO();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     ObjectGeometryRenderPass(projection, view, camPos);
-    framebuffer->UnbindShaderFBO();
+    this->geometryFramebuffer->UnbindShaderFBO();
 
     // 2. Light pass
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    lightPassShader->Use();
-    framebuffer->BindTextures();
-    quadVAO->Bind();
+    this->lightPassShader->Use();
+    this->geometryFramebuffer->BindTextures();
+    this->postProcessFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
+    this->postProcessFramebuffer->BindShaderFBO();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    this->quadVAO->Bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // 2.5 No-light objects pass
     glEnable(GL_BLEND);
-    this->framebuffer->CopyDepthToFBO(0);
+    this->geometryFramebuffer->CopyDepthToFBO(*this->postProcessFramebuffer);
+    this->postProcessFramebuffer->BindShaderFBO();
     ObjectsSpecialRenderPass(projection, view, camPos);
+    this->postProcessFramebuffer->UnbindShaderFBO();
 
     // 3. Post-processing pass
-    // postProcessShader->Use();
-    // quadVAO->Bind();
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
+    this->postProcessShader->Use();
+    this->postProcessFramebuffer->BindTextures();
+    this->quadVAO->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // 4. Render ImGui
     ImGuiRenderPass();

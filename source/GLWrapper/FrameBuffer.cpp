@@ -1,5 +1,7 @@
 #include "FrameBuffer.h"
 
+#include <format>
+
 #include "Debug/Logger.h"
 
 namespace GL
@@ -56,8 +58,6 @@ void FrameBuffer::CompleteSetup()
 void FrameBuffer::BindShaderFBO() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     if(attachments.size() > 31) [[unlikely]] {
         Debug::LogError(std::format("Too many attachments for FrameBuffer! Max is 32, current is {0}", attachments.size()));
@@ -96,6 +96,11 @@ void FrameBuffer::CopyDepthToFBO(GLuint targetFBO) const
         GL_NEAREST
     );
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FrameBuffer::CopyDepthToFBO(FrameBuffer &targetFBO) const
+{
+    this->CopyDepthToFBO(targetFBO.FBO);
 }
 
 FrameBuffer::FrameBuffer(FrameBuffer &&other) noexcept
