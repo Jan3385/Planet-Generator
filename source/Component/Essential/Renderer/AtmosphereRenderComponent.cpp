@@ -24,14 +24,13 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
         - this->transform->GetPos()
     ) < PlanetGen::PLANET_SCALE + this->transform->GetScale().x + 0.1f;
 
-    GL::Shader *s = isInsideSphere ? this->renderShaderInside : this->renderShader;
 
     Renderer::SetReverseFaceCulling(true);
-    s->Use();
-    s->SetMat4("transform", model);
-    s->SetMat3("normalMatrix", normalMatrix);
+    this->renderShader->Use();
+    this->renderShader->SetMat4("transform", model);
+    this->renderShader->SetMat3("normalMatrix", normalMatrix);
 
-    s->SetVec3("originPos", this->transform->GetPos());
+    this->renderShader->SetVec3("originPos", this->transform->GetPos());
 
     if(!mesh) {
         Debug::LogWarn("AtmosphereRender: No mesh set");

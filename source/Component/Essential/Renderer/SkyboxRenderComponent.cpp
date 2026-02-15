@@ -20,11 +20,12 @@ Component::SkyboxRender::SkyboxRender(Object::BaseObject *owner)
  * @brief Loads cubemap textures from file paths
  * @param filePaths Array of 6 file paths for the cubemap faces
  * @param blurred if the textures should be blurred
+ * @param sRGB if the textures should be loaded within sRGB color space
  * @note Order of images: right, left, bottom, top, front, back
  */
-void Component::SkyboxRender::LoadCubemap(const std::string filePaths[6], bool blurred)
+void Component::SkyboxRender::LoadCubemap(const std::string filePaths[6], bool blurred, bool sRGB)
 {
-    this->cubemap = GL::Cubemap(filePaths, blurred);
+    this->cubemap = GL::Cubemap(filePaths, blurred, sRGB);
 }
 
 void Component::SkyboxRender::Render(glm::mat4 &projection, glm::mat4 &view)

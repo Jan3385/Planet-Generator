@@ -10,7 +10,7 @@ public:
     SkyboxRender(Object::BaseObject* owner);
     ~SkyboxRender() override = default;
 
-    void LoadCubemap(const std::string filePaths[6], bool blurred = false);
+    void LoadCubemap(const std::string filePaths[6], bool blurred = false, bool sRGB = false);
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 protected:

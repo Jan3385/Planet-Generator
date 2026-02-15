@@ -192,11 +192,11 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     // normal color buffer
     this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // color + specular - albedo buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RGBA, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
     this->geometryFramebuffer->CompleteSetup();
 
     this->postProcessFramebuffer = new GL::FrameBuffer();
-    this->postProcessFramebuffer->AddBufferTexture(GL_SRGB8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     this->postProcessFramebuffer->CompleteSetup();
 }
 

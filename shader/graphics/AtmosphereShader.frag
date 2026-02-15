@@ -15,11 +15,13 @@ uniform DirectionLight directionalLight;
 
 #get LOW_POLY_FEEL
 
-#define HORIZON_INTENSITY_EXPONENT 1.5f
+#define HORIZON_INTENSITY_EXPONENT 0.8f
 #define SUN_INTENSITY 1.5f
 #define CAMERA_CLEAR_DISTANCE_FACTOR 2.0f
 
 out vec4 FragColor;
+
+#include "Color.glsl"
 
 void main()
 {
@@ -32,8 +34,9 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     // color intensity based on horizon
-    float horizon = 1.0 - max(dot(viewDir, normalSample), 0.0);
-    float intensity = pow(horizon, HORIZON_INTENSITY_EXPONENT);
+    float horizon = abs(dot(viewDir, normalSample)) * 2.2f;
+    //float intensity = pow(horizon, HORIZON_INTENSITY_EXPONENT);
+    float intensity = 1.0f;
 
     // color intensity based on sun orientation
     float sunAmount = max(dot(-directionalLight.direction, normalSample), 0.0) * SUN_INTENSITY;
@@ -49,5 +52,6 @@ void main()
     float t = smoothstep(0.0, 1.0, horizon);
     vec3 atmColor = mix(zenithColor.xyz, horizonColor.xyz, t);
 
-    FragColor = vec4(atmColor * intensity, intensity);
+    FragColor = vec4(toLinear(atmColor * intensity), intensity);
+    //FragColor = vec4(horizon, horizon, horizon, 1.0f);
 } 

@@ -18,8 +18,6 @@ public:
     AtmosphereRender(Object::BaseObject* owner);
     ~AtmosphereRender() override = default;
 
-        BaseMeshRender* SetRenderShaderInside(GL::Shader* shader) { this->renderShaderInside = shader; return this; }
-
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
     void SetColorPalette(const atmospherePalette& palette);
@@ -35,8 +33,6 @@ protected:
 private:
     std::shared_ptr<GL::Mesh> mesh = nullptr;
     GL::Buffer<atmospherePalette, GL::BufferTarget::UniformBuffer> paletteBuffer;
-
-    GL::Shader *renderShaderInside = nullptr;
 
     friend class Object::BaseObject;
 };

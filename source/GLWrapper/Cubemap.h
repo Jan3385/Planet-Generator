@@ -9,7 +9,7 @@ namespace GL
 class Cubemap{
 public:
     Cubemap();
-    Cubemap(const std::string filePaths[6], bool blurred);
+    Cubemap(const std::string filePaths[6], bool blurred, bool sRGB);
     ~Cubemap();
 
     // disable copy semantics
@@ -28,7 +28,7 @@ public:
 protected:
     GLuint ID = 0;
 
-    virtual void LoadCubemapFaces(const std::string filePaths[6]);
+    virtual void LoadCubemapFaces(const std::string filePaths[6], bool sRGB);
 private:
     bool blurred;
 };

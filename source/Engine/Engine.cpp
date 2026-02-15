@@ -61,8 +61,6 @@ void GameEngine::Run(const Config& config)
 
     GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
     lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
-    GL::BasicShaderProgram atmosphereOutsideShader("AtmosphereShaderOutside");
-    lighting->RegisterShaderLightUpdateCallback(&atmosphereOutsideShader);
 
     std::shared_ptr<GL::Mesh> cube;
     cube = MeshGenerator::GenerateCubeMesh();
@@ -81,7 +79,7 @@ void GameEngine::Run(const Config& config)
         "Images/Skybox/skybox-front.jpg",
         "Images/Skybox/skybox-back.jpg"
     };
-    skyboxRenderComp->LoadCubemap(cubemapPaths.data(), false);
+    skyboxRenderComp->LoadCubemap(cubemapPaths.data(), false, true);
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
@@ -130,8 +128,7 @@ void GameEngine::Run(const Config& config)
     renderComp->SetColorPalette(palette);
 
     Component::AtmosphereRender *atmosphereRenderComp = planet->AddComponent<Component::AtmosphereRender>();
-    atmosphereRenderComp->SetRenderShader(&atmosphereOutsideShader);
-    atmosphereRenderComp->SetRenderShaderInside(&atmosphereShader);
+    atmosphereRenderComp->SetRenderShader(&atmosphereShader);
     atmosphereRenderComp->SetColorPalette({ glm::vec4(0.2f, 0.5f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.5f, 1.0f) });
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());
