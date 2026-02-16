@@ -25,7 +25,6 @@ void Lighting::SetAmbientIntensity(float intensity)
 /**
  * @brief Registers a shader to receive light change updates
  * @param shader Pointer to the shader to register
- * @note The shader is expected to have uniform variables called "Vec3 ambientColor" and "float ambientIntensity"
  */
 void Lighting::RegisterShaderLightUpdateCallback(GL::Shader *shader)
 {

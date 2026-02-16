@@ -282,6 +282,18 @@ void Renderer::Update()
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
+    // bind N nearest point lights to the shader
+    auto closestPLights = GameEngine::lighting->GetClosestPointLights(camera->GetPosition());
+    int pointLightCount = 0;
+    this->GetLightPassShader().Use();
+    for (auto* pointLight : closestPLights) {
+        if (pointLight != nullptr) {
+            pointLight->Bind(this->GetLightPassShader(), pointLightCount);
+            pointLightCount++;
+        }
+    }
+    this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
+
     glm::mat4 projection = camera->GetProjection();
     glm::mat4 view = camera->GetView();
     GL::Shader::UpdateShaderVariable("mat4 projection", projection);
@@ -322,7 +334,7 @@ void Renderer::Update()
     
     // 3. Post-processing pass
     glDisable(GL_DEPTH_TEST);
-    // 3.1 SMAA if enabled
+    // 3.1 MLAA if enabled
     if(this->mlaa){
         // 1. Edge detection pass
         this->mlaa->edgeFBO.UpdateSize(screenSize);
@@ -355,6 +367,7 @@ void Renderer::Update()
         lastFBO = &this->mlaa->neighborhoodBlendingFBO;
     }
 
+    // 3.2 Final post-processing
     lastFBO->UnbindShaderFBO();
     this->postProcessShader->Use();
     lastFBO->BindTextures(0);

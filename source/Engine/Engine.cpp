@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 #include <iostream>
+#include <format>
 
 #include "Debug/Logger.h"
 #include "GLWrapper/BasicShaderProgram.h"
@@ -165,18 +166,6 @@ void GameEngine::Run(const EngineConfig::Config& config)
     Debug::LogInfo("Starting main loop");
     while (!renderer->ShouldClose())
     {
-        //TODO: move anywhere else asap
-        auto closestPLights = GameEngine::lighting->GetClosestPointLights(glm::vec3(0.0f));
-        int pointLightCount = 0;
-        renderer->GetLightPassShader().Use();
-        for (auto* pointLight : closestPLights) {
-            if (pointLight != nullptr) {
-                pointLight->Bind(renderer->GetLightPassShader(), pointLightCount);
-                pointLightCount++;
-            }
-        }
-        renderer->GetLightPassShader().SetInt("numPointLights", pointLightCount);
-
         this->CalculateDeltaTime();
 
         input->Update();

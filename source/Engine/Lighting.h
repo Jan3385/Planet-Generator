@@ -9,7 +9,7 @@
 class Lighting {
 public:
     static constexpr bool LOW_POLY_LIGHTING_FEEL = false;
-    static constexpr int MAX_EFFECTING_POINT_LIGHTS = 4;
+    static constexpr int MAX_EFFECTING_POINT_LIGHTS = 16;
 
     struct PointLightSource {
         glm::vec3 position;
