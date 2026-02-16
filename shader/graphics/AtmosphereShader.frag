@@ -53,5 +53,4 @@ void main()
     vec3 atmColor = mix(zenithColor.xyz, horizonColor.xyz, t);
 
     FragColor = vec4(toLinear(atmColor * intensity), intensity);
-    //FragColor = vec4(horizon, horizon, horizon, 1.0f);
 } 

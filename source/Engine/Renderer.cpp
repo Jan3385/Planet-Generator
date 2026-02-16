@@ -107,7 +107,8 @@ void Renderer::DrawImGuiWindows()
     ImGui::End();
 }
 
-Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float gamma)
+Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma)
+ : antiAliasingMethod(antialiasing)
 {
     this->SetupShaderValues();
 
@@ -134,8 +135,6 @@ Renderer::Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float 
     this->SetReverseFaceCulling(false);
 
     this->SetGammaCorrection(gamma);
-
-    if(MSAA_Samples > 1) glEnable(GL_MULTISAMPLE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -248,6 +247,9 @@ void Renderer::Update()
     glm::vec3 camPos = camera->GetPosition();
     GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
 
+    glm::vec2 inverseScreenSize = glm::vec2(1.0f / this->windowWidth, 1.0f / this->windowHeight);
+    GL::Shader::UpdateShaderVariable("vec2 inverseScreenSize", inverseScreenSize);
+
     // 1. Geometry pass
     glDisable(GL_BLEND);
     this->geometryFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
@@ -306,6 +308,8 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
     GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
     GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
+    GL::Shader::AddShaderConstant("FXAA_ANTIALIASING", 
+        this->antiAliasingMethod == EngineConfig::AntiAliasingMethod::FXAA ? "1" : "0");
 
     GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));
@@ -313,4 +317,5 @@ void Renderer::SetupShaderValues()
 
     GL::Shader::AddShaderVariable("float gamma", 2.2f);
     GL::Shader::AddShaderVariable("float exposure", 1.0f);
+    GL::Shader::AddShaderVariable("vec2 inverseScreenSize", glm::vec2(0.0f));
 }

@@ -37,7 +37,7 @@ GameEngine::~GameEngine()
     glfwTerminate();
 }
 
-void GameEngine::Run(const Config& config)
+void GameEngine::Run(const EngineConfig::Config& config)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -50,7 +50,7 @@ void GameEngine::Run(const Config& config)
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
 
-    renderer = new Renderer(config.windowWidth, config.windowHeight, config.MSAA_Samples, config.gamma);
+    renderer = new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma);
     currentLevel = new Level();
     input = new Input();
 
@@ -196,7 +196,7 @@ void GameEngine::CalculateDeltaTime()
     this->lastFrameTime = currentFrameTime;
 }
 
-void GameEngine::InitializeGLFW(const Config& config)
+void GameEngine::InitializeGLFW(const EngineConfig::Config& config)
 {
     glfwSetErrorCallback([](int error, const char* description) {
         Debug::LogError(std::format("GLFW Error ({0}): {1}", error, description));

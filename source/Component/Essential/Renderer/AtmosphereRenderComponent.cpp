@@ -19,12 +19,6 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     this->paletteBuffer.BindBufferBase(0);
 
-    bool isInsideSphere = glm::length(
-        GameEngine::currentLevel->GetCamera()->GetPosition()
-        - this->transform->GetPos()
-    ) < PlanetGen::PLANET_SCALE + this->transform->GetScale().x + 0.1f;
-
-
     Renderer::SetReverseFaceCulling(true);
     this->renderShader->Use();
     this->renderShader->SetMat4("transform", model);

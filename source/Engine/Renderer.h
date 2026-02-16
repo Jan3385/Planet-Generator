@@ -7,6 +7,8 @@
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/FrameBuffer.h"
 
+#include "Engine/Config.h"
+
 #include <vector>
 
 class Input;
@@ -25,7 +27,7 @@ public:
         friend class Renderer;
     };
 
-    Renderer(uint16_t width, uint16_t height, uint8_t MSAA_Samples, float gamma);
+    Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {
@@ -70,6 +72,8 @@ public:
     void RemoveImGuiCallback(Component::IImGuiUpdatable* callback) {
         std::erase(imguiCallbacks, callback);
     }
+
+    EngineConfig::AntiAliasingMethod GetAntiAliasingMethod() const { return this->antiAliasingMethod; }
 protected:
     void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
     void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
@@ -87,6 +91,7 @@ protected:
     GL::FrameBuffer *postProcessFramebuffer;
 private:
     bool isWireframeMode = false;
+    EngineConfig::AntiAliasingMethod antiAliasingMethod;
 
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;

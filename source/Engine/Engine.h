@@ -4,18 +4,10 @@
 #include "Engine/Renderer.h"
 #include "Engine/Input.h"
 #include "Engine/Lighting.h"
+#include "Engine/Config.h"
 
 class GameEngine{
 public:
-    struct Config{
-        uint16_t windowWidth = 800;
-        uint16_t windowHeight = 600;
-
-        uint8_t MSAA_Samples = 8; // 1 means no MSAA
-        float gamma = 2.2f;
-        bool VSync = true;
-    };
-
     static GameEngine* instance;
     static Renderer* renderer;
     static Level* currentLevel;
@@ -27,10 +19,10 @@ public:
     GameEngine();
     ~GameEngine();
 
-    void Run(const Config& config);
+    void Run(const EngineConfig::Config& config);
 private:
     void CalculateDeltaTime();
     double lastFrameTime = 0.0;
     float deltaTime = 0.166f;
-    void InitializeGLFW(const Config& config);
+    void InitializeGLFW(const EngineConfig::Config& config);
 };
