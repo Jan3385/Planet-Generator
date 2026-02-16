@@ -19,6 +19,7 @@ public:
 
     void BindShaderFBO() const;
     void BindTextures() const;
+    void BindTextures(uint8_t start) const;
     void UnbindShaderFBO() const;
 
     void CopyDepthToFBO(GLuint targetFBO) const;

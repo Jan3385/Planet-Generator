@@ -80,6 +80,13 @@ void FrameBuffer::BindTextures() const
     }
 }
 
+void FrameBuffer::BindTextures(uint8_t start) const
+{
+    for(size_t i = 0; i < attachments.size(); i++) {
+        attachments[i]->BindToUnit(static_cast<uint8_t>(start + i));
+    }
+}
+
 void FrameBuffer::UnbindShaderFBO() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

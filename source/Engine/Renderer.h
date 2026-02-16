@@ -26,6 +26,14 @@ public:
 
         friend class Renderer;
     };
+    struct MLAA_Components{
+        GL::FrameBuffer edgeFBO;
+        GL::BasicShaderProgram edgeShader;
+        GL::FrameBuffer blendWeightFBO;
+        GL::BasicShaderProgram blendWeightShader;
+        GL::FrameBuffer neighborhoodBlendingFBO;
+        GL::BasicShaderProgram neighborhoodBlendingShader;
+    };
 
     Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma);
     ~Renderer();
@@ -93,6 +101,8 @@ private:
     bool isWireframeMode = false;
     EngineConfig::AntiAliasingMethod antiAliasingMethod;
 
+    void GLDrawScreenQuad();
+
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;
     GL::BasicShaderProgram skyboxShader;
@@ -104,6 +114,8 @@ private:
     std::vector<IRendererCallback*> noLightRenderCallbacks;
 
     std::vector<Component::IImGuiUpdatable*> imguiCallbacks;
+
+    MLAA_Components *mlaa = nullptr;
 
     int windowWidth = 800;
     int windowHeight = 600;

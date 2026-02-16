@@ -7,6 +7,7 @@ uniform sampler2D screenTexture;
 #var vec2 inverseScreenSize
 
 #get FXAA_ANTIALIASING
+#var float aaThreshold
 
 out vec4 FragColor;
 
@@ -32,7 +33,7 @@ void main()
     float lumaMax = max(lumaM, max(max(lumaN, lumaS), max(lumaE, lumaW)));
     float lumaRange = lumaMax - lumaMin;
 
-    if (lumaRange > 0.1){
+    if (lumaRange > aaThreshold){
         vec3 filtered = (HDRColor + rgbN + rgbS + rgbE + rgbW) / 5.0;
         HDRColor = filtered;
     }

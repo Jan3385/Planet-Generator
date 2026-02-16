@@ -76,6 +76,12 @@ void Renderer::ImGuiRenderPass()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+void Renderer::GLDrawScreenQuad()
+{
+    this->quadVAO->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
 void Renderer::DrawImGuiWindows()
 {
     ImGui::Begin("Basic Window");
@@ -94,6 +100,10 @@ void Renderer::DrawImGuiWindows()
     static float exposureValue = 1.0f;
     if(ImGui::DragFloat("Exposure", &exposureValue, 0.1f, 0.1f, 10.0f)){
         GL::Shader::UpdateShaderVariable("float exposure", exposureValue);
+    }
+    static float aaThreshold = 0.15f;
+    if(ImGui::DragFloat("AntiAliasing threshold", &aaThreshold, 0.001f, 0.001f, 1.0f)){
+        GL::Shader::UpdateShaderVariable("float aaThreshold", aaThreshold);
     }
     static float sunDir[3] = {-0.8f, 0.3f, 0.3f};
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
@@ -181,7 +191,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->lightPassShader->SetInt("gNormal", 1);
     this->lightPassShader->SetInt("gAlbedoSpec", 2);
 
-    this->postProcessShader = new GL::BasicShaderProgram("PostProcessShader");
+    this->postProcessShader = new GL::BasicShaderProgram("post-processing/PostProcessShader");
     this->postProcessShader->Use();
     this->postProcessShader->SetInt("screenTexture", 0);
 
@@ -197,6 +207,36 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->postProcessFramebuffer = new GL::FrameBuffer();
     this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     this->postProcessFramebuffer->CompleteSetup();
+
+    if(antialiasing == EngineConfig::AntiAliasingMethod::MLAA) {
+        Debug::LogTrace("Initializing SMAA anti-aliasing components");
+
+        this->mlaa = new MLAA_Components();
+
+        this->mlaa->edgeFBO = GL::FrameBuffer();
+        this->mlaa->edgeFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+        this->mlaa->edgeFBO.CompleteSetup();
+        this->mlaa->edgeShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/EdgeDetectionShader.frag", "Edge Detection Pass FBO");
+        this->mlaa->edgeShader.SetInt("screenTexture", 0);
+
+        this->mlaa->blendWeightFBO = GL::FrameBuffer();
+        this->mlaa->blendWeightFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+        this->mlaa->blendWeightFBO.CompleteSetup();
+        this->mlaa->blendWeightShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/BlendWeightShader.frag", "Blend Weight Calculation Pass FBO");
+        this->mlaa->blendWeightShader.SetInt("uEdgeTex", 0);
+
+        this->mlaa->neighborhoodBlendingFBO = GL::FrameBuffer();
+        this->mlaa->neighborhoodBlendingFBO.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+        this->mlaa->neighborhoodBlendingFBO.CompleteSetup();
+        this->mlaa->neighborhoodBlendingShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/NeighborhoodBlendingShader.frag", "Neighborhood Blending Pass FBO");
+        this->mlaa->neighborhoodBlendingShader.SetInt("screenTexture", 0);
+        this->mlaa->neighborhoodBlendingShader.SetInt("uBlendWeightTex", 1);
+    }
+
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        Debug::LogError("OpenGL error during renderer initialization: " + std::to_string(err));
+    }
 }
 
 Renderer::~Renderer()
@@ -215,6 +255,9 @@ Renderer::~Renderer()
     delete this->postProcessShader;
     delete this->lightPassShader;
     delete this->geometryFramebuffer;
+    delete this->postProcessFramebuffer;
+
+    if(this->mlaa) delete this->mlaa;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -247,12 +290,14 @@ void Renderer::Update()
     glm::vec3 camPos = camera->GetPosition();
     GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
 
-    glm::vec2 inverseScreenSize = glm::vec2(1.0f / this->windowWidth, 1.0f / this->windowHeight);
+    glm::vec2 screenSize = glm::vec2(this->windowWidth, this->windowHeight);
+    glm::vec2 inverseScreenSize = 1.0f / screenSize;
     GL::Shader::UpdateShaderVariable("vec2 inverseScreenSize", inverseScreenSize);
+    GL::Shader::UpdateShaderVariable("vec2 screenSize", screenSize);
 
     // 1. Geometry pass
     glDisable(GL_BLEND);
-    this->geometryFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
+    this->geometryFramebuffer->UpdateSize(screenSize);
     this->geometryFramebuffer->BindShaderFBO();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -263,24 +308,59 @@ void Renderer::Update()
     glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
-    this->postProcessFramebuffer->UpdateSize(glm::uvec2(this->windowWidth, this->windowHeight));
+    this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    this->quadVAO->Bind();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    this->GLDrawScreenQuad();
 
     // 2.5 No-light objects pass
     glEnable(GL_BLEND);
     this->geometryFramebuffer->CopyDepthToFBO(*this->postProcessFramebuffer);
     this->postProcessFramebuffer->BindShaderFBO();
     ObjectsSpecialRenderPass(projection, view, camPos);
-    this->postProcessFramebuffer->UnbindShaderFBO();
-
+    GL::FrameBuffer *lastFBO = this->postProcessFramebuffer;
+    
     // 3. Post-processing pass
+    glDisable(GL_DEPTH_TEST);
+    // 3.1 SMAA if enabled
+    if(this->mlaa){
+        // 1. Edge detection pass
+        this->mlaa->edgeFBO.UpdateSize(screenSize);
+        this->mlaa->edgeFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->mlaa->edgeShader.Use();
+        this->postProcessFramebuffer->BindTextures();
+        this->GLDrawScreenQuad();
+        this->mlaa->edgeFBO.UnbindShaderFBO();
+
+        // 2. Blend weight calculation pass
+        this->mlaa->blendWeightFBO.UpdateSize(screenSize);
+        this->mlaa->blendWeightFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->mlaa->blendWeightShader.Use();
+        this->mlaa->edgeFBO.BindTextures();
+        this->GLDrawScreenQuad();
+        this->mlaa->blendWeightFBO.UnbindShaderFBO();
+
+        // 3. Neighborhood blending pass
+        this->mlaa->neighborhoodBlendingFBO.UpdateSize(screenSize);
+        this->mlaa->neighborhoodBlendingFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->mlaa->neighborhoodBlendingShader.Use();
+        this->postProcessFramebuffer->BindTextures();
+        this->mlaa->blendWeightFBO.BindTextures(1);
+        this->GLDrawScreenQuad();
+        this->mlaa->neighborhoodBlendingFBO.UnbindShaderFBO();
+
+        lastFBO = &this->mlaa->neighborhoodBlendingFBO;
+    }
+
+    lastFBO->UnbindShaderFBO();
     this->postProcessShader->Use();
-    this->postProcessFramebuffer->BindTextures();
-    this->quadVAO->Bind();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    lastFBO->BindTextures(0);
+    this->GLDrawScreenQuad();
+
+    glEnable(GL_DEPTH_TEST);
 
     // 4. Render ImGui
     ImGuiRenderPass();
@@ -318,4 +398,8 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderVariable("float gamma", 2.2f);
     GL::Shader::AddShaderVariable("float exposure", 1.0f);
     GL::Shader::AddShaderVariable("vec2 inverseScreenSize", glm::vec2(0.0f));
+    GL::Shader::AddShaderVariable("vec2 screenSize", glm::vec2(0.0f));
+    GL::Shader::AddShaderVariable("float aaThreshold", 0.15f);
+
+    Debug::LogSpam("Shader constants and variables initialized");
 }
