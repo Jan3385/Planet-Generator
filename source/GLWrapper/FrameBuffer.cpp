@@ -6,16 +6,17 @@
 
 namespace GL
 {
-FrameBuffer::FrameBuffer()
+FrameBuffer::FrameBuffer(bool depthBuffer)
 {
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-    //TODO: temp depth RBO
-    glGenRenderbuffers(1, &DepthRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+    if(depthBuffer) {
+        glGenRenderbuffers(1, &DepthRBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+    }
 }
 
 FrameBuffer::~FrameBuffer()
@@ -148,9 +149,12 @@ void FrameBuffer::UpdateSize(const glm::uvec2 &newSize)
         attachments[i]->Resize(size.x, size.y);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, attachments[i]->GetID(), 0);
     }
-    glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+
+    if(DepthRBO != 0) {
+        glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

@@ -11,7 +11,7 @@ namespace GL
 
 class FrameBuffer{
 public:
-    FrameBuffer();
+    FrameBuffer(bool depthBuffer = true);
     ~FrameBuffer();
 
     void AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type);
@@ -34,6 +34,8 @@ public:
     FrameBuffer& operator=(FrameBuffer&&other) noexcept;
 
     void UpdateSize(const glm::uvec2& newSize);
+
+    bool HasDepthBuffer() const { return DepthRBO != 0; };
 protected:
     GLuint FBO = 0;
 
