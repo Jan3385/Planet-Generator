@@ -88,6 +88,16 @@ void FrameBuffer::BindTextures(uint8_t start) const
     }
 }
 
+void FrameBuffer::BindTextureTo(uint8_t attachmentIndex, uint8_t unit) const
+{
+    if(attachmentIndex >= attachments.size()) {
+        Debug::LogError(std::format("Attachment index {0} is out of bounds for FrameBuffer with {1} attachments!", attachmentIndex, attachments.size()));
+        return;
+    }
+    
+    attachments[attachmentIndex]->BindToUnit(unit);
+}
+
 void FrameBuffer::UnbindShaderFBO() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -53,10 +53,7 @@ std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> L
 {
     std::vector<Lighting::PointLightSource*> viableLights;
     for (Lighting::PointLightSource* light : this->pointLightSources) {
-        float distance2 = glm::distance2(light->position, position);
-        if (distance2 <= light->radius * light->radius) {
-            viableLights.push_back(light);
-        }
+        viableLights.push_back(light);
     }
     std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
 

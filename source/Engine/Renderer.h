@@ -22,6 +22,7 @@ public:
     struct IRendererCallback{
     protected:
         virtual void Render(glm::mat4 &projection, glm::mat4 &view) = 0;
+        virtual void RenderVelocity(GL::Shader &s) = 0;
         virtual ~IRendererCallback() = default;
 
         friend class Renderer;
@@ -33,6 +34,19 @@ public:
         GL::BasicShaderProgram blendWeightShader;
         GL::FrameBuffer neighborhoodBlendingFBO;
         GL::BasicShaderProgram neighborhoodBlendingShader;
+    };
+    struct TAA_Components{
+        unsigned int frameIndex = 0;
+        GL::FrameBuffer TAA_FBO1;
+        GL::BasicShaderProgram TAAShader;
+
+        GL::FrameBuffer TAA_FBO2;
+
+        GL::FrameBuffer velocityFBO;
+        GL::BasicShaderProgram velocityShader;
+
+        glm::mat4 previousProjection;
+        glm::mat4 previousView;
     };
 
     Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma);
@@ -85,9 +99,12 @@ public:
 protected:
     void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
     void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
+    void ObjectsVelocityRenderPass();
     void ImGuiRenderPass();
 
     void SetupShaderValues();
+
+    glm::mat4 JitterProjection(const glm::mat4& projection, const int frameIndex);
 
     GL::VertexArray *quadVAO;
     GL::Buffer<float, GL_ARRAY_BUFFER> *quadVBO;
@@ -116,6 +133,7 @@ private:
     std::vector<Component::IImGuiUpdatable*> imguiCallbacks;
 
     MLAA_Components *mlaa = nullptr;
+    TAA_Components *taa = nullptr;
 
     int windowWidth = 800;
     int windowHeight = 600;

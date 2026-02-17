@@ -13,6 +13,7 @@ public:
     void LoadCubemap(const std::string filePaths[6], bool blurred = false, bool sRGB = false);
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
+    void RenderVelocity(GL::Shader &s) override;
 protected:
     void Awake() override     {};
     void OnDestroy() override {};

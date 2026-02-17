@@ -38,6 +38,7 @@ protected:
     GL::Shader *renderShader;
 
     Transform* transform = nullptr;
+    glm::mat4 prevMatrixTransform = glm::mat4(1.0f);
 
     friend class Object::BaseObject;
 };

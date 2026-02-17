@@ -16,6 +16,7 @@ public:
     ~ColorMeshRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
+    void RenderVelocity(GL::Shader &s) override;
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 

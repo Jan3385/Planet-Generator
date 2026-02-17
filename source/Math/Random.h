@@ -17,6 +17,7 @@ public:
     static uint32_t HashFromPos(const glm::vec3& pos, uint32_t seed);
     static uint32_t HashFromPos(const glm::ivec3& pos, uint32_t seed);
     static uint32_t HashFromInt(uint32_t value, uint32_t seed);
+    static float HaltonSequence(unsigned int index, int base);
 
     Random();
     Random(uint32_t seed);
@@ -28,6 +29,7 @@ public:
     float GetFloat(float min, float max);
     int32_t GetInt(int32_t min, int32_t max);
     bool GetBool();
+    bool GetBool(float trueProbability);
 
     // disable copy
     Random(const Random&) = delete;

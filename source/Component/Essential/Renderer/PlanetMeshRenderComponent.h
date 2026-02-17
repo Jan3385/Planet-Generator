@@ -31,6 +31,7 @@ public:
     ~PlanetMeshRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
+    void RenderVelocity(GL::Shader &s) override;
 
     void SetMesh(std::shared_ptr<GL::Mesh> mesh) { this->mesh = mesh; }
     void SetColorPalette(const planetPalette& palette);

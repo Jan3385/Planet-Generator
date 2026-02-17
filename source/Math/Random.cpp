@@ -81,6 +81,23 @@ uint32_t Math::Random::HashFromInt(uint32_t value, uint32_t seed)
     return (value * 2654435761) ^ seed;
 }
 
+/// @brief Generates a value in the Halton sequence for a given index and base
+/// @param index The index in the sequence
+/// @param base The base to use for the sequence (should be a prime number for better distribution)
+/// @return A float in range of 0 (inclusive) to 1 (exclusive)
+float Math::Random::HaltonSequence(unsigned int index, int base)
+{
+    float f = 1.0f;
+    float r = 0.0f;
+
+    while (index > 0) {
+        f /= base;
+        r += f * (index % base);
+        index /= base;
+    }
+    return r;
+}
+
 Math::Random::Random()
 {
     this->seed = rand();
@@ -103,7 +120,7 @@ void Math::Random::SetSeed(uint32_t seed)
     generator.seed(this->seed);
 }
 
-/// @brief 
+/// @brief Returns a random float in the range [min, max)
 /// @param min minimum value (inclusive)
 /// @param max maximum value (exclusive)
 /// @return 
@@ -113,7 +130,7 @@ float Math::Random::GetFloat(float min, float max)
     return distribution(generator);
 }
 
-/// @brief 
+/// @brief Returns a random int in the range [min, max]
 /// @param min minimum value (inclusive) 
 /// @param max maximum value (inclusive)
 /// @return 
@@ -123,8 +140,19 @@ int32_t Math::Random::GetInt(int32_t min, int32_t max)
     return distribution(generator);
 }
 
+/// @brief Returns a random bool with 50/50 chance
+/// @return
 bool Math::Random::GetBool()
 {
     std::bernoulli_distribution distribution(0.5f);
+    return distribution(generator);
+}
+
+/// @brief Returns a random bool with a given probability of being true
+/// @param trueProbability Probability of the result being true (0.0f to 1.0f)
+/// @return 
+bool Math::Random::GetBool(float trueProbability)
+{
+    std::bernoulli_distribution distribution(trueProbability);
     return distribution(generator);
 }

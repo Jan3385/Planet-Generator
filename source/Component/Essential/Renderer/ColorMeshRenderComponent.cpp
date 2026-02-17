@@ -21,6 +21,19 @@ void Component::ColorMeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     this->mesh->Draw();
 }
 
+void Component::ColorMeshRender::RenderVelocity(GL::Shader &s)
+{
+    if(!this->transform || !this->mesh) return;
+
+    glm::mat4 model = this->transform->GetMatrixTransform();
+    s.SetMat4("transform", model);
+    s.SetMat4("prevTransform", this->prevMatrixTransform);
+    this->prevMatrixTransform = model;
+
+    this->mesh->Bind();
+    this->mesh->Draw();
+}
+
 void Component::ColorMeshRender::Awake()
 {
     GameEngine::renderer->AddNoLightRenderCallback(this);

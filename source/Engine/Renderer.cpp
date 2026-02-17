@@ -7,6 +7,7 @@
 #include "Engine/Engine.h"
 #include "Component/BaseComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
+#include "Math/Random.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
@@ -54,6 +55,19 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
 
     for(auto& callback : transparentRenderCallbacks) {
         callback->Render(projection, view);
+    }
+}
+
+void Renderer::ObjectsVelocityRenderPass()
+{
+    if(!this->taa) return;
+
+    for(auto& callback : renderCallbacks) {
+        callback->RenderVelocity(this->taa->velocityShader);
+    }
+
+    for(auto& callback : noLightRenderCallbacks) {
+        callback->RenderVelocity(this->taa->velocityShader);
     }
 }
 
@@ -232,6 +246,27 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
         this->mlaa->neighborhoodBlendingShader.SetInt("screenTexture", 0);
         this->mlaa->neighborhoodBlendingShader.SetInt("uBlendWeightTex", 1);
     }
+    if(antialiasing == EngineConfig::AntiAliasingMethod::TAA) {
+        Debug::LogTrace("Initializing TAA anti-aliasing components");
+
+        this->taa = new TAA_Components();
+
+        this->taa->TAA_FBO1 = GL::FrameBuffer();
+        this->taa->TAA_FBO1.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+        this->taa->TAA_FBO1.CompleteSetup();
+        this->taa->TAA_FBO2 = GL::FrameBuffer();
+        this->taa->TAA_FBO2.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+        this->taa->TAA_FBO2.CompleteSetup();
+        this->taa->TAAShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/TAABlendShader.frag", "TAA Blend Pass FBO");
+        this->taa->TAAShader.SetInt("uCurrent", 0);
+        this->taa->TAAShader.SetInt("uHistory", 1);
+        this->taa->TAAShader.SetInt("uVelocity", 2);
+
+        this->taa->velocityFBO = GL::FrameBuffer();
+        this->taa->velocityFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+        this->taa->velocityFBO.CompleteSetup();
+        this->taa->velocityShader = GL::BasicShaderProgram("post-processing/VelocityShader");
+    }
 
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
@@ -258,6 +293,7 @@ Renderer::~Renderer()
     delete this->postProcessFramebuffer;
 
     if(this->mlaa) delete this->mlaa;
+    if(this->taa) delete this->taa;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -279,6 +315,9 @@ void Renderer::SetGammaCorrection(float value)
 
 void Renderer::Update()
 {
+    static bool firstFrame = true;
+
+    // Camera setup
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
@@ -294,10 +333,25 @@ void Renderer::Update()
     }
     this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
 
+    // setup projections etc
     glm::mat4 projection = camera->GetProjection();
+
+    // For TAA jitter projection
+    if(this->taa){
+        this->taa->frameIndex++;
+        projection = this->JitterProjection(projection, this->taa->frameIndex);
+    }
+
     glm::mat4 view = camera->GetView();
     GL::Shader::UpdateShaderVariable("mat4 projection", projection);
     GL::Shader::UpdateShaderVariable("mat4 view", view);
+
+    if(firstFrame && this->taa){
+        this->taa->previousProjection = projection;
+        this->taa->previousView = view;
+        GL::Shader::UpdateShaderVariable("mat4 previousProjection", this->taa->previousProjection);
+        GL::Shader::UpdateShaderVariable("mat4 previousView", this->taa->previousView);
+    }
     
     glm::vec3 camPos = camera->GetPosition();
     GL::Shader::UpdateShaderVariable("vec3 viewPos", camPos);
@@ -334,6 +388,7 @@ void Renderer::Update()
     
     // 3. Post-processing pass
     glDisable(GL_DEPTH_TEST);
+
     // 3.1 MLAA if enabled
     if(this->mlaa){
         // 1. Edge detection pass
@@ -366,6 +421,42 @@ void Renderer::Update()
 
         lastFBO = &this->mlaa->neighborhoodBlendingFBO;
     }
+    // 3.1 TAA if enabled
+    else if(this->taa){
+        // render velocity to a texture
+        glEnable(GL_DEPTH_TEST);
+        this->taa->velocityFBO.UpdateSize(screenSize);
+        this->taa->velocityFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        this->taa->velocityShader.Use();
+        ObjectsVelocityRenderPass();
+        this->taa->velocityFBO.UnbindShaderFBO();
+        glDisable(GL_DEPTH_TEST);
+
+        static bool flip = false;
+        GL::FrameBuffer *writeFBO = flip ? &this->taa->TAA_FBO1    : &this->taa->TAA_FBO2;
+        GL::FrameBuffer *readFBO =  flip ? &this->taa->TAA_FBO2 : &this->taa->TAA_FBO1;
+        flip = !flip;
+
+        writeFBO->UpdateSize(screenSize);
+        readFBO->UpdateSize(screenSize);
+
+        writeFBO->BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->taa->TAAShader.Use();
+        this->postProcessFramebuffer->BindTextures(0);
+        readFBO->BindTextures(1);
+        this->taa->velocityFBO.BindTextures(2); // velocity buffer
+        this->GLDrawScreenQuad();
+        writeFBO->UnbindShaderFBO();
+
+        this->taa->previousProjection = projection;
+        this->taa->previousView = view;
+        GL::Shader::UpdateShaderVariable("mat4 previousProjection", this->taa->previousProjection);
+        GL::Shader::UpdateShaderVariable("mat4 previousView", this->taa->previousView);
+
+        lastFBO = writeFBO;
+    }
 
     // 3.2 Final post-processing
     lastFBO->UnbindShaderFBO();
@@ -380,6 +471,8 @@ void Renderer::Update()
 
     // 5. Swap buffers
     glfwSwapBuffers(window);
+
+    firstFrame = false;
 }
 
 void Renderer::WireframeMode(bool enabled)
@@ -413,6 +506,24 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderVariable("vec2 inverseScreenSize", glm::vec2(0.0f));
     GL::Shader::AddShaderVariable("vec2 screenSize", glm::vec2(0.0f));
     GL::Shader::AddShaderVariable("float aaThreshold", 0.15f);
+    GL::Shader::AddShaderVariable("mat4 previousProjection", glm::mat4(1.0f));
+    GL::Shader::AddShaderVariable("mat4 previousView", glm::mat4(1.0f));
 
     Debug::LogSpam("Shader constants and variables initialized");
+}
+
+glm::mat4 Renderer::JitterProjection(const glm::mat4 &projection, const int frameIndex)
+{
+    glm::vec2 frameJitter = glm::vec2(
+        (Math::Random::HaltonSequence(frameIndex % 16, 2) - 0.5f),
+        (Math::Random::HaltonSequence(frameIndex % 16, 3) - 0.5f)
+    );
+
+    frameJitter = frameJitter / glm::vec2(this->windowWidth, this->windowHeight);
+
+    glm::mat4 jitteredProjection = projection;
+    constexpr float jiggleScale = 1.0f;
+    jitteredProjection[2][0] += frameJitter.x * jiggleScale;
+    jitteredProjection[2][1] += frameJitter.y * jiggleScale;
+    return jitteredProjection;
 }

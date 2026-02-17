@@ -48,3 +48,16 @@ void Component::SkyboxRender::Render(glm::mat4 &projection, glm::mat4 &view)
     Renderer::SetReverseFaceCulling(false);
     glDepthFunc(GL_LESS);
 }
+
+void Component::SkyboxRender::RenderVelocity(GL::Shader &s)
+{
+    if(!this->transform || !this->cubeMesh) return;
+
+    glm::mat4 model = this->transform->GetMatrixTransform();
+    s.SetMat4("transform", model);
+    s.SetMat4("prevTransform", this->prevMatrixTransform);
+    this->prevMatrixTransform = model;
+
+    this->cubeMesh->Bind();
+    this->cubeMesh->Draw();
+}

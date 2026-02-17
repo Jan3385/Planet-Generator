@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
 
     GameEngine engine;
     EngineConfig::Config config;
-    config.antiAliasingMethod = EngineConfig::AntiAliasingMethod::FXAA;
+    config.antiAliasingMethod = EngineConfig::AntiAliasingMethod::TAA;
 
     engine.Run(config);
 

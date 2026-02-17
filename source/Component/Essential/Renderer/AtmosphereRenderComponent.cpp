@@ -35,6 +35,23 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
     Renderer::SetReverseFaceCulling(false);
 }
 
+void Component::AtmosphereRender::RenderVelocity(GL::Shader &s)
+{
+    if(!this->transform || !this->mesh) return;
+
+    Renderer::SetReverseFaceCulling(true);
+
+    glm::mat4 model = this->transform->GetMatrixTransform();
+    s.SetMat4("transform", model);
+    s.SetMat4("prevTransform", this->prevMatrixTransform);
+    this->prevMatrixTransform = model;
+
+    this->mesh->Bind();
+    this->mesh->Draw();
+
+    Renderer::SetReverseFaceCulling(false);
+}
+
 void Component::AtmosphereRender::SetColorPalette(const atmospherePalette &palette)
 {
     this->paletteBuffer.SetData(palette, GL_STATIC_DRAW);

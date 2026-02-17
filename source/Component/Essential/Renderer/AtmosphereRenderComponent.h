@@ -19,6 +19,7 @@ public:
     ~AtmosphereRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
+    void RenderVelocity(GL::Shader &s) override;
 
     void SetColorPalette(const atmospherePalette& palette);
 protected:
