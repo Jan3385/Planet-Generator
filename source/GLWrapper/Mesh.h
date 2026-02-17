@@ -38,7 +38,14 @@ public:
 
     virtual void SetupMeshBuffers();
     virtual void UpdateMeshBuffers();
+
+    double GetFrustumRadiusWithCentroid(glm::vec3 *centroidOut, glm::vec3 position, glm::vec3 scale) const;
 protected:
+    glm::vec3 centroid = glm::vec3(0.0f);
+    double frustumRadius = 0.0;
+    static glm::vec3 CalculateCentroid(const std::vector<VertexObj>& vertices);
+    static double CalculateFrustumRadius(const std::vector<VertexObj>& vertices, glm::vec3 centroid);
+
     bool buffersInitialized = false;
 
     GL::Buffer<GL::VertexObj, GL::BufferTarget::ArrayBuffer> vertexBuffer;

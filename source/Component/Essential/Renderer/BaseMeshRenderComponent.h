@@ -26,6 +26,7 @@ protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return { }; }
 
+    static bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius);
 
     void Awake() override;
     void OnDestroy() override;

@@ -33,6 +33,12 @@ public:
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
     void RenderVelocity(GL::Shader &s) override;
 
+    bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override{
+        glm::vec3 centroid;
+        double radius = this->mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), this->transform->GetScale());
+        return Component::BaseMeshRender::IsInsideFrustum(frustumPlanes, centroid, radius);
+    }
+
     void SetMesh(std::shared_ptr<GL::Mesh> mesh) { this->mesh = mesh; }
     void SetColorPalette(const planetPalette& palette);
     std::shared_ptr<GL::Mesh> GetMesh() const { return this->mesh; }

@@ -3,6 +3,16 @@
 #include "Engine/Engine.h"
 #include "Engine/Lighting.h"
 
+bool Component::BaseMeshRender::IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius)
+{
+    for (const auto& plane : frustumPlanes) {
+        if (glm::dot(glm::vec3(plane), centroid) + plane.w < -radius) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 void Component::BaseMeshRender::Awake()
 {

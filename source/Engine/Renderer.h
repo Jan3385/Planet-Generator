@@ -23,6 +23,7 @@ public:
     protected:
         virtual void Render(glm::mat4 &projection, glm::mat4 &view) = 0;
         virtual void RenderVelocity(GL::Shader &s) = 0;
+        virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0; 
         virtual ~IRendererCallback() = default;
 
         friend class Renderer;
@@ -48,6 +49,8 @@ public:
         glm::mat4 previousProjection;
         glm::mat4 previousView;
     };
+
+    using Frustum = std::array<glm::vec4, 6>;
 
     Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma);
     ~Renderer();
@@ -97,12 +100,14 @@ public:
 
     EngineConfig::AntiAliasingMethod GetAntiAliasingMethod() const { return this->antiAliasingMethod; }
 protected:
-    void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
-    void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos);
-    void ObjectsVelocityRenderPass();
+    void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
+    void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
+    void ObjectsVelocityRenderPass(Frustum &frustumPlanes);
     void ImGuiRenderPass();
 
     void SetupShaderValues();
+
+    static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
 
     glm::mat4 JitterProjection(const glm::mat4& projection, const int frameIndex);
 

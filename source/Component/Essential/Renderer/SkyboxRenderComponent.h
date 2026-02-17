@@ -14,6 +14,8 @@ public:
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
     void RenderVelocity(GL::Shader &s) override;
+
+    bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override { return true; }
 protected:
     void Awake() override     {};
     void OnDestroy() override {};

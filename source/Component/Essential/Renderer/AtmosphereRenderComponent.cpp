@@ -52,6 +52,15 @@ void Component::AtmosphereRender::RenderVelocity(GL::Shader &s)
     Renderer::SetReverseFaceCulling(false);
 }
 
+bool Component::AtmosphereRender::IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes)
+{
+    glm::vec3 centroid;
+    double radius = this->mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), 
+        this->transform->GetScale() + PlanetGen::PLANET_SCALE * 0.11f
+    );
+    return Component::BaseMeshRender::IsInsideFrustum(frustumPlanes, centroid, radius);
+}
+
 void Component::AtmosphereRender::SetColorPalette(const atmospherePalette &palette)
 {
     this->paletteBuffer.SetData(palette, GL_STATIC_DRAW);

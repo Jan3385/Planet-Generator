@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <glm/gtc/matrix_access.hpp>
+
 #include "Debug/Logger.h"
 #include "Engine/Engine.h"
 #include "Component/BaseComponent.h"
@@ -21,20 +23,22 @@ void Renderer::StoreWindowSize(int width, int height)
     this->windowHeight = height;
 }
 
-void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
+void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes)
 {
     for(auto& callback : renderCallbacks) {
-        callback->Render(projection, view);
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->Render(projection, view);
     }
 }
 
-void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos)
+void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes)
 {
     Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
     if(skybox) skybox->Render(projection, view);
 
     for(auto& callback : noLightRenderCallbacks) {
-        callback->Render(projection, view);
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->Render(projection, view);
     }
 
     // sort transparent objects
@@ -54,20 +58,23 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     );
 
     for(auto& callback : transparentRenderCallbacks) {
-        callback->Render(projection, view);
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->Render(projection, view);
     }
 }
 
-void Renderer::ObjectsVelocityRenderPass()
+void Renderer::ObjectsVelocityRenderPass(Frustum &frustumPlanes)
 {
     if(!this->taa) return;
 
     for(auto& callback : renderCallbacks) {
-        callback->RenderVelocity(this->taa->velocityShader);
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->RenderVelocity(this->taa->velocityShader);
     }
 
     for(auto& callback : noLightRenderCallbacks) {
-        callback->RenderVelocity(this->taa->velocityShader);
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->RenderVelocity(this->taa->velocityShader);
     }
 }
 
@@ -361,13 +368,15 @@ void Renderer::Update()
     GL::Shader::UpdateShaderVariable("vec2 inverseScreenSize", inverseScreenSize);
     GL::Shader::UpdateShaderVariable("vec2 screenSize", screenSize);
 
+    Frustum frustumPlanes = CalculateFrustumPlanes(projection, view);
+
     // 1. Geometry pass
     glDisable(GL_BLEND);
     this->geometryFramebuffer->UpdateSize(screenSize);
     this->geometryFramebuffer->BindShaderFBO();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    ObjectGeometryRenderPass(projection, view, camPos);
+    ObjectGeometryRenderPass(projection, view, camPos, frustumPlanes);
     this->geometryFramebuffer->UnbindShaderFBO();
 
     // 2. Light pass
@@ -383,7 +392,7 @@ void Renderer::Update()
     glEnable(GL_BLEND);
     this->geometryFramebuffer->CopyDepthToFBO(*this->postProcessFramebuffer);
     this->postProcessFramebuffer->BindShaderFBO();
-    ObjectsSpecialRenderPass(projection, view, camPos);
+    ObjectsSpecialRenderPass(projection, view, camPos, frustumPlanes);
     GL::FrameBuffer *lastFBO = this->postProcessFramebuffer;
     
     // 3. Post-processing pass
@@ -429,7 +438,7 @@ void Renderer::Update()
         this->taa->velocityFBO.BindShaderFBO();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         this->taa->velocityShader.Use();
-        ObjectsVelocityRenderPass();
+        ObjectsVelocityRenderPass(frustumPlanes);
         this->taa->velocityFBO.UnbindShaderFBO();
         glDisable(GL_DEPTH_TEST);
 
@@ -510,6 +519,38 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderVariable("mat4 previousView", glm::mat4(1.0f));
 
     Debug::LogSpam("Shader constants and variables initialized");
+}
+
+std::array<glm::vec4, 6> Renderer::CalculateFrustumPlanes(const glm::mat4 &projection, const glm::mat4 &view)
+{
+    glm::mat4 m = projection * view;
+    std::array<glm::vec4, 6> planes;
+
+    glm::vec4 row0 = glm::row(m, 0);
+    glm::vec4 row1 = glm::row(m, 1);
+    glm::vec4 row2 = glm::row(m, 2);
+    glm::vec4 row3 = glm::row(m, 3);
+
+    // Left
+    planes[0] = row3 + row0;
+    // Right
+    planes[1] = row3 - row0;
+    // Bottom
+    planes[2] = row3 + row1;
+    // Top
+    planes[3] = row3 - row1;
+    // Near
+    planes[4] = row3 + row2;
+    // Far
+    planes[5] = row3 - row2;
+
+
+    for (auto& plane : planes) {
+        float length = glm::length(glm::vec3(plane));
+        plane /= length;
+    }
+    
+    return planes;
 }
 
 glm::mat4 Renderer::JitterProjection(const glm::mat4 &projection, const int frameIndex)
