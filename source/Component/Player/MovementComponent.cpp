@@ -7,8 +7,6 @@ void Component::Movement::Awake()
 {
     transform = this->GetOwner()->GetComponent<Component::Transform>();
     camera = this->GetOwner()->GetComponent<Component::Camera>();
-
-    transform->SetLockPitchRange(true);
 }
 
 void Component::Movement::OnDestroy()
@@ -34,12 +32,12 @@ void Component::Movement::Update()
     }
     glm::vec3 upVec = transform->GetUpVector();
 
-    if(Input::GetCursorMode() == Input::CursorMode::Trapped)
+    if(Input::GetCursorMode() == Input::CursorMode::Trapped){
         transform->RotateBy(
             glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
             * 0.15f
         );
-
+    }
     glm::vec2 input = Input::GetMovementVector();
 
 

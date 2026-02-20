@@ -19,6 +19,9 @@ public:
 
     glm::vec3 GetPos() const { return position; }
     glm::quat GetRotQuaternion() const { return rotation; }
+
+    /// @brief Reconstructs euler angles from the current rotation quaternion
+    /// @return Euler angles in radians
     glm::vec3 GetRot() const { return glm::eulerAngles(rotation); }
 
     glm::vec3 GetScale() const { return scale; }
@@ -45,31 +48,23 @@ public:
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
 
-    /**
-     * @brief Sets whether to lock the pitch rotation between -89 and 89 degrees
-     * @param lock True to lock, false to unlock
-     * @note Default `false`
-     */
-    Transform* SetLockPitchRange(bool lock) { this->lockPitchRange = lock; return this; }
-
     Transform* ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
 
     std::vector<std::type_index> GetDependencies() const override 
         { return {}; }
+protected:
+    glm::quat ReconstructRotationFromEuler(const glm::vec3& euler);
+    glm::quat UpdateRotationFromEuler(const glm::vec3& deltaEuler);
 private:
     glm::vec3 position = glm::vec3(0.0f);
 
-    bool lockPitchRange = false;
-
-    // quaternion angle
-    glm::vec3 modelUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 modelUp =      glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 modelForward = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 modelRight = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 modelRight =   glm::vec3(1.0f, 0.0f, 0.0f);
 
     glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-    void UpdateRotationQuaternion();
 
     glm::vec3 scale    = glm::vec3(1.0f);
 

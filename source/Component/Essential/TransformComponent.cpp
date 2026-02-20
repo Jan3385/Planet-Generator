@@ -19,14 +19,7 @@ Component::Transform* Component::Transform::SetRot(const glm::vec2 &newRot)
 {
     dirtyTransform = true;
 
-    glm::quat yawRot = glm::angleAxis(glm::radians(newRot.x), modelUp);
-
-    glm::quat pitchRot = glm::angleAxis(glm::radians(newRot.y), modelRight);
-
-    this->rotation = yawRot * pitchRot;
-
-    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
-    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+    this->rotation = ReconstructRotationFromEuler(glm::vec3(newRot.y, newRot.x, 0.0f));
 
     return this;
 }
@@ -35,14 +28,29 @@ Component::Transform* Component::Transform::SetRot(const glm::vec3 &newRot)
 {
     dirtyTransform = true;
     
-    glm::quat yawRot = glm::angleAxis(glm::radians(newRot.y), modelUp);
-    glm::quat pitchRot = glm::angleAxis(glm::radians(newRot.x), modelRight);
-    glm::quat rollRot = glm::angleAxis(glm::radians(newRot.z), modelForward);
+    this->rotation = ReconstructRotationFromEuler(newRot);
 
-    this->rotation = yawRot * pitchRot * rollRot;
+    return this;
+}
 
-    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
-    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+Component::Transform* Component::Transform::RotateBy(const glm::vec2 &deltaRot)
+{
+    if(deltaRot == glm::vec2(0.0f)) return this;
+    
+    this->dirtyTransform = true;
+    
+    this->rotation = UpdateRotationFromEuler(glm::vec3(deltaRot.x, deltaRot.y, 0.0f));
+
+    return this;
+}
+
+Component::Transform* Component::Transform::RotateBy(const glm::vec3 &deltaRot)
+{
+    if(deltaRot == glm::vec3(0.0f)) return this;
+
+    dirtyTransform = true;
+
+    this->rotation = UpdateRotationFromEuler(deltaRot);
 
     return this;
 }
@@ -65,61 +73,6 @@ Component::Transform* Component::Transform::MovePosBy(const glm::vec3 &deltaPos)
     return this;
 }
 
-Component::Transform* Component::Transform::RotateBy(const glm::vec2 &deltaRot)
-{
-    glm::quat yawRot = glm::angleAxis(glm::radians(deltaRot.x), modelUp);
-
-    glm::quat pitchRot = glm::angleAxis(glm::radians(deltaRot.y), modelRight);
-
-    this->rotation = yawRot * this->rotation;
-    this->rotation = pitchRot * this->rotation;
-
-    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
-    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-
-    return this;
-}
-
-Component::Transform* Component::Transform::RotateBy(const glm::vec3 &deltaRot)
-{
-    if(deltaRot == glm::vec3(0.0f)) return this;
-
-    dirtyTransform = true;
-
-
-    glm::quat yawRot = glm::angleAxis(glm::radians(deltaRot.y), modelUp);
-
-    glm::quat pitchRot = glm::angleAxis(glm::radians(deltaRot.x), modelRight);
-
-    glm::quat rollRot = glm::angleAxis(glm::radians(deltaRot.z), modelForward);
-
-    this->rotation = yawRot * this->rotation;
-    this->rotation = pitchRot * this->rotation;
-    this->rotation = rollRot * this->rotation;
-
-    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
-    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-
-    return this;
-}
-
-void Component::Transform::UpdateRotationQuaternion()
-{
-    glm::vec3 localForward = glm::normalize(modelForward - glm::dot(modelForward, modelUp) * modelUp);
-
-    // if the forward vector is parallel to up vector
-    if(glm::length(localForward) < 1e-6)
-        localForward = glm::normalize(glm::cross(modelUp, glm::vec3(1.0f, 0.0f, 0.0f)));
-
-    glm::vec3 localRight = glm::normalize(glm::cross(localForward, modelUp));
-    glm::mat3 rotationMatrix(localRight, modelUp, -localForward); // columns: right, up, -forward
-
-    this->rotation = glm::quat_cast(rotationMatrix);
-
-    modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-    modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
-}
-
 Component::Transform* Component::Transform::SetUpDirection(glm::vec3 newUp)
 {
     newUp = glm::normalize(newUp);
@@ -127,11 +80,12 @@ Component::Transform* Component::Transform::SetUpDirection(glm::vec3 newUp)
 
     dirtyTransform = true;
 
-    glm::quat upAlign = glm::rotation(this->modelUp, newUp);
-
-    this->rotation = upAlign * this->rotation;
-
+    glm::vec3 oldUp = this->modelUp;
     this->modelUp = newUp;
+
+    glm::quat rot = glm::rotation(oldUp, newUp);
+    this->rotation = glm::normalize(rot * this->rotation);
+
     this->modelForward = this->rotation * glm::vec3(0.0f, 0.0f, -1.0f);
     this->modelRight = this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 
@@ -160,4 +114,45 @@ glm::mat4 Component::Transform::GetMatrixTransform()
     dirtyTransform = false;
 
     return this->matrixTransform;
+}
+
+glm::quat Component::Transform::ReconstructRotationFromEuler(const glm::vec3 &euler)
+{
+    glm::quat q = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
+    glm::vec3 up = glm::normalize(this->modelUp);
+    q = glm::angleAxis(glm::radians(euler.x), up) * q;
+
+    glm::vec3 right = glm::normalize(glm::cross(up, q * glm::vec3(0.0f, 0.0f, 1.0f)));
+    q = glm::angleAxis(glm::radians(euler.y), right) * q;
+
+    glm::vec3 forward = glm::normalize(q * glm::vec3(0.0f, 0.0f, -1.0f));
+    q = glm::angleAxis(glm::radians(euler.z), forward) * q;
+
+    q = glm::normalize(q);
+
+    this->modelForward = q * glm::vec3(0.0f, 0.0f, -1.0f);
+    this->modelRight = q * glm::vec3(1.0f, 0.0f, 0.0f);
+
+    return q;
+}
+
+glm::quat Component::Transform::UpdateRotationFromEuler(const glm::vec3 &deltaEuler)
+{
+    glm::quat q = this->rotation;
+
+    q = glm::angleAxis(glm::radians(deltaEuler.x), this->modelUp) * q;
+
+    glm::vec3 right = glm::normalize(q * glm::vec3(1.0f, 0.0f, 0.0f));
+    q = glm::angleAxis(glm::radians(deltaEuler.y), right) * q;
+
+    glm::vec3 forward = q * glm::vec3(0.0f, 0.0f, -1.0f);
+    q = glm::angleAxis(glm::radians(deltaEuler.z), forward) * q;
+
+    q = glm::normalize(q);
+
+    this->modelForward = q * glm::vec3(0.0f, 0.0f, -1.0f);
+    this->modelRight   = q * glm::vec3(1.0f, 0.0f, 0.0f);
+
+    return q;
 }
