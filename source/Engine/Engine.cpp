@@ -183,6 +183,15 @@ void GameEngine::CalculateDeltaTime()
     double currentFrameTime = glfwGetTime();
     this->deltaTime = static_cast<float>(currentFrameTime - this->lastFrameTime);
     this->lastFrameTime = currentFrameTime;
+    this->FPS = 1.0f / this->deltaTime;
+
+    this->fpsHistory.push_back(this->FPS);
+    if (this->fpsHistory.size() > FPS_HISTORY_SIZE)
+        this->fpsHistory.pop_front();
+
+    this->avgFPS = 0;
+    for (float fps : this->fpsHistory) this->avgFPS += fps;
+    this->avgFPS /= this->fpsHistory.size();
 }
 
 void GameEngine::InitializeGLFW(const EngineConfig::Config& config)

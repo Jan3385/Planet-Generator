@@ -3,6 +3,7 @@
 #include "Object/BaseObject.h"
 #include "Generator/NoiseGenerator.h"
 #include "Math/Random.h"
+#include "Engine/Engine.h"
 
 void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 {
@@ -72,7 +73,8 @@ void Component::PlanetGen::OnDisable()
 
 void Component::PlanetGen::Update()
 {
-    if(this->rotatePlanet) this->transform->RotateBy(glm::vec3(0.2f, 0.4f, 0.06f));
+    float deltaTime = GameEngine::instance->DeltaTime();
+    if(this->rotatePlanet) this->transform->RotateBy(glm::vec3(16.0f, 32.0f, 6.0f) * deltaTime);
 }
 
 void Component::PlanetGen::FixedUpdate()

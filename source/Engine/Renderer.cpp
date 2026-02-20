@@ -106,6 +106,9 @@ void Renderer::GLDrawScreenQuad()
 void Renderer::DrawImGuiWindows()
 {
     ImGui::Begin("Basic Window");
+    ImGui::Text("Delta Time: %.3f ms", GameEngine::instance->DeltaTime() * 1000.0f);
+    ImGui::Text("Immediate FPS: %.1f", GameEngine::instance->GetFPS());
+    ImGui::Text("Avg FPS: %.1f", GameEngine::instance->GetAvgFPS());
     if(ImGui::Button("Toggle Wireframe")){
         this->WireframeMode(!this->isWireframeMode);
     }
