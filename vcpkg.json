@@ -4,7 +4,8 @@
   "description": "A 3D planet generator",
   "dependencies": [
     "glfw3",
-    "glm"
+    "glm",
+    "assimp"
   ],
   "builtin-baseline": "b91c3336aee7f32412508f7dd351ae2cabdb8819"
 }

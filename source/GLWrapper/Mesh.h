@@ -5,19 +5,45 @@
 
 #include "GLWrapper/Buffer.h"
 #include "GLWrapper/VertexArray.h"
+#include "GLWrapper/Texture.h"
 #include "glm/glm.hpp"
 
 namespace GL{
+class Mesh;
+
+class IMeshRenderable{
+public:
+    virtual void Draw() const = 0;
+
+    virtual std::vector<GL::Mesh*> GetMeshes() = 0;
+};
 struct VertexObj{
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 uv;
 };
 struct TextureObj{
-    unsigned int id;
+    GL::Texture texture;
     std::string type;
+
+    TextureObj() = default;
+    TextureObj(const TextureObj&other){
+        this->texture = other.texture;
+        this->type = other.type;
+    };
+    TextureObj& operator=(const TextureObj&other){
+        if(this != &other){
+            this->texture = other.texture;
+            this->type = other.type;
+        }
+        return *this;
+    };
+    TextureObj(TextureObj&&) noexcept = default;
+    TextureObj& operator=(TextureObj&&) noexcept = default;
 };
-class Mesh{
+
+/// @brief A class representing a 3D mesh formed by vertices, indices and textures
+class Mesh : public IMeshRenderable {
 public:
     std::vector<GL::VertexObj> vertices;
     std::vector<unsigned int> indices;
@@ -33,8 +59,9 @@ public:
     Mesh(Mesh&&) noexcept;
     Mesh& operator=(Mesh&&) noexcept;
 
-    virtual void Bind() const;
-    virtual void Draw() const { glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0); };
+    virtual void Draw() const override;
+
+    virtual std::vector<GL::Mesh*> GetMeshes() override { return { this }; }
 
     virtual void SetupMeshBuffers();
     virtual void UpdateMeshBuffers();

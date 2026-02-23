@@ -71,6 +71,7 @@ target_include_directories(PlanetGenerator
 # VCPKG packages
 find_package(glm CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 if(UNIX)
   find_package(PkgConfig QUIET)
 
@@ -107,6 +108,7 @@ target_link_libraries( PlanetGenerator
     glm::glm
     glfw
     OpenGL::GL
+    assimp::assimp
     imgui
 )
 

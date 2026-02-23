@@ -34,7 +34,6 @@ protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
 private:
-    std::shared_ptr<GL::Mesh> mesh = nullptr;
     GL::Buffer<atmospherePalette, GL::BufferTarget::UniformBuffer> paletteBuffer;
 
     friend class Object::BaseObject;

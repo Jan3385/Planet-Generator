@@ -63,12 +63,14 @@ GL::Mesh &GL::Mesh::operator=(GL::Mesh &&other) noexcept
     return *this;
 }
 
-void GL::Mesh::Bind() const
+void GL::Mesh::Draw() const
 {
     //TODO: Bind textures ?
 
     this->vertexArrayObject.Bind();
     this->indexBuffer.Bind();
+    
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0); 
 }
 
 void GL::Mesh::UpdateMeshBuffers()

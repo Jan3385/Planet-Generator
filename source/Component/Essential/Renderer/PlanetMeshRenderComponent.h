@@ -31,17 +31,10 @@ public:
     ~PlanetMeshRender() override = default;
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
-    void RenderVelocity(GL::Shader &s) override;
 
-    bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override{
-        glm::vec3 centroid;
-        double radius = this->mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), this->transform->GetScale());
-        return Component::BaseMeshRender::IsInsideFrustum(frustumPlanes, centroid, radius);
-    }
-
-    void SetMesh(std::shared_ptr<GL::Mesh> mesh) { this->mesh = mesh; }
+    void SetMesh(std::shared_ptr<GL::IMeshRenderable> mesh) { this->mesh = mesh; }
     void SetColorPalette(const planetPalette& palette);
-    std::shared_ptr<GL::Mesh> GetMesh() const { return this->mesh; }
+    std::shared_ptr<GL::IMeshRenderable> GetMesh() const { return this->mesh; }
 protected:
     void Awake() override;
     void OnDestroy() override;
@@ -49,7 +42,6 @@ protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
 private:
-    std::shared_ptr<GL::Mesh> mesh = nullptr;
     GL::Buffer<planetPalette, GL::BufferTarget::UniformBuffer> paletteBuffer;
 
     friend class Object::BaseObject;

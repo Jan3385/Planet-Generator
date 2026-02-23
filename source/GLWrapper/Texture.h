@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <string>
+#include <unordered_map>
 
 namespace GL
 {
@@ -41,9 +42,9 @@ public:
     Texture(TextureWrapMode wrap, MipmapMode mipmap, bool blurred);
     ~Texture();
 
-    // disable copy semantics
-    Texture(const Texture&) = delete;
-    Texture& operator=(const Texture&) = delete;
+    // copy semantics
+    Texture(const Texture &other);
+    Texture& operator=(const Texture &other);
 
     // move semantics
     Texture(Texture&&other) noexcept;
@@ -61,7 +62,7 @@ public:
 
     GLuint GetID() const { return ID; };
     
-    bool hasMipmaps() { return this->mipmapsGenerated; };
+    bool hasMipmaps() { return this->generateMipmaps; };
     bool isBlurred()  { return this->blurred; };
     bool isInitialized() { return this->ID != 0; };
     TextureWrapMode wrapMode() { return this->currentWrapMode; };
@@ -71,14 +72,18 @@ public:
 protected:
     GLuint ID = 0;
     static GLuint GetTextureFiltering(MipmapMode mipmap, bool blurred);
+
+    static std::unordered_map<std::string, GLuint> loadedTextures;
 private:
-    bool mipmapsGenerated;
+    bool generateMipmaps;
     bool blurred;
     TextureWrapMode currentWrapMode;
 
     TextureFormat format;
     GLuint internalFormat;
     GLenum type;
+
+    std::string path = "";
 
     bool textureGenerated = false;
 };

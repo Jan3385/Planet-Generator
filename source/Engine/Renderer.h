@@ -21,9 +21,17 @@ class Renderer{
 public:
     struct IRendererCallback{
     protected:
+        /// @brief Standard render pass
+        /// @param projection 
+        /// @param view 
         virtual void Render(glm::mat4 &projection, glm::mat4 &view) = 0;
+
+        /// @brief TAA velocity render pass
+        /// @param s Shader used
         virtual void RenderVelocity(GL::Shader &s) = 0;
-        virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0; 
+
+        virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0;
+
         virtual ~IRendererCallback() = default;
 
         friend class Renderer;

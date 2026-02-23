@@ -22,11 +22,17 @@ public:
     ~BaseMeshRender() override = default;
 
     BaseMeshRender* SetRenderShader(GL::Shader* shader) { this->renderShader = shader; return this; }
+
+    virtual void RenderVelocity(GL::Shader &s) override;
+
+    virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override;
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return { }; }
 
-    static bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius);
+    static bool IsSphereInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius);
+
+    std::shared_ptr<GL::IMeshRenderable> mesh = nullptr;
 
     void Awake() override;
     void OnDestroy() override;

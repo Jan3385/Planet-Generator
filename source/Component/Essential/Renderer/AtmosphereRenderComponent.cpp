@@ -30,7 +30,6 @@ void Component::AtmosphereRender::Render(glm::mat4 &projection, glm::mat4 &view)
         Debug::LogWarn("AtmosphereRender: No mesh set");
     }
 
-    this->mesh->Bind();
     this->mesh->Draw();
     Renderer::SetReverseFaceCulling(false);
 }
@@ -46,7 +45,6 @@ void Component::AtmosphereRender::RenderVelocity(GL::Shader &s)
     s.SetMat4("prevTransform", this->prevMatrixTransform);
     this->prevMatrixTransform = model;
 
-    this->mesh->Bind();
     this->mesh->Draw();
 
     Renderer::SetReverseFaceCulling(false);
@@ -54,11 +52,14 @@ void Component::AtmosphereRender::RenderVelocity(GL::Shader &s)
 
 bool Component::AtmosphereRender::IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes)
 {
-    glm::vec3 centroid;
-    double radius = this->mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), 
-        this->transform->GetScale() + PlanetGen::PLANET_SCALE * 0.11f
-    );
-    return Component::BaseMeshRender::IsInsideFrustum(frustumPlanes, centroid, radius);
+    for (const GL::Mesh* mesh : this->mesh->GetMeshes()){
+        glm::vec3 centroid;
+        double radius = mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), 
+            this->transform->GetScale() + PlanetGen::PLANET_SCALE * 0.11f
+        );
+        if(IsSphereInsideFrustum(frustumPlanes, centroid, radius)) return true;
+    }
+    return false;
 }
 
 void Component::AtmosphereRender::SetColorPalette(const atmospherePalette &palette)

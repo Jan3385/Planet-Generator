@@ -7,7 +7,7 @@ Component::SkyboxRender::SkyboxRender(Object::BaseObject *owner)
     : BaseMeshRender(owner)
 {
     this->SetRenderShader(&GameEngine::renderer->GetSkyboxShader());
-    this->cubeMesh = MeshGenerator::GenerateCubeMesh();
+    this->mesh = MeshGenerator::GenerateCubeMesh();
 
     if(!GameEngine::currentLevel->GetSkybox())
         GameEngine::currentLevel->SetSkybox(this);
@@ -39,25 +39,10 @@ void Component::SkyboxRender::Render(glm::mat4 &projection, glm::mat4 &view)
     glm::mat4 viewNoTranslation = glm::mat4(glm::mat3(view));
     this->renderShader->SetMat4("view", viewNoTranslation);
 
-    this->cubeMesh->Bind();
-
     this->cubemap.Bind();
 
-    this->cubeMesh->Draw();
+    this->mesh->Draw();
     
     Renderer::SetReverseFaceCulling(false);
     glDepthFunc(GL_LESS);
-}
-
-void Component::SkyboxRender::RenderVelocity(GL::Shader &s)
-{
-    if(!this->transform || !this->cubeMesh) return;
-
-    glm::mat4 model = this->transform->GetMatrixTransform();
-    s.SetMat4("transform", model);
-    s.SetMat4("prevTransform", this->prevMatrixTransform);
-    this->prevMatrixTransform = model;
-
-    this->cubeMesh->Bind();
-    this->cubeMesh->Draw();
 }

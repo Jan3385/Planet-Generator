@@ -13,7 +13,6 @@ public:
     void LoadCubemap(const std::string filePaths[6], bool blurred = false, bool sRGB = false);
 
     void Render(glm::mat4 &projection, glm::mat4 &view) override;
-    void RenderVelocity(GL::Shader &s) override;
 
     bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override { return true; }
 protected:
@@ -24,10 +23,9 @@ protected:
     void OnDisable() override {};
 
     std::vector<std::type_index> GetDependencies() const override 
-        { return {/*typeid(Component::Transform)*/}; }
+        { return { }; }
 private:
     GL::Cubemap cubemap;
-    std::shared_ptr<GL::Mesh> cubeMesh = nullptr;
     friend class Object::BaseObject;
 };
 }

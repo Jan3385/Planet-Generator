@@ -5,10 +5,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+std::unordered_map<std::string, GLuint> GL::Texture::loadedTextures = std::unordered_map<std::string, GLuint>();
+
 GL::Texture::Texture() : ID(0) { }
 
 GL::Texture::Texture(TextureWrapMode wrap, MipmapMode mipmap, bool blurred)
-    : mipmapsGenerated(mipmap != MipmapMode::None), blurred(blurred), currentWrapMode(wrap)
+    : generateMipmaps(mipmap != MipmapMode::None), blurred(blurred), currentWrapMode(wrap)
 {
     glGenTextures(1, &ID);
     this->Bind();
@@ -26,11 +28,39 @@ GL::Texture::~Texture()
     if(ID != 0) glDeleteTextures(1, &ID);
 }
 
+GL::Texture::Texture(const Texture &other)
+{
+    this->ID = other.ID;
+    this->blurred = other.blurred;
+    this->generateMipmaps = other.generateMipmaps;
+    this->currentWrapMode = other.currentWrapMode;
+    this->textureGenerated = other.textureGenerated;
+    this->format = other.format;
+    this->internalFormat = other.internalFormat;
+    this->type = other.type;
+}
+
+GL::Texture &GL::Texture::operator=(const Texture &other)
+{
+    if (this != &other) {
+        if(this->ID != 0) glDeleteTextures(1, &this->ID);
+        this->ID = other.ID;
+        this->blurred = other.blurred;
+        this->generateMipmaps = other.generateMipmaps;
+        this->currentWrapMode = other.currentWrapMode;
+        this->textureGenerated = other.textureGenerated;
+        this->format = other.format;
+        this->internalFormat = other.internalFormat;
+        this->type = other.type;
+    }
+    return *this;
+}
+
 GL::Texture::Texture(GL::Texture &&other) noexcept
 {
     this->ID = other.ID;
     this->blurred = other.blurred;
-    this->mipmapsGenerated = other.mipmapsGenerated;
+    this->generateMipmaps = other.generateMipmaps;
     this->currentWrapMode = other.currentWrapMode;
     this->textureGenerated = other.textureGenerated;
     this->format = other.format;
@@ -45,7 +75,7 @@ GL::Texture &GL::Texture::operator=(GL::Texture &&other) noexcept
         if(this->ID != 0) glDeleteTextures(1, &this->ID);
         this->ID = other.ID;
         this->blurred = other.blurred;
-        this->mipmapsGenerated = other.mipmapsGenerated;
+        this->generateMipmaps = other.generateMipmaps;
         this->currentWrapMode = other.currentWrapMode;
         this->textureGenerated = other.textureGenerated;
         this->format = other.format;
@@ -65,7 +95,7 @@ void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, GLenum
 {
     this->Bind();
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), type, nullptr);
-    if(this->mipmapsGenerated) glGenerateMipmap(GL_TEXTURE_2D);
+    if(this->generateMipmaps) glGenerateMipmap(GL_TEXTURE_2D);
     
     this->textureGenerated = true;
 
@@ -82,14 +112,24 @@ void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, GLenum
 void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, std::string filePath, bool flip)
 {
     this->Bind();
+    this->path = filePath;
     
-    int width, height, nrChannels;
-    unsigned char *data = Texture::LoadImageFromPath(filePath, width, height, nrChannels, flip);
+    if(loadedTextures.contains(filePath)) {
+        Debug::LogSpam(std::format("Texture already loaded from path: {0}, using cached version", filePath));
+        
+        this->ID = loadedTextures[filePath];
+        glBindTexture(GL_TEXTURE_2D, loadedTextures[filePath]);
+        this->textureGenerated = true;
+    }else{
+        int width, height, nrChannels;
+        unsigned char *data = Texture::LoadImageFromPath(filePath, width, height, nrChannels, flip);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), GL_UNSIGNED_BYTE, data);
-    if(this->mipmapsGenerated) glGenerateMipmap(GL_TEXTURE_2D);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), GL_UNSIGNED_BYTE, data);
+        if(this->generateMipmaps) glGenerateMipmap(GL_TEXTURE_2D);
 
-    Texture::FreeImageData(data);
+        Texture::FreeImageData(data);
+        loadedTextures[filePath] = this->ID;
+    }
 
     this->textureGenerated = true;
 
@@ -108,7 +148,7 @@ void GL::Texture::GenTexture(TextureFormat format, GLuint internalFormat, GLenum
 {
     this->Bind();
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, static_cast<GLuint>(format), type, data);
-    if(this->mipmapsGenerated) glGenerateMipmap(GL_TEXTURE_2D);
+    if(this->generateMipmaps) glGenerateMipmap(GL_TEXTURE_2D);
 
     this->textureGenerated = true;
 
@@ -122,6 +162,14 @@ void GL::Texture::Resize(int width, int height)
     if(!this->textureGenerated) [[unlikely]] {
         Debug::LogError("Resizing a texture that is not generated!");
         return;
+    }
+
+    if(this->path != "") [[unlikely]] {
+        Debug::LogTrace(
+            "Resizing a texture generated from a file path"
+            "This may cause unexpected behavior"
+            "texture path: " + this->path
+        );
     }
 
     this->Bind();
