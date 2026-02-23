@@ -112,8 +112,10 @@ target_link_libraries( PlanetGenerator
     imgui
 )
 
-set(SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/shader/graphics")
-set(INCLUDE_SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/shader/include")
+set(SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/Shaders/graphics")
+set(INCLUDE_SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/Shaders/include")
+set(IMAGES_FOLDER "${CMAKE_SOURCE_DIR}/Images")
+set(MODEL_FOLDER "${CMAKE_SOURCE_DIR}/Models")
 
 add_custom_target(copy_assets ALL
   # Shaders
@@ -122,5 +124,8 @@ add_custom_target(copy_assets ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${INCLUDE_SHADERS_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Shaders/Includes
   # Images
   COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Images
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/images $<TARGET_FILE_DIR:PlanetGenerator>/Images
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${IMAGES_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Images
+  # Models
+  COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Models
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODEL_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Models
 )

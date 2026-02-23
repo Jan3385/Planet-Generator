@@ -34,7 +34,11 @@ void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, 
 void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes)
 {
     Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
-    if(skybox) skybox->Render(projection, view);
+    if(skybox) {
+        if(this->isWireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // temp disable wireframe mode for skybox
+        skybox->Render(projection, view);
+        if(this->isWireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 
     for(auto& callback : noLightRenderCallbacks) {
         if(callback->IsInsideFrustum(frustumPlanes))
@@ -99,8 +103,12 @@ void Renderer::ImGuiRenderPass()
 
 void Renderer::GLDrawScreenQuad()
 {
+    if(this->isWireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // temp disable wireframe mode
+    
     this->quadVAO->Bind();
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    if(this->isWireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void Renderer::DrawImGuiWindows()
@@ -373,12 +381,15 @@ void Renderer::Update()
 
     Frustum frustumPlanes = CalculateFrustumPlanes(projection, view);
 
+    uint32_t renderClearFlags = GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+    if(this->isWireframeMode) renderClearFlags |= GL_COLOR_BUFFER_BIT;
+
     // 1. Geometry pass
     glDisable(GL_BLEND);
     this->geometryFramebuffer->UpdateSize(screenSize);
     this->geometryFramebuffer->BindShaderFBO();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(renderClearFlags);
     ObjectGeometryRenderPass(projection, view, camPos, frustumPlanes);
     this->geometryFramebuffer->UnbindShaderFBO();
 
@@ -388,7 +399,7 @@ void Renderer::Update()
     this->geometryFramebuffer->BindTextures();
     this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
-    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(renderClearFlags);
     this->GLDrawScreenQuad();
 
     // 2.5 No-light objects pass

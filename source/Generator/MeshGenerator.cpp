@@ -10,7 +10,7 @@
  * @param v3 Third vertex of the triangle
  * @return Normalized normal vector
  */
-glm::vec3 CalculateNormal(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3)
+glm::vec3 MeshGenerator::CalculateNormal(const glm::vec3 &v1, const glm::vec3 &v2, const glm::vec3 &v3)
 {
     return glm::normalize(glm::cross(v2 - v1, v3 - v1));
 }

@@ -135,6 +135,20 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());
 
+    // model import
+    Object::GameObject *modelObj = currentLevel->CreateGameObject();
+    modelObj->GetTransform()
+        ->SetPos(glm::vec3(1.7f, 0.0f, 1.7f))
+        ->SetScale(glm::vec3(0.25f))
+        ->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
+
+    Component::PhongMeshRender *modelRenderComp = modelObj->GetRenderComponent();
+    modelRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+    Debug::LogInfo("Loading model...");
+    std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
+    Debug::LogTrace("Model loaded with " + std::to_string(modelMesh->GetMeshes().size()) + " meshes");
+    modelRenderComp->SetMesh(modelMesh);
+
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
@@ -145,6 +159,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     floorRenderComp->SetMesh(cube);
     floor->Disable();
 
+    // lights
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);

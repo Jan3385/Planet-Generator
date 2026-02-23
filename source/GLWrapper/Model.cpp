@@ -1,6 +1,7 @@
 #include "Model.h"
 
 #include "Debug/Logger.h"
+#include "Generator/MeshGenerator.h"
 
 GL::Model::Model(const char *filePath)
 {
@@ -44,6 +45,10 @@ void GL::Model::ProcessNode(const aiNode *node, const aiScene *scene)
 
 GL::Mesh GL::Model::ProcessMesh(const aiMesh *mesh, const aiScene *scene)
 {
+    Debug::LogSpam(std::format(
+        "Processing mesh with {} vertices, {} indices, normals: {} and {} faces", 
+        mesh->mNumVertices, mesh->mNumFaces * 3, mesh->HasNormals(), mesh->mNumFaces));
+
     std::vector<GL::VertexObj> vertices;
     std::vector<unsigned int> indices;
     std::vector<GL::TextureObj> textures;
@@ -52,7 +57,11 @@ GL::Mesh GL::Model::ProcessMesh(const aiMesh *mesh, const aiScene *scene)
     for (unsigned int i = 0; i < mesh->mNumVertices; i++){
         GL::VertexObj vertex;
         vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+    
+        if(mesh->HasNormals())
+            vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+        else
+            vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
         
         if (mesh->mTextureCoords[0])
             vertex.uv = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
