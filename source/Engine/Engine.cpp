@@ -149,8 +149,6 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     modelObj->SetParent(planet);
 
-    this->currentLevel->ObjectDestroy(planet);
-
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
