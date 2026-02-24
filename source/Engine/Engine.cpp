@@ -144,10 +144,12 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     Component::PhongMeshRender *modelRenderComp = modelObj->GetRenderComponent();
     modelRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
-    Debug::LogInfo("Loading model...");
     std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
-    Debug::LogTrace("Model loaded with " + std::to_string(modelMesh->GetMeshes().size()) + " meshes");
     modelRenderComp->SetMesh(modelMesh);
+
+    modelObj->SetParent(planet);
+
+    this->currentLevel->ObjectDestroy(planet);
 
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();

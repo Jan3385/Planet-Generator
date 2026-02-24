@@ -17,38 +17,36 @@ public:
     Transform(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~Transform() override = default;
 
-    glm::vec3 GetPos() const { return position; }
-    glm::quat GetRotQuaternion() const { return rotation; }
+    glm::vec3 GetPos(bool local = false);
+    glm::quat GetRotQuaternion(bool local = false);
 
-    /// @brief Reconstructs euler angles from the current rotation quaternion
-    /// @return Euler angles in radians
-    glm::vec3 GetRot() const { return glm::eulerAngles(rotation); }
+    glm::vec3 GetRot(bool local = false);
 
-    glm::vec3 GetScale() const { return scale; }
+    glm::vec3 GetScale(bool local = false);
 
-    Transform* SetPos(const glm::vec3& newPos);
+    Transform* SetPos(const glm::vec3& newPos, bool local = false);
 
     // dx, dy in degrees
-    Transform* SetRot(const glm::vec2& newRot);
+    Transform* SetRot(const glm::vec2& newRot, bool local = false);
     // euler angles
-    Transform* SetRot(const glm::vec3& newRot);
+    Transform* SetRot(const glm::vec3& newRot, bool local = false);
 
-    Transform* SetScale(const glm::vec3& newScale);
+    Transform* SetScale(const glm::vec3& newScale, bool local = false);
 
-    Transform* MovePosBy(const glm::vec3& deltaPos);
+    Transform* ScaleBy(const glm::vec3& deltaScale, bool local = false);
+
+    Transform* MovePosBy(const glm::vec3& deltaPos, bool local = false);
 
     // dx, dy in degrees
-    Transform* RotateBy(const glm::vec2& deltaRot);
+    Transform* RotateBy(const glm::vec2& deltaRot, bool local = false);
     // euler angles
-    Transform* RotateBy(const glm::vec3& deltaRot);
+    Transform* RotateBy(const glm::vec3& deltaRot, bool local = false);
 
     Transform* SetUpDirection(glm::vec3 newUp);
 
     glm::vec3 GetUpVector() const { return modelUp; }
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
-
-    Transform* ScaleBy(const glm::vec3& deltaScale);
 
     glm::mat4 GetMatrixTransform();
 
@@ -57,6 +55,8 @@ public:
 protected:
     glm::quat ReconstructRotationFromEuler(const glm::vec3& euler);
     glm::quat UpdateRotationFromEuler(const glm::vec3& deltaEuler);
+
+    void MarkDirty() { dirtyTransform = true; }
 private:
     glm::vec3 position = glm::vec3(0.0f);
 
@@ -70,5 +70,6 @@ private:
 
     bool dirtyTransform = true;
     glm::mat4 matrixTransform;
+    glm::mat4 invParentMatrixTransform = glm::inverse(glm::mat4(1.0f));
 };
 }

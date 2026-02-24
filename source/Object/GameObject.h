@@ -11,7 +11,8 @@
 namespace Object {
 class GameObject : public BaseObject {
 public:
-    GameObject();
+    GameObject() = default;
+    GameObject(Level* level);
     ~GameObject() override = default;
 
     // disable copy

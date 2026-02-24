@@ -7,7 +7,7 @@
 
 Object::BaseObject *Level::CreateObject()
 {
-    auto object = std::make_unique<Object::BaseObject>();
+    auto object = std::make_unique<Object::BaseObject>(this);
 
     Object::BaseObject* objectPtr = object.get();
     objects.push_back(std::move(object));
@@ -17,7 +17,7 @@ Object::BaseObject *Level::CreateObject()
 
 Object::GameObject *Level::CreateGameObject()
 {
-    auto gameObject = std::make_unique<Object::GameObject>();
+    auto gameObject = std::make_unique<Object::GameObject>(this);
 
     Object::GameObject* gameObjectPtr = gameObject.get();
     objects.push_back(std::move(gameObject));
@@ -27,7 +27,7 @@ Object::GameObject *Level::CreateGameObject()
 
 Object::BaseObject *Level::CreateLightObject(Math::RGB color)
 {
-    auto lightObject = std::make_unique<Object::BaseObject>();
+    auto lightObject = std::make_unique<Object::BaseObject>(this);
 
     Component::Transform *lightTransform = lightObject->AddComponent<Component::Transform>();
 
@@ -47,8 +47,11 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color)
 }
 
 void Level::ObjectDestroy(Object::BaseObject *object)
-{
+{    
     destroyQueue.push(object);
+
+    for (const auto& child : object->GetChildren())
+        if(child) [[likely]] destroyQueue.push(child);
 }
 
 /**

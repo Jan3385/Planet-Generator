@@ -2,7 +2,7 @@
 
 #include "Debug/Logger.h"
 
-Object::GameObject::GameObject()
+Object::GameObject::GameObject(Level* level) : BaseObject(level)
 {
     this->transform = this->AddComponent<Component::Transform>();
     this->renderComponent = this->AddComponent<Component::PhongMeshRender>();

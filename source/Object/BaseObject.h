@@ -7,10 +7,14 @@
 
 #include "Component/BaseComponent.h"
 
+class Level;
+
 namespace Object {
 class BaseObject {
 public:
     BaseObject() = default;
+    BaseObject(Level* level) : level(level) {};
+
     virtual ~BaseObject();
 
     // Disable copy
@@ -22,12 +26,14 @@ public:
         this->updatables = std::move(other.updatables);
         this->startables = std::move(other.startables);
         this->enabled = other.enabled;
+        this->level = other.level;
     };
     BaseObject& operator=(BaseObject&& other){
         this->components = std::move(other.components);
         this->updatables = std::move(other.updatables);
         this->startables = std::move(other.startables);
         this->enabled = other.enabled;
+        this->level = other.level;
         return *this;
     };
 
@@ -48,11 +54,24 @@ public:
 
     void Update();
 
+    void SetParent(BaseObject* newParent);
+
+    /// @return The parent object / nullptr if root object
+    BaseObject* GetParent() const { return parent; }
+    std::vector<BaseObject*> GetChildren() const;
+
     void Enable();
     void Disable();
     bool IsEnabled() const { return enabled; }
+protected:
+    void AddChild(BaseObject* child);
+    void RemoveChild(BaseObject* child);
+    Level* level = nullptr;
 private:
     bool enabled = true;
+
+    BaseObject* parent = nullptr;
+    std::vector<BaseObject*> children;
 
     std::vector<std::unique_ptr<Component::BaseComponent>> components;
     std::vector<Component::IUpdatable*> updatables;

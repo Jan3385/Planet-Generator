@@ -1,7 +1,19 @@
 #include "BaseObject.h"
 
+#include "Engine/Level.h"
+
 Object::BaseObject::~BaseObject()
 {
+    for (const auto& child : children) {
+        if(child && child->level){
+            child->SetParent(nullptr);
+        }
+    }
+
+    if(this->parent)
+        this->parent->RemoveChild(this);
+    this->parent = nullptr;
+
     for (const auto& component : components) {
         component->OnDestroy();
     }
@@ -48,6 +60,24 @@ void Object::BaseObject::Update()
     }
 }
 
+/// @brief Sets the parent of this object
+/// @param newParent pointer to the new parent, nullptr to make root object
+void Object::BaseObject::SetParent(BaseObject *newParent)
+{
+    if(this->parent){
+        this->parent->RemoveChild(this);
+    }
+    this->parent = newParent;
+
+    if(this->parent)   
+        this->parent->AddChild(this);
+}
+
+std::vector<BaseObject *> Object::BaseObject::GetChildren() const
+{
+    return this->children;
+}
+
 void Object::BaseObject::Enable()
 {
     for (const auto& component : components) {
@@ -68,4 +98,16 @@ void Object::BaseObject::Disable()
     }
 
     this->enabled = false;
+}
+
+void Object::BaseObject::AddChild(BaseObject* child)
+{
+    this->children.push_back(child);
+}
+
+void Object::BaseObject::RemoveChild(BaseObject *child)
+{
+    auto it = std::find(children.begin(), children.end(), child);
+
+    if (it != children.end()) children.erase(it);
 }
