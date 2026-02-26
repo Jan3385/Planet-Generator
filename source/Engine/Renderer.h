@@ -57,6 +57,12 @@ public:
         glm::mat4 previousProjection;
         glm::mat4 previousView;
     };
+    enum class SpecialRenderMode : uint8_t {
+        Standard = 0,
+        Normal = 1,
+        Albedo = 2,
+        Specular = 3
+    };
 
     using Frustum = std::array<glm::vec4, 6>;
 
@@ -91,6 +97,7 @@ public:
     void Update();
     void WireframeMode(bool enabled);
     void BackfaceCulling(bool enabled);
+    void SetSpecialRenderMode(SpecialRenderMode mode) const;
 
     void StoreWindowSize(int width, int height);
 

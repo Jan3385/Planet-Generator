@@ -146,6 +146,13 @@ void Renderer::DrawImGuiWindows()
     if(ImGui::ColorEdit3("Ambient Color", ambientColorArr)){
         GameEngine::lighting->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
     }
+    
+    char *renderModes[] = { "Standard", "Normal", "Albedo", "Specular" };
+    static int currentRenderMode = 0;
+    if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
+        this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
+    }
+
     ImGui::End();
 }
 
@@ -511,6 +518,11 @@ void Renderer::BackfaceCulling(bool enabled)
     else        glDisable(GL_CULL_FACE);
 }
 
+void Renderer::SetSpecialRenderMode(SpecialRenderMode mode) const
+{
+    GL::Shader::UpdateShaderVariable("int SpecialRenderMode", static_cast<int>(mode));
+}
+
 void Renderer::SetupShaderValues()
 {
     GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
@@ -531,6 +543,8 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderVariable("float aaThreshold", 0.15f);
     GL::Shader::AddShaderVariable("mat4 previousProjection", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("mat4 previousView", glm::mat4(1.0f));
+
+    GL::Shader::AddShaderVariable("int SpecialRenderMode", 0);
 
     Debug::LogSpam("Shader constants and variables initialized");
 }

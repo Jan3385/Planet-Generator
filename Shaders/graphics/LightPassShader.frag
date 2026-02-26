@@ -16,6 +16,8 @@ uniform DirectionLight directionalLight;
 
 #var vec3 viewPos
 
+#var int SpecialRenderMode
+
 #include "LightFunctions.glsl"
 
 out vec4 FragColor;
@@ -39,6 +41,12 @@ void main()
     // directional light
     lighting += CalculateDirLight(directionalLight, Normal, viewDir, Albedo, 1-Specular);
 
-    //FragColor = vec4(Normal * 0.5 + 0.5, 1.0f);
-    FragColor = vec4(lighting, 1.0);
+    if(SpecialRenderMode == 0)
+        FragColor = vec4(lighting, 1.0);
+    else if(SpecialRenderMode == 1)
+        FragColor = vec4(Normal * 0.5 + 0.5, 1.0f);
+    else if(SpecialRenderMode == 2)
+        FragColor = vec4(Albedo, 1.0f);
+    else if(SpecialRenderMode == 3)
+        FragColor = vec4(Specular, Specular, Specular, 1.0f);
 }
