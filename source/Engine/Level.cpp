@@ -38,7 +38,11 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color)
     lightRenderer->color = glm::vec3(color.ToVec3());
 
     Component::PointLightSource *pointLight = lightObject->AddComponent<Component::PointLightSource>();
-    pointLight->SetLightData(lightRenderer->color, 0.5f, 0.5f, 0.35f, 0.44f, 5.0f);
+    
+    Component::PointLightSource::PointLightData lightData;
+    lightData.color = lightRenderer->color;
+
+    pointLight->SetLightData(lightData);
     
     Object::BaseObject* lightObjectPtr = lightObject.get();
     objects.push_back(std::move(lightObject));

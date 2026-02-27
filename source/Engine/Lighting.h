@@ -14,20 +14,16 @@ public:
     struct PointLightSource {
         glm::vec3 position;
 
-        glm::vec3 diffuse;
-        glm::vec3 specular;
+        glm::vec3 color;
 
         float constant;
         float linear;
         float quadratic;
 
-        float radius;
-
         void Bind(GL::Shader& shader, int index) const{
             std::string baseName = "pointLights[" + std::to_string(index) + "]";
             shader.SetVec3(baseName + ".position", this->position);
-            shader.SetVec3(baseName + ".diffuse", this->diffuse);
-            shader.SetVec3(baseName + ".specular", this->specular);
+            shader.SetVec3(baseName + ".light", this->color);
             shader.SetFloat(baseName + ".constant", this->constant);
             shader.SetFloat(baseName + ".linear", this->linear);
             shader.SetFloat(baseName + ".quadratic", this->quadratic);
@@ -37,8 +33,7 @@ public:
     struct DirectionLightSource {
         glm::vec3 direction;
 
-        glm::vec3 diffuse;
-        glm::vec3 specular;
+        glm::vec3 color;
     };
 
     Lighting() = default;
@@ -60,8 +55,7 @@ public:
     void SetDirectionalLightSourceDirection(const glm::vec3& direction);
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
     void SetDirectionalLightSource(const glm::vec3& direction,
-                                   const glm::vec3& diffuse,
-                                   const glm::vec3& specular);  
+                                   const glm::vec3& color);  
 private:
     std::vector<PointLightSource*> pointLightSources;
     DirectionLightSource directionalLightSource;

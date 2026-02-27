@@ -47,10 +47,10 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     lighting = new Lighting();
     lighting->SetDirectionalLightSource(
-        glm::vec3(-0.8f, 0.3f, 0.3f),
-        glm::vec3(0.5f, 0.5f, 0.5f),
+        glm::vec3(-0.8f, -0.8f, 0.3f),
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
+    lighting->SetAmbientIntensity(0.02f);
 
     renderer = new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma);
     currentLevel = new Level();

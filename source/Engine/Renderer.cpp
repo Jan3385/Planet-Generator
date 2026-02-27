@@ -137,7 +137,7 @@ void Renderer::DrawImGuiWindows()
     if(ImGui::DragFloat("AntiAliasing threshold", &aaThreshold, 0.001f, 0.001f, 1.0f)){
         GL::Shader::UpdateShaderVariable("float aaThreshold", aaThreshold);
     }
-    static float sunDir[3] = {-0.8f, 0.3f, 0.3f};
+    static float sunDir[3] = {-0.8f, -0.8f, 0.3f};
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
         GameEngine::lighting->SetDirectionalLightSourceDirection(glm::vec3(sunDir[0], sunDir[1], sunDir[2]));
     }
@@ -145,6 +145,10 @@ void Renderer::DrawImGuiWindows()
     float ambientColorArr[3] = {ambientColor.r, ambientColor.g, ambientColor.b};
     if(ImGui::ColorEdit3("Ambient Color", ambientColorArr)){
         GameEngine::lighting->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
+    }
+    float ambientIntensity = GameEngine::lighting->GetAmbientIntensity();
+    if(ImGui::DragFloat("Ambient Intensity", &ambientIntensity, 0.01f, 0.0f, 10.0f)){
+        GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
     const char *renderModes[] = { "Standard", "Normal", "Albedo", "Specular" };
@@ -527,6 +531,7 @@ void Renderer::SetupShaderValues()
 {
     GL::Shader::AddShaderConstant("SHADER_VERSION", "460");
     GL::Shader::AddShaderConstant("MAX_POINT_LIGHTS", std::to_string(Lighting::MAX_EFFECTING_POINT_LIGHTS));
+    GL::Shader::AddShaderConstant("PI", "3.14159265359");
     GL::Shader::AddShaderConstant("LOW_POLY_FEEL", Lighting::LOW_POLY_LIGHTING_FEEL ? "1" : "0");
     GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
     GL::Shader::AddShaderConstant("FXAA_ANTIALIASING", 

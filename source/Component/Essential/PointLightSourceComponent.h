@@ -13,7 +13,6 @@ public:
     struct PointLightData{
         glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
         float intensity = 1.0f;
-        float radius = 5.0f;
 
         float constant = 1.0f;
         float linear = 0.09f;
@@ -21,7 +20,7 @@ public:
     };
 
     PointLightSource* SetLightData(const PointLightData& newData);
-    PointLightSource* SetLightData(glm::vec3 color, float diffuseIntensity, float specularIntensity, float linear, float quadratic, float radius);
+    PointLightSource* SetLightData(glm::vec3 color, float linear, float quadratic, float radius);
 
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;

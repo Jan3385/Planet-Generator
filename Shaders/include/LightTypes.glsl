@@ -16,8 +16,22 @@ struct PointLight {
     float quadratic;
 };
 
+struct PointLightPBR {
+    vec3 position;
+    vec3 light;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 struct DirectionLight{
     vec3 direction;
     vec3 diffuse;
     vec3 specular;
+};
+
+struct DirectionLightPBR{
+    vec3 direction;
+    vec3 light;
 };
