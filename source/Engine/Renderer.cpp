@@ -151,7 +151,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
-    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Specular" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
@@ -232,7 +232,8 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->lightPassShader->Use();
     this->lightPassShader->SetInt("gPosition", 0);
     this->lightPassShader->SetInt("gNormal", 1);
-    this->lightPassShader->SetInt("gAlbedoSpec", 2);
+    this->lightPassShader->SetInt("gAlbedo", 2);
+    this->lightPassShader->SetInt("gMetalRough", 3);
 
     this->postProcessShader = new GL::BasicShaderProgram("post-processing/PostProcessShader");
     this->postProcessShader->Use();
@@ -243,8 +244,10 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // normal color buffer
     this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
-    // color + specular - albedo buffer
+    // color - albedo buffer
     this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    // metalicity, roughness buffer
+    this->geometryFramebuffer->AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
     this->geometryFramebuffer->CompleteSetup();
 
     this->postProcessFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
@@ -345,6 +348,9 @@ void Renderer::SetGammaCorrection(float value)
 void Renderer::Update()
 {
     static bool firstFrame = true;
+
+    // skip rendering minimised window
+    if(this->windowWidth == 0 || this->windowHeight == 0) return;
 
     // Camera setup
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();

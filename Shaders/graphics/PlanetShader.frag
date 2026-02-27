@@ -20,18 +20,15 @@ layout(std140, binding = 0) uniform palette {
 #include "Noise.glsl"
 
 Material multMaterial(Material a, float factor) {
-    a.ambient  *= factor;
-    a.diffuse  *= factor;
-    a.specular *= factor;
+    a.color *= factor;
+    a.MetalRought *= factor;
     return a;
 }
 
 Material mixMaterial(Material a, Material b, float t) {
     Material result;
-    result.ambient  = mix(a.ambient,  b.ambient,  t);
-    result.diffuse  = mix(a.diffuse,  b.diffuse,  t);
-    result.specular = mix(a.specular, b.specular, t);
-    result.shininess = mix(a.shininess, b.shininess, t);
+    result.color  = mix(a.color,  b.color,  t);
+    result.MetalRought  = mix(a.MetalRought,  b.MetalRought,  t);
     return result;
 }
 
@@ -47,9 +44,7 @@ Material GetColorAtHeight(float height){
         mat = mixMaterial(multMaterial(grass, 0.95f), multMaterial(grass, 1.05f), t);
 
         float greenModifier = valNoise(normalize(Pos) * 2.0f);
-        mat.ambient.g *= mix(0.8f, 1.2f, greenModifier);
-        mat.diffuse.g *= mix(0.8f, 1.2f, greenModifier);
-        mat.specular.g *= mix(0.8f, 1.2f, greenModifier);
+        mat.color.g *= mix(0.8f, 1.2f, greenModifier);
     }
     else if(height < 0.052f * PLANET_SCALE) mat = rock;
     else mat = snow;
@@ -74,6 +69,8 @@ void main()
     gPosition = vec4(FragPos, 1.0);
     gNormal = vec4(normalize(Normal), 1.0);
     
-    gAlbedoSpec.rgb = mat.diffuse.rgb;
-    gAlbedoSpec.a = mat.specular.r;
+    gAlbedo.rgb = mat.color.rgb;
+
+    gMetalRough.r = mat.MetalRought.r;
+    gMetalRough.g = mat.MetalRought.g;
 } 

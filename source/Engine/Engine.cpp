@@ -96,35 +96,23 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     PlanetMeshRender::planetPalette palette{
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.0f, 0.3f, 1.0f) * 0.5f,
             glm::vec3(0.0f, 0.3f, 1.0f),
-            glm::vec3(0.6f, 0.6f, 0.6f),
-            0.5f),
+            glm::vec2(0.1f, 0.5f)),
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.04f, 0.55f, 1.0f) * 0.5f,
             glm::vec3(0.04f, 0.55f, 1.0f),
-            glm::vec3(0.5f, 0.5f, 0.5f),
-            0.375f),
+            glm::vec2(0.1f, 0.375f)),
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.76f, 0.70f, 0.50f) * 0.5f,
             glm::vec3(0.76f, 0.70f, 0.50f),
-            glm::vec3(0.15f, 0.15f, 0.15f),
-            0.0625f),
+            glm::vec2(0.0f, 0.0625f)),
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.1f, 0.6f, 0.1f) * 0.5f,
-            glm::vec3(0.1f, 0.6f, 0.1f),
-            glm::vec3(0.05f, 0.05f, 0.05f),
-            0.03125f),
+            glm::vec3(0.1f, 0.55f, 0.1f),
+            glm::vec2(0.0f, 0.03125f)),
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.5f, 0.5f, 0.5f) * 0.5f,
             glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec3(0.2f, 0.2f, 0.2f),
-            0.125f),
+            glm::vec2(0.15f, 0.04f)),
         PlanetMeshRender::MaterialSTD140(
-            glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f,
             glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(0.4f, 0.4f, 0.4f),
-            0.25f)
+            glm::vec2(0.0f, 0.02f))
     };
 
     renderComp->SetColorPalette(palette);
@@ -168,6 +156,9 @@ void GameEngine::Run(const EngineConfig::Config& config)
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
+    lightObj->Disable();
+    lightObj2->Disable();
+
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.5f, 2.5f));
@@ -183,7 +174,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     while (!renderer->ShouldClose())
     {
         this->CalculateDeltaTime();
-
+        
         input->Update();
 
         currentLevel->Update(); 

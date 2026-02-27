@@ -12,6 +12,8 @@ void main()
     gPosition = vec4(FragPos, 1.0);
     gNormal = vec4(normalize(Normal), 1.0);
 
-    gAlbedoSpec.rgb = material.diffuse.rgb;
-    gAlbedoSpec.a = material.specular.r;
+    gAlbedo.rgb = material.color.rgb;
+
+    gMetalRough.r = material.MetalRought.r;
+    gMetalRough.g = material.MetalRought.g;
 } 

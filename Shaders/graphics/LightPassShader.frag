@@ -2,7 +2,8 @@ in vec2 TexCoords;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
+uniform sampler2D gAlbedo;
+uniform sampler2D gMetalRough;
 
 #include "LightTypes.glsl"
 
@@ -28,10 +29,11 @@ void main()
 {
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
-    vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
-    //float Specular = texture(gAlbedoSpec, TexCoords).a; //TODO: remove specular
-    float metallic = 0.0;
-    float roughness = 0.5;
+    vec3 Albedo = texture(gAlbedo, TexCoords).rgb;
+
+    vec2 MetalRough = texture(gMetalRough, TexCoords).rg;
+    float metallic = MetalRough.x;
+    float roughness = MetalRough.y;
 
     float ao = 1.0; //TODO: add SSAO
 
@@ -66,5 +68,7 @@ void main()
     else if(SpecialRenderMode == 2)
         FragColor = vec4(Albedo, 1.0f);
     else if(SpecialRenderMode == 3)
-        FragColor = vec4(1.0); //vec4(Specular, Specular, Specular, 1.0f);
+        FragColor = vec4(metallic, 0.0f, 0.0f, 1.0f);
+    else if(SpecialRenderMode == 4)
+        FragColor = vec4(roughness, 0.0f, 0.0f, 1.0f);
 }

@@ -1,6 +1,6 @@
 #include "LightTypes.glsl"
 
-vec3 CalculateDirLight(DirectionLight light, vec3 normal, vec3 viewDir, Material mat){
+vec3 CalculateDirLight(DirectionLight light, vec3 normal, vec3 viewDir, MaterialOld mat){
     vec3 dirLightDir = normalize(-light.direction);
     vec3 reflectDir = reflect(-dirLightDir, normal);
 
@@ -34,7 +34,7 @@ float CalculateAttenuation(PointLight light, vec3 fragPos){
     );
 }
 
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, Material mat){
+vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, MaterialOld mat){
     vec3 lightDir = normalize(light.position - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 halfWayDir = normalize(lightDir + viewDir);

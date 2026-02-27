@@ -1,8 +1,13 @@
-struct Material {
+struct MaterialOld {
     vec4 ambient;
     vec4 diffuse;
     vec4 specular;
     vec4 shininess;
+};
+
+struct Material {
+    vec4 color;
+    vec4 MetalRought; // .r = metallic, .g = roughness
 };
 
 struct PointLight {

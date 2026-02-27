@@ -11,12 +11,10 @@ namespace Component {
 class PlanetMeshRender : public Component::BaseMeshRender{
 public:
     struct alignas(16) MaterialSTD140{
-        glm::vec4 ambient;
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-        glm::vec4 shininess; // alignas 16. Only use x component 
-        MaterialSTD140(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shininess)
-            : ambient(ambient, 1), diffuse(diffuse, 1), specular(specular, 1), shininess(shininess, 1, 1, 1) {}
+        glm::vec4 color;
+        glm::vec4 MetalRought; // .r = metallic, .g = roughness
+        MaterialSTD140(glm::vec3 color, glm::vec2 MetalRought)
+            : color(color, 1), MetalRought(MetalRought.x, MetalRought.y, 0, 0) {};
     };
     struct alignas(16) planetPalette{
         MaterialSTD140 deepOcean;

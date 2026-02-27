@@ -4,16 +4,13 @@
 #include <glm/glm.hpp>
 
 struct Material {
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    float shininess;
+    glm::vec3 color;
+    float metallic;
+    float roughness;
 
     void Bind(GL::Shader& shader) const{
-        shader.SetVec4("material.ambient", glm::vec4(this->ambient, 1.0f));
-        shader.SetVec4("material.diffuse", glm::vec4(this->diffuse, 1.0f));
-        shader.SetVec4("material.specular", glm::vec4(this->specular, 1.0f));
-        shader.SetVec4("material.shininess", glm::vec4(this->shininess, this->shininess, this->shininess, 1.0f));
+        shader.SetVec4("material.color", glm::vec4(this->color, 1.0f));
+        shader.SetVec4("material.MetalRought", glm::vec4(this->metallic, this->roughness, 0, 0));
     }
 };
 
@@ -34,5 +31,6 @@ enum class MatIndex {
 };
 
 Material* GetMaterial(MatIndex index);
+Material* GetRandomMaterial();
 
 extern Material CommonMaterials[];
