@@ -234,7 +234,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->postProcessShader->Use();
     this->postProcessShader->SetInt("screenTexture", 0);
 
-    this->geometryFramebuffer = new GL::FrameBuffer();
+    this->geometryFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
     // position color buffer
     this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // normal color buffer
@@ -243,7 +243,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
     this->geometryFramebuffer->CompleteSetup();
 
-    this->postProcessFramebuffer = new GL::FrameBuffer();
+    this->postProcessFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
     this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     this->postProcessFramebuffer->CompleteSetup();
 
@@ -252,19 +252,19 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
 
         this->mlaa = new MLAA_Components();
 
-        this->mlaa->edgeFBO = GL::FrameBuffer();
+        this->mlaa->edgeFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->mlaa->edgeFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
         this->mlaa->edgeFBO.CompleteSetup();
         this->mlaa->edgeShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/EdgeDetectionShader.frag", "Edge Detection Pass FBO");
         this->mlaa->edgeShader.SetInt("screenTexture", 0);
 
-        this->mlaa->blendWeightFBO = GL::FrameBuffer();
+        this->mlaa->blendWeightFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->mlaa->blendWeightFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
         this->mlaa->blendWeightFBO.CompleteSetup();
         this->mlaa->blendWeightShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/BlendWeightShader.frag", "Blend Weight Calculation Pass FBO");
         this->mlaa->blendWeightShader.SetInt("uEdgeTex", 0);
 
-        this->mlaa->neighborhoodBlendingFBO = GL::FrameBuffer();
+        this->mlaa->neighborhoodBlendingFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->mlaa->neighborhoodBlendingFBO.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
         this->mlaa->neighborhoodBlendingFBO.CompleteSetup();
         this->mlaa->neighborhoodBlendingShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/NeighborhoodBlendingShader.frag", "Neighborhood Blending Pass FBO");
@@ -276,10 +276,10 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
 
         this->taa = new TAA_Components();
 
-        this->taa->TAA_FBO1 = GL::FrameBuffer();
+        this->taa->TAA_FBO1 = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->taa->TAA_FBO1.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
         this->taa->TAA_FBO1.CompleteSetup();
-        this->taa->TAA_FBO2 = GL::FrameBuffer();
+        this->taa->TAA_FBO2 = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->taa->TAA_FBO2.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
         this->taa->TAA_FBO2.CompleteSetup();
         this->taa->TAAShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/TAABlendShader.frag", "TAA Blend Pass FBO");
@@ -287,7 +287,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
         this->taa->TAAShader.SetInt("uHistory", 1);
         this->taa->TAAShader.SetInt("uVelocity", 2);
 
-        this->taa->velocityFBO = GL::FrameBuffer();
+        this->taa->velocityFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
         this->taa->velocityFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
         this->taa->velocityFBO.CompleteSetup();
         this->taa->velocityShader = GL::BasicShaderProgram("post-processing/VelocityShader");

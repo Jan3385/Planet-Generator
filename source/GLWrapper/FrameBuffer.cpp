@@ -6,17 +6,34 @@
 
 namespace GL
 {
-FrameBuffer::FrameBuffer(bool depthBuffer)
+FrameBuffer::FrameBuffer(DepthBufferMode mode)
+    : depthBufferType(mode)
 {
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-    if(depthBuffer) {
-        glGenRenderbuffers(1, &DepthRBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
+    // generate depth buffer
+    if(mode == DepthBufferMode::RenderBuffer) {
+        glGenRenderbuffers(1, &depthStorage);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthStorage);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStorage);
+    }else if(mode == DepthBufferMode::Texture){
+        glGenTextures(1, &depthStorage);
+        glBindTexture(GL_TEXTURE_2D, depthStorage);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else{
+        this->depthStorage = 0;
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 FrameBuffer::~FrameBuffer()
@@ -160,10 +177,10 @@ void FrameBuffer::UpdateSize(const glm::uvec2 &newSize)
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, attachments[i]->GetID(), 0);
     }
 
-    if(DepthRBO != 0) {
-        glBindRenderbuffer(GL_RENDERBUFFER, DepthRBO);
+    if(depthStorage != 0) {
+        glBindRenderbuffer(GL_RENDERBUFFER, depthStorage);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStorage);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

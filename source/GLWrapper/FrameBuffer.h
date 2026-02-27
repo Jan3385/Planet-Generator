@@ -8,10 +8,14 @@
 
 namespace GL
 {
-
+enum class DepthBufferMode : uint8_t{
+    None = 0,
+    RenderBuffer = 1,
+    Texture = 2
+};
 class FrameBuffer{
 public:
-    FrameBuffer(bool depthBuffer = true);
+    FrameBuffer(DepthBufferMode mode);
     ~FrameBuffer();
 
     void AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type);
@@ -36,11 +40,13 @@ public:
 
     void UpdateSize(const glm::uvec2& newSize);
 
-    bool HasDepthBuffer() const { return DepthRBO != 0; };
+    bool HasDepthBuffer() const { return depthStorage != 0; };
+    DepthBufferMode GetDepthBufferType() const { return this->depthBufferType; };
 protected:
     GLuint FBO = 0;
 
-    GLuint DepthRBO = 0;
+    DepthBufferMode depthBufferType = DepthBufferMode::None;
+    GLuint depthStorage = 0;
 
     std::vector<GL::Texture*> attachments;
 
