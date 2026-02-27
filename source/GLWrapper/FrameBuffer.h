@@ -15,6 +15,7 @@ enum class DepthBufferMode : uint8_t{
 };
 class FrameBuffer{
 public:
+    FrameBuffer();
     FrameBuffer(DepthBufferMode mode);
     ~FrameBuffer();
 

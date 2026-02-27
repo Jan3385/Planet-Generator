@@ -6,6 +6,12 @@
 
 namespace GL
 {
+FrameBuffer::FrameBuffer()
+    : FBO(0), depthBufferType(DepthBufferMode::None), depthStorage(0)
+{
+    
+}
+
 FrameBuffer::FrameBuffer(DepthBufferMode mode)
     : depthBufferType(mode)
 {
@@ -47,6 +53,11 @@ FrameBuffer::~FrameBuffer()
 
 void FrameBuffer::AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type)
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to add texture to uninitialized framebuffer!");
+        return;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
     Texture* t = new GL::Texture(
@@ -67,6 +78,11 @@ void FrameBuffer::AddBufferTexture(GLenum internalFormat, GL::TextureFormat form
 
 void FrameBuffer::CompleteSetup()
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to complete setup of uninitialized framebuffer!");
+        return;
+    }
+
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         Debug::LogError("Failed to complete framebuffer setup!");
     }
@@ -75,6 +91,11 @@ void FrameBuffer::CompleteSetup()
 /// @brief Binds the framebuffer with textures and clears its attachments
 void FrameBuffer::BindShaderFBO() const
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to bind uninitialized framebuffer!");
+        return;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
     if(attachments.size() > 31) [[unlikely]] {
@@ -93,6 +114,11 @@ void FrameBuffer::BindShaderFBO() const
 
 void FrameBuffer::BindTextures() const
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to bind textures of uninitialized framebuffer!");
+        return;
+    }
+
     for(size_t i = 0; i < attachments.size(); i++) {
         attachments[i]->BindToUnit(static_cast<uint8_t>(i));
     }
@@ -100,6 +126,11 @@ void FrameBuffer::BindTextures() const
 
 void FrameBuffer::BindTextures(uint8_t start) const
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to bind textures of uninitialized framebuffer!");
+        return;
+    }
+
     for(size_t i = 0; i < attachments.size(); i++) {
         attachments[i]->BindToUnit(static_cast<uint8_t>(start + i));
     }
@@ -107,6 +138,11 @@ void FrameBuffer::BindTextures(uint8_t start) const
 
 void FrameBuffer::BindTextureTo(uint8_t attachmentIndex, uint8_t unit) const
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to bind texture of uninitialized framebuffer!");
+        return;
+    }
+
     if(attachmentIndex >= attachments.size()) {
         Debug::LogError(std::format("Attachment index {0} is out of bounds for FrameBuffer with {1} attachments!", attachmentIndex, attachments.size()));
         return;
@@ -122,6 +158,19 @@ void FrameBuffer::UnbindShaderFBO() const
 
 void FrameBuffer::CopyDepthToFBO(GLuint targetFBO) const
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to copy depth from uninitialized framebuffer!");
+        return;
+    }
+    if(targetFBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to copy depth to uninitialized framebuffer!");
+        return;
+    }
+    if(depthStorage == 0) [[unlikely]] {
+        Debug::LogError("Trying to copy depth from framebuffer without depth buffer!");
+        return;
+    }
+
     glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFBO);
     glBlitFramebuffer(
@@ -165,6 +214,11 @@ FrameBuffer &FrameBuffer::operator=(FrameBuffer &&other) noexcept
 /// @param newSize New size of the framebuffer in pixels
 void FrameBuffer::UpdateSize(const glm::uvec2 &newSize)
 {
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to update size of uninitialized framebuffer!");
+        return;
+    }
+
     if(this->size == newSize) return;
 
     this->size = newSize;

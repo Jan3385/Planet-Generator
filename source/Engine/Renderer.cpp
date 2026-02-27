@@ -147,7 +147,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
     }
     
-    char *renderModes[] = { "Standard", "Normal", "Albedo", "Specular" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Specular" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
