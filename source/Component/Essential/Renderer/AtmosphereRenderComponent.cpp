@@ -54,9 +54,8 @@ bool Component::AtmosphereRender::IsInsideFrustum(const std::array<glm::vec4, 6>
 {
     for (const GL::Mesh* mesh : this->mesh->GetMeshes()){
         glm::vec3 centroid;
-        double radius = mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), 
-            this->transform->GetScale() + PlanetGen::PLANET_SCALE * 0.11f
-        );
+        double radius = mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetMatrixTransform());
+        radius += PlanetGen::PLANET_SCALE * 0.11f; 
         if(IsSphereInsideFrustum(frustumPlanes, centroid, radius)) return true;
     }
     return false;

@@ -66,7 +66,7 @@ public:
     virtual void SetupMeshBuffers();
     virtual void UpdateMeshBuffers();
 
-    double GetFrustumRadiusWithCentroid(glm::vec3 *centroidOut, glm::vec3 position, glm::vec3 scale) const;
+    double GetFrustumRadiusWithCentroid(glm::vec3 *centroidOut, const glm::mat4& transformMatrix) const;
 protected:
     glm::vec3 centroid = glm::vec3(0.0f);
     double frustumRadius = 0.0;

@@ -24,13 +24,24 @@ bool Component::BaseMeshRender::IsInsideFrustum(const std::array<glm::vec4, 6> &
     if(!this->transform || !this->mesh) return false;
 
     // if any part of renderable mesh is inside frustum render it
-    for (const GL::Mesh* mesh : this->mesh->GetMeshes()){
-        glm::vec3 centroid;
-        double radius = mesh->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetPos(), this->transform->GetScale());
+    glm::vec3 centroid;
+    double radius;
+    for(size_t i = 0; this->GetFrustumData(centroid, radius, i); i++){
         if(IsSphereInsideFrustum(frustumPlanes, centroid, radius)) return true;
     }
 
     return false;
+}
+
+bool Component::BaseMeshRender::GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex)
+{
+    if(!this->transform || !this->mesh) return false;
+
+    std::vector<GL::Mesh*> meshes = this->mesh->GetMeshes();
+    if(meshIndex >= meshes.size()) return false;
+
+    radius = meshes[meshIndex]->GetFrustumRadiusWithCentroid(&centroid, this->transform->GetMatrixTransform());
+    return true;
 }
 
 bool Component::BaseMeshRender::IsSphereInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius)

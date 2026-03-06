@@ -13,6 +13,7 @@ vec3 CalculatePointLightPBR(PointLightPBR light, vec3 Normal, vec3 FragPos, vec3
 vec3 CalculateDirLightPBR(DirectionLightPBR light, vec3 Normal, vec3 ViewDir, vec3 Albedo, float Metallic, float Roughness);
 float CalculateAttenuation(PointLightPBR light, float distance);
 
+// ---- function implementations ----
 vec3 CalculatePointLightPBR(PointLightPBR light, vec3 Normal, vec3 FragPos, vec3 ViewDir, vec3 Albedo, float Metallic, float Roughness){
     vec3 lightDir = light.position - FragPos;
 

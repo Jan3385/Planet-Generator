@@ -7,6 +7,7 @@
 
 #include "Debug/Logger.h"
 #include "Engine/Engine.h"
+#include "Generator/MeshGenerator.h"
 #include "Component/BaseComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
 #include "Math/Random.h"
@@ -82,6 +83,17 @@ void Renderer::ObjectsVelocityRenderPass(Frustum &frustumPlanes)
     }
 }
 
+void Renderer::ObjectsFrustumDebugRenderPass()
+{
+    for(Renderer::IRendererCallback* callback : renderCallbacks) {
+        glm::vec3 centroid;
+        double radius;
+        for(size_t i = 0; callback->GetFrustumData(centroid, radius, i); i++){
+            this->RenderDebugSphere(centroid, radius, glm::vec3(0.8f, 0.0f, 0.0f));
+        }
+    }
+}
+
 void Renderer::ImGuiRenderPass()
 {
     ImGui_ImplGlfw_NewFrame();
@@ -99,6 +111,22 @@ void Renderer::ImGuiRenderPass()
     
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Renderer::RenderDebugSphere(
+    const glm::vec3 &position, float radius, 
+    const glm::vec3 &color)
+{
+    bool wireframeState = this->isWireframeMode;
+    if(!wireframeState) this->WireframeMode(true);
+
+    this->defaultColorShader.Use();
+    this->defaultColorShader.SetUniform("objectColor", color);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
+    this->defaultColorShader.SetUniform("transform", model);
+    this->debugSphereMesh->Draw();
+
+    if(!wireframeState) this->WireframeMode(false);
 }
 
 void Renderer::GLDrawScreenQuad()
@@ -125,6 +153,12 @@ void Renderer::DrawImGuiWindows()
         this->BackfaceCulling(!isBackfaceCullingEnabled);
         isBackfaceCullingEnabled = !isBackfaceCullingEnabled;
     }
+    if(ImGui::Button("Toggle Frustum Colliders")){
+        this->ShowFrustumColliders(!this->showFrustumColliders);
+    }
+    if(ImGui::IsItemHovered())
+        ImGui::SetTooltip("Toggles Approximate Frustum Colliders - Meshes Aren't Perfectly Round And Representative");
+
     static float gammaValue = 2.2f;
     if(ImGui::DragFloat("Gamma", &gammaValue, 0.1f, 0.1f, 10.0f)){
         this->SetGammaCorrection(gammaValue);
@@ -226,6 +260,8 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     this->quadVAO->AddAttribute<float, float>(0, 2, *this->quadVBO, GL_FALSE, 0, 0, 4 * sizeof(float));
     this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
     this->quadVAO->Unbind();
+
+    this->debugSphereMesh = MeshGenerator::GenerateSpherifiedCubeMesh(5);
 
     this->lightPassShader = new GL::BasicShaderProgram("LightPassShader");
     GameEngine::lighting->RegisterShaderLightUpdateCallback(this->lightPassShader);
@@ -431,7 +467,7 @@ void Renderer::Update()
 
     // 3.1 MLAA if enabled
     if(this->mlaa){
-        // 1. Edge detection pass
+        // 3.1.1. Edge detection pass
         this->mlaa->edgeFBO.UpdateSize(screenSize);
         this->mlaa->edgeFBO.BindShaderFBO();
         glClear(GL_COLOR_BUFFER_BIT);
@@ -440,7 +476,7 @@ void Renderer::Update()
         this->GLDrawScreenQuad();
         this->mlaa->edgeFBO.UnbindShaderFBO();
 
-        // 2. Blend weight calculation pass
+        // 3.1.2. Blend weight calculation pass
         this->mlaa->blendWeightFBO.UpdateSize(screenSize);
         this->mlaa->blendWeightFBO.BindShaderFBO();
         glClear(GL_COLOR_BUFFER_BIT);
@@ -449,7 +485,7 @@ void Renderer::Update()
         this->GLDrawScreenQuad();
         this->mlaa->blendWeightFBO.UnbindShaderFBO();
 
-        // 3. Neighborhood blending pass
+        // 3.1.3. Neighborhood blending pass
         this->mlaa->neighborhoodBlendingFBO.UpdateSize(screenSize);
         this->mlaa->neighborhoodBlendingFBO.BindShaderFBO();
         glClear(GL_COLOR_BUFFER_BIT);
@@ -461,6 +497,7 @@ void Renderer::Update()
 
         lastFBO = &this->mlaa->neighborhoodBlendingFBO;
     }
+
     // 3.1 TAA if enabled
     else if(this->taa){
         // render velocity to a texture
@@ -506,10 +543,13 @@ void Renderer::Update()
 
     glEnable(GL_DEPTH_TEST);
 
-    // 4. Render ImGui
+    // 4. Debug frustum render pass
+    if(this->showFrustumColliders) ObjectsFrustumDebugRenderPass();
+
+    // 5. Render ImGui
     ImGuiRenderPass();
 
-    // 5. Swap buffers
+    // 6. Swap buffers
     glfwSwapBuffers(window);
 
     firstFrame = false;

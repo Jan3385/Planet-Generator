@@ -26,6 +26,8 @@ public:
     virtual void RenderVelocity(GL::Shader &s) override;
 
     virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override;
+
+    virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) override;
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return { }; }

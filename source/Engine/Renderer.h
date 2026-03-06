@@ -6,6 +6,7 @@
 
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/FrameBuffer.h"
+#include "GLWrapper/Mesh.h"
 
 #include "Engine/Config.h"
 
@@ -31,6 +32,13 @@ public:
         virtual void RenderVelocity(GL::Shader &s) = 0;
 
         virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0;
+
+        /// @brief Gets the centroid and radius of the object for frustum culling
+        /// @param centroid Output parameter for the centroid of the object
+        /// @param radius   Output parameter for the radius of the object
+        /// @param meshIndex Input parameter for the index of the mesh
+        /// @return true if the object data could be loaded, false otherwise
+        virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) = 0;
 
         virtual ~IRendererCallback() = default;
 
@@ -97,6 +105,7 @@ public:
     void Update();
     void WireframeMode(bool enabled);
     void BackfaceCulling(bool enabled);
+    void ShowFrustumColliders(bool enabled) { this->showFrustumColliders = enabled; }
     void SetSpecialRenderMode(SpecialRenderMode mode) const;
 
     void StoreWindowSize(int width, int height);
@@ -118,7 +127,14 @@ protected:
     void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
     void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
     void ObjectsVelocityRenderPass(Frustum &frustumPlanes);
+    void ObjectsFrustumDebugRenderPass();
     void ImGuiRenderPass();
+
+    std::shared_ptr<GL::Mesh> debugSphereMesh;
+    void RenderDebugSphere(
+        const glm::vec3 &position, float radius, 
+        const glm::vec3 &color
+    );
 
     void SetupShaderValues();
 
@@ -136,6 +152,7 @@ protected:
     GL::FrameBuffer *postProcessFramebuffer;
 private:
     bool isWireframeMode = false;
+    bool showFrustumColliders = false;
     EngineConfig::AntiAliasingMethod antiAliasingMethod;
 
     void GLDrawScreenQuad();

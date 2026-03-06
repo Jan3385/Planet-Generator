@@ -84,15 +84,18 @@ void GL::Mesh::UpdateMeshBuffers()
 
 /// @brief Returns the frustum radius along with the centroid of the mesh in world space
 /// @param centroidOut output pointer for the centroid in world space
-/// @param position world position of the mesh
-/// @param scale world scale of the mesh
+/// @param transformMatrix the transform matrix of the mesh
 /// @return the frustum radius of the mesh
-double GL::Mesh::GetFrustumRadiusWithCentroid(glm::vec3 *centroidOut, glm::vec3 position, glm::vec3 scale) const
+double GL::Mesh::GetFrustumRadiusWithCentroid(glm::vec3 *centroidOut, const glm::mat4& transformMatrix) const
 {
-    float maxScale = std::max(scale.x, std::max(scale.y, scale.z));
-    centroidOut->x = this->centroid.x * scale.x + position.x;
-    centroidOut->y = this->centroid.y * scale.y + position.y;
-    centroidOut->z = this->centroid.z * scale.z + position.z;
+    *centroidOut = glm::vec3(transformMatrix * glm::vec4(this->centroid, 1.0f));
+
+    float maxScale = std::max({ 
+        glm::length(glm::vec3(transformMatrix[0])), 
+        glm::length(glm::vec3(transformMatrix[1])), 
+        glm::length(glm::vec3(transformMatrix[2])) 
+    });
+
     return this->frustumRadius * maxScale;
 }
 
