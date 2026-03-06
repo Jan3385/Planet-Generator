@@ -138,6 +138,8 @@ protected:
 
     void SetupShaderValues();
 
+    void BindNearestPointLights(const glm::vec3 &camPos);
+
     static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
 
     glm::mat4 JitterProjection(const glm::mat4& projection, const int frameIndex);
@@ -155,7 +157,17 @@ private:
     bool showFrustumColliders = false;
     EngineConfig::AntiAliasingMethod antiAliasingMethod;
 
-    void GLDrawScreenQuad();
+    inline void GLDrawScreenQuad();
+
+    inline void InitializeImGui(GLFWwindow* window);
+    inline void GenerateScreenQuad();
+
+    inline void SetupLightShader();
+    inline void SetupPostProcessing();
+    inline void SetupGeometryFramebuffer();
+
+    MLAA_Components* GenerateMLAAComponents();
+    TAA_Components* GenerateTAAComponents();
 
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;

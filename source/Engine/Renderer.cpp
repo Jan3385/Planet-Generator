@@ -194,6 +194,130 @@ void Renderer::DrawImGuiWindows()
     ImGui::End();
 }
 
+void Renderer::InitializeImGui(GLFWwindow* window)
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 460");
+}
+
+void Renderer::GenerateScreenQuad()
+{
+    this->quadVBO = new GL::Buffer<float, GL_ARRAY_BUFFER>("Quad VBO");
+
+    this->quadVBO->SetData(
+        std::vector<float>{
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    }, GL_STATIC_DRAW);
+
+    this->quadVAO = new GL::VertexArray("Quad VAO");
+    this->quadVAO->Bind();
+    this->quadVBO->Bind();
+    this->quadVAO->AddAttribute<float, float>(0, 2, *this->quadVBO, GL_FALSE, 0, 0, 4 * sizeof(float));
+    this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
+    this->quadVAO->Unbind();
+}
+
+void Renderer::SetupLightShader()
+{
+    this->lightPassShader = new GL::BasicShaderProgram("LightPassShader");
+    GameEngine::lighting->RegisterShaderLightUpdateCallback(this->lightPassShader);
+    this->lightPassShader->Use();
+    this->lightPassShader->SetInt("gPosition", 0);
+    this->lightPassShader->SetInt("gNormal", 1);
+    this->lightPassShader->SetInt("gAlbedo", 2);
+    this->lightPassShader->SetInt("gMetalRough", 3);
+}
+
+void Renderer::SetupPostProcessing()
+{
+    this->postProcessShader = new GL::BasicShaderProgram("post-processing/PostProcessShader");
+    this->postProcessShader->Use();
+    this->postProcessShader->SetInt("screenTexture", 0);
+
+this->postProcessFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
+    this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    this->postProcessFramebuffer->CompleteSetup();
+}
+
+void Renderer::SetupGeometryFramebuffer()
+{
+    this->geometryFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
+
+    // position color buffer
+    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    // normal color buffer
+    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    // color - albedo buffer
+    this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    // metalicity, roughness buffer
+    this->geometryFramebuffer->AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+
+    this->geometryFramebuffer->CompleteSetup();
+}
+
+/// @warning Pointer needs to be managed by caller 
+Renderer::MLAA_Components *Renderer::GenerateMLAAComponents()
+{
+    MLAA_Components *mlaa = new MLAA_Components();
+
+    mlaa->edgeFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    mlaa->edgeFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    mlaa->edgeFBO.CompleteSetup();
+    mlaa->edgeShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/EdgeDetectionShader.frag", "Edge Detection Pass FBO");
+    mlaa->edgeShader.SetInt("screenTexture", 0);
+
+    mlaa->blendWeightFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    mlaa->blendWeightFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    mlaa->blendWeightFBO.CompleteSetup();
+    mlaa->blendWeightShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/BlendWeightShader.frag", "Blend Weight Calculation Pass FBO");
+    mlaa->blendWeightShader.SetInt("uEdgeTex", 0);
+
+    mlaa->neighborhoodBlendingFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    mlaa->neighborhoodBlendingFBO.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    mlaa->neighborhoodBlendingFBO.CompleteSetup();
+    mlaa->neighborhoodBlendingShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/NeighborhoodBlendingShader.frag", "Neighborhood Blending Pass FBO");
+    mlaa->neighborhoodBlendingShader.SetInt("screenTexture", 0);
+    mlaa->neighborhoodBlendingShader.SetInt("uBlendWeightTex", 1);
+
+    return mlaa;
+}
+
+/// @warning Pointer needs to be managed by caller 
+Renderer::TAA_Components *Renderer::GenerateTAAComponents()
+{
+    TAA_Components *taa = new TAA_Components();
+
+    taa->TAA_FBO1 = GL::FrameBuffer(GL::DepthBufferMode::None);
+    taa->TAA_FBO1.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    taa->TAA_FBO1.CompleteSetup();
+    taa->TAA_FBO2 = GL::FrameBuffer(GL::DepthBufferMode::None);
+    taa->TAA_FBO2.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    taa->TAA_FBO2.CompleteSetup();
+    taa->TAAShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/TAABlendShader.frag", "TAA Blend Pass FBO");
+    taa->TAAShader.SetInt("uCurrent", 0);
+    taa->TAAShader.SetInt("uHistory", 1);
+    taa->TAAShader.SetInt("uVelocity", 2);
+
+    taa->velocityFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    taa->velocityFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    taa->velocityFBO.CompleteSetup();
+    taa->velocityShader = GL::BasicShaderProgram("post-processing/VelocityShader");
+
+    return taa;
+}
+
 Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma)
  : antiAliasingMethod(antialiasing)
 {
@@ -229,111 +353,30 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); //GL_LINE
     // glPointSize(7.0f);
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplGlfw_InitForOpenGL(this->window, true);
-    ImGui_ImplOpenGL3_Init("#version 460");
+    this->InitializeImGui(this->window);
 
     this->defaultLightShader = std::move(GL::BasicShaderProgram("LightedShader"));
     
     this->defaultColorShader = std::move(GL::BasicShaderProgram("ColorShader"));
     this->skyboxShader = std::move(GL::BasicShaderProgram("SkyboxShader"));
 
-    this->quadVBO = new GL::Buffer<float, GL_ARRAY_BUFFER>("Quad VBO");
-    this->quadVBO->SetData(
-        std::vector<float>{
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    }, GL_STATIC_DRAW);
-    this->quadVAO = new GL::VertexArray("Quad VAO");
-    this->quadVAO->Bind();
-    this->quadVBO->Bind();
-    this->quadVAO->AddAttribute<float, float>(0, 2, *this->quadVBO, GL_FALSE, 0, 0, 4 * sizeof(float));
-    this->quadVAO->AddAttribute<float, float>(1, 2, *this->quadVBO, GL_FALSE, 2 * sizeof(float), 0, 4 * sizeof(float));
-    this->quadVAO->Unbind();
+    this->GenerateScreenQuad();
 
     this->debugSphereMesh = MeshGenerator::GenerateSpherifiedCubeMesh(5);
 
-    this->lightPassShader = new GL::BasicShaderProgram("LightPassShader");
-    GameEngine::lighting->RegisterShaderLightUpdateCallback(this->lightPassShader);
-    this->lightPassShader->Use();
-    this->lightPassShader->SetInt("gPosition", 0);
-    this->lightPassShader->SetInt("gNormal", 1);
-    this->lightPassShader->SetInt("gAlbedo", 2);
-    this->lightPassShader->SetInt("gMetalRough", 3);
+    this->SetupLightShader();
 
-    this->postProcessShader = new GL::BasicShaderProgram("post-processing/PostProcessShader");
-    this->postProcessShader->Use();
-    this->postProcessShader->SetInt("screenTexture", 0);
+    this->SetupPostProcessing();
 
-    this->geometryFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
-    // position color buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
-    // normal color buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
-    // color - albedo buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
-    // metalicity, roughness buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
-    this->geometryFramebuffer->CompleteSetup();
-
-    this->postProcessFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
-    this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
-    this->postProcessFramebuffer->CompleteSetup();
+    this->SetupGeometryFramebuffer();
 
     if(antialiasing == EngineConfig::AntiAliasingMethod::MLAA) {
         Debug::LogTrace("Initializing SMAA anti-aliasing components");
-
-        this->mlaa = new MLAA_Components();
-
-        this->mlaa->edgeFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->mlaa->edgeFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
-        this->mlaa->edgeFBO.CompleteSetup();
-        this->mlaa->edgeShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/EdgeDetectionShader.frag", "Edge Detection Pass FBO");
-        this->mlaa->edgeShader.SetInt("screenTexture", 0);
-
-        this->mlaa->blendWeightFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->mlaa->blendWeightFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
-        this->mlaa->blendWeightFBO.CompleteSetup();
-        this->mlaa->blendWeightShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/BlendWeightShader.frag", "Blend Weight Calculation Pass FBO");
-        this->mlaa->blendWeightShader.SetInt("uEdgeTex", 0);
-
-        this->mlaa->neighborhoodBlendingFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->mlaa->neighborhoodBlendingFBO.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
-        this->mlaa->neighborhoodBlendingFBO.CompleteSetup();
-        this->mlaa->neighborhoodBlendingShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/NeighborhoodBlendingShader.frag", "Neighborhood Blending Pass FBO");
-        this->mlaa->neighborhoodBlendingShader.SetInt("screenTexture", 0);
-        this->mlaa->neighborhoodBlendingShader.SetInt("uBlendWeightTex", 1);
+        this->mlaa = this->GenerateMLAAComponents();
     }
     if(antialiasing == EngineConfig::AntiAliasingMethod::TAA) {
         Debug::LogTrace("Initializing TAA anti-aliasing components");
-
-        this->taa = new TAA_Components();
-
-        this->taa->TAA_FBO1 = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->taa->TAA_FBO1.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
-        this->taa->TAA_FBO1.CompleteSetup();
-        this->taa->TAA_FBO2 = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->taa->TAA_FBO2.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
-        this->taa->TAA_FBO2.CompleteSetup();
-        this->taa->TAAShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/TAABlendShader.frag", "TAA Blend Pass FBO");
-        this->taa->TAAShader.SetInt("uCurrent", 0);
-        this->taa->TAAShader.SetInt("uHistory", 1);
-        this->taa->TAAShader.SetInt("uVelocity", 2);
-
-        this->taa->velocityFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-        this->taa->velocityFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
-        this->taa->velocityFBO.CompleteSetup();
-        this->taa->velocityShader = GL::BasicShaderProgram("post-processing/VelocityShader");
+        this->taa = this->GenerateTAAComponents();
     }
 
     GLenum err;
@@ -381,6 +424,20 @@ void Renderer::SetGammaCorrection(float value)
     GL::Shader::UpdateShaderVariable("float gamma", value);
 }
 
+void Renderer::BindNearestPointLights(const glm::vec3 &camPos)
+{
+    auto closestPLights = GameEngine::lighting->GetClosestPointLights(camPos);
+    int pointLightCount = 0;
+    this->GetLightPassShader().Use();
+    for (auto* pointLight : closestPLights) {
+        if (pointLight != nullptr) {
+            pointLight->Bind(this->GetLightPassShader(), pointLightCount);
+            pointLightCount++;
+        }
+    }
+    this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
+}
+
 void Renderer::Update()
 {
     static bool firstFrame = true;
@@ -393,16 +450,7 @@ void Renderer::Update()
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
     // bind N nearest point lights to the shader
-    auto closestPLights = GameEngine::lighting->GetClosestPointLights(camera->GetPosition());
-    int pointLightCount = 0;
-    this->GetLightPassShader().Use();
-    for (auto* pointLight : closestPLights) {
-        if (pointLight != nullptr) {
-            pointLight->Bind(this->GetLightPassShader(), pointLightCount);
-            pointLightCount++;
-        }
-    }
-    this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
+    this->BindNearestPointLights(camera->GetPosition());
 
     // setup projections etc
     glm::mat4 projection = camera->GetProjection();
