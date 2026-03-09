@@ -28,11 +28,13 @@ FrameBuffer::FrameBuffer(DepthBufferMode mode)
         glGenTextures(1, &depthStorage);
         glBindTexture(GL_TEXTURE_2D, depthStorage);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
         glBindTexture(GL_TEXTURE_2D, 0);
     } else{
@@ -76,6 +78,20 @@ void FrameBuffer::AddBufferTexture(GLenum internalFormat, GL::TextureFormat form
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+/// @brief Disables drawing and reading of the framebuffer making it only usable for depth storage
+void FrameBuffer::DisableDrawRead()
+{
+    if(this->FBO == 0) [[unlikely]] {
+        Debug::LogError("Trying to disable draw/read of uninitialized framebuffer!");
+        return;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void FrameBuffer::CompleteSetup()
 {
     if(this->FBO == 0) [[unlikely]] {
@@ -83,8 +99,9 @@ void FrameBuffer::CompleteSetup()
         return;
     }
 
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Debug::LogError("Failed to complete framebuffer setup!");
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if(status != GL_FRAMEBUFFER_COMPLETE) {
+        Debug::LogError("Failed to complete framebuffer setup! Status: " + std::to_string(status));
     }
 }
 
@@ -151,7 +168,7 @@ void FrameBuffer::BindTextureTo(uint8_t attachmentIndex, uint8_t unit) const
     attachments[attachmentIndex]->BindToUnit(unit);
 }
 
-void FrameBuffer::UnbindShaderFBO() const
+void FrameBuffer::UnbindShaderFBO()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -192,6 +209,8 @@ FrameBuffer::FrameBuffer(FrameBuffer &&other) noexcept
     this->FBO = other.FBO;
     this->attachments = std::move(other.attachments);
     this->size = other.size;
+    this->depthBufferType = other.depthBufferType;
+    this->depthStorage = other.depthStorage;
 
     other.FBO = 0;
 }
@@ -200,12 +219,22 @@ FrameBuffer &FrameBuffer::operator=(FrameBuffer &&other) noexcept
 {
     if (this != &other) {
         if(FBO != 0) glDeleteFramebuffers(1, &FBO);
+        for(auto t : attachments) {
+            delete t;
+        }
+        if(depthBufferType == DepthBufferMode::RenderBuffer && depthStorage != 0)
+            glDeleteRenderbuffers(1, &depthStorage);
+        else if(depthBufferType == DepthBufferMode::Texture && depthStorage != 0)
+            glDeleteTextures(1, &depthStorage);
 
         this->attachments = std::move(other.attachments);
         this->size = other.size;
+        this->depthBufferType = other.depthBufferType;
+        this->depthStorage = other.depthStorage;
         FBO = other.FBO;
         
         other.FBO = 0;
+        other.depthStorage = 0;
     }
     return *this;
 }
@@ -231,11 +260,25 @@ void FrameBuffer::UpdateSize(const glm::uvec2 &newSize)
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, attachments[i]->GetID(), 0);
     }
 
-    if(depthStorage != 0) {
+    if(depthBufferType == DepthBufferMode::RenderBuffer) {
         glBindRenderbuffer(GL_RENDERBUFFER, depthStorage);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthStorage);
+    }else if(depthBufferType == DepthBufferMode::Texture){
+        glBindTexture(GL_TEXTURE_2D, depthStorage);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthStorage, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+    this->CompleteSetup();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

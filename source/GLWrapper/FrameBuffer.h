@@ -20,13 +20,14 @@ public:
     ~FrameBuffer();
 
     void AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type);
+    void DisableDrawRead();
     void CompleteSetup();
 
     void BindShaderFBO() const;
     void BindTextures() const;
     void BindTextures(uint8_t start) const;
     void BindTextureTo(uint8_t attachmentIndex, uint8_t unit) const;
-    void UnbindShaderFBO() const;
+    static void UnbindShaderFBO();
 
     void CopyDepthToFBO(GLuint targetFBO) const;
     void CopyDepthToFBO(FrameBuffer &targetFBO) const;
@@ -42,6 +43,7 @@ public:
     void UpdateSize(const glm::uvec2& newSize);
 
     bool HasDepthBuffer() const { return depthStorage != 0; };
+    GLuint GetDepthStorageID() const { return depthStorage; };
     DepthBufferMode GetDepthBufferType() const { return this->depthBufferType; };
 protected:
     GLuint FBO = 0;

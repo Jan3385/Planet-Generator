@@ -19,6 +19,16 @@ void Component::BaseMeshRender::RenderVelocity(GL::Shader &s)
     Renderer::SetReverseFaceCulling(false);
 }
 
+void Component::BaseMeshRender::RenderDepthOnly(GL::Shader &s)
+{
+    if(!this->transform || !this->mesh) return;
+
+    glm::mat4 model = this->transform->GetMatrixTransform();
+    s.SetMat4("transform", model);
+
+    this->mesh->Draw();
+}
+
 bool Component::BaseMeshRender::IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes)
 {
     if(!this->transform || !this->mesh) return false;

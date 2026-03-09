@@ -141,7 +141,7 @@ void Renderer::GLDrawScreenQuad()
 
 void Renderer::DrawImGuiWindows()
 {
-    ImGui::Begin("Basic Window");
+    ImGui::Begin("Debug Window");
     ImGui::Text("Delta Time: %.3f ms", GameEngine::instance->DeltaTime() * 1000.0f);
     ImGui::Text("Immediate FPS: %.1f", GameEngine::instance->GetFPS());
     ImGui::Text("Avg FPS: %.1f", GameEngine::instance->GetAvgFPS());
@@ -185,7 +185,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
-    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow", "A", "B" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
@@ -238,6 +238,7 @@ void Renderer::SetupLightShader()
     this->lightPassShader->SetInt("gNormal", 1);
     this->lightPassShader->SetInt("gAlbedo", 2);
     this->lightPassShader->SetInt("gMetalRough", 3);
+    this->lightPassShader->SetInt("shadowMap", 4);
 }
 
 void Renderer::SetupPostProcessing()
@@ -438,6 +439,7 @@ void Renderer::BindNearestPointLights(const glm::vec3 &camPos)
     this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
 }
 
+/// @brief Renders the scene
 void Renderer::Update()
 {
     static bool firstFrame = true;
@@ -495,9 +497,16 @@ void Renderer::Update()
     this->geometryFramebuffer->UnbindShaderFBO();
 
     // 2. Light pass
+    
+    // 2.1 Shadow pass
+    GameEngine::lighting->RenderShadowDirectionalLight();
+
+    // 2.2 Light accumulation pass
     glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, GameEngine::lighting->GetShadowMapTextureID());
     this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
     glClear(renderClearFlags);
@@ -603,6 +612,14 @@ void Renderer::Update()
     firstFrame = false;
 }
 
+void Renderer::RenderShadowMap(GL::Shader &s, Frustum &frustumPlanes)
+{
+    for(auto& callback : renderCallbacks) {
+        if(callback->IsInsideFrustum(frustumPlanes))
+            callback->RenderDepthOnly(s);
+    }
+}
+
 void Renderer::WireframeMode(bool enabled)
 {
     if(enabled) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -644,6 +661,8 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderVariable("mat4 previousView", glm::mat4(1.0f));
 
     GL::Shader::AddShaderVariable("int SpecialRenderMode", 0);
+
+    GL::Shader::AddShaderVariable("mat4 dirLightSpaceMatrix", glm::mat4(1.0f));
 
     Debug::LogSpam("Shader constants and variables initialized");
 }

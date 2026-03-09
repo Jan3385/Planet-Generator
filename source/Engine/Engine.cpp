@@ -41,6 +41,7 @@ GameEngine::~GameEngine()
 
 void GameEngine::Run(const EngineConfig::Config& config)
 {
+    Debug::LogInfo("Starting game engine");
     srand(static_cast<unsigned int>(time(nullptr)));
 
     InitializeGLFW(config);
@@ -55,6 +56,8 @@ void GameEngine::Run(const EngineConfig::Config& config)
     renderer = new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma);
     currentLevel = new Level();
     input = new Input();
+
+    lighting->InitializeShadowMapping();
 
     Renderer::SetVSYNC(config.VSync);
 
@@ -85,7 +88,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
-    constexpr float planetScale = 1.0f;
+    constexpr float planetScale = 2.0f;
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
     Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
@@ -140,12 +143,12 @@ void GameEngine::Run(const EngineConfig::Config& config)
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
-        ->SetScale(glm::vec3(8.0f, 0.1f, 8.0f))
+        ->SetScale(glm::vec3(80.0f, 0.1f, 80.0f))
         ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
     Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
     floorRenderComp->SetMesh(cube);
-    floor->Disable();
+    //floor->Disable();
 
     // lights
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
@@ -153,11 +156,11 @@ void GameEngine::Run(const EngineConfig::Config& config)
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
-    lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -0.5f, 1.5f));
+    lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -1.5f, 2.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
     lightObj->Disable();
-    lightObj2->Disable();
+    //lightObj2->Disable();
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();

@@ -6,6 +6,14 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp>
 
+#include "Engine/Renderer.h"
+#include "Engine/Engine.h"
+
+Lighting::Lighting()
+{
+
+}
+
 void Lighting::SetAmbientColor(const glm::vec3 &color)
 {
     if(this->ambientColor == color) return;
@@ -79,6 +87,46 @@ void Lighting::RemovePointLightSource(PointLightSource *pointLight)
                     this->pointLightSources.end(),
                     pointLight),
         this->pointLightSources.end());
+}
+
+void Lighting::InitializeShadowMapping()
+{
+    Debug::LogSpam("Initializing shadow mapping");
+    this->dlShadowFBO = GL::FrameBuffer(GL::DepthBufferMode::Texture);
+    dlShadowFBO.DisableDrawRead();
+    dlShadowFBO.CompleteSetup();
+    dlShadowFBO.UpdateSize(glm::uvec2(SHADOW_MAP_SIZE));
+
+    shadowShader = GL::BasicShaderProgram("lighting/shadowShader");
+}
+
+void Lighting::RenderShadowDirectionalLight()
+{
+    constexpr float OrtographicBoxSize = 10.0f;
+    float nearPlane = 1.0f, farPlane = 100.0f;
+    glm::mat4 lightProjection = glm::ortho(-OrtographicBoxSize, OrtographicBoxSize, -OrtographicBoxSize, OrtographicBoxSize, nearPlane, farPlane);
+    glm::mat4 lightView = glm::lookAt(
+        -directionalLightSource.direction * OrtographicBoxSize, 
+        glm::vec3(0.0f), 
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+    
+    glm::mat4 dirLightSpaceMatrix = lightProjection * lightView;
+    GL::Shader::UpdateShaderVariable("mat4 dirLightSpaceMatrix", dirLightSpaceMatrix);
+
+    glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+    dlShadowFBO.BindShaderFBO();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    shadowShader.Use();
+
+    Renderer::Frustum shadowFrustumPlanes = Renderer::CalculateFrustumPlanes(lightProjection, lightView);
+    GameEngine::renderer->RenderShadowMap(shadowShader, shadowFrustumPlanes);
+
+    dlShadowFBO.UnbindShaderFBO();
+
+    glm::vec2 screenSize = GameEngine::renderer->GetScreenSize();
+    glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
 }
 
 void Lighting::SetDirectionalLightSourceDirection(const glm::vec3 &direction)

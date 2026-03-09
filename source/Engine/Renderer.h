@@ -31,6 +31,10 @@ public:
         /// @param s Shader used
         virtual void RenderVelocity(GL::Shader &s) = 0;
 
+        /// @brief Depth-only render pass
+        /// @param s Shader used
+        virtual void RenderDepthOnly(GL::Shader &s) = 0;
+
         virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0;
 
         /// @brief Gets the centroid and radius of the object for frustum culling
@@ -103,6 +107,8 @@ public:
     static void SetGammaCorrection(float value);
 
     void Update();
+    void RenderShadowMap(GL::Shader &s, Frustum &frustumPlanes);
+
     void WireframeMode(bool enabled);
     void BackfaceCulling(bool enabled);
     void ShowFrustumColliders(bool enabled) { this->showFrustumColliders = enabled; }
@@ -123,6 +129,10 @@ public:
     }
 
     EngineConfig::AntiAliasingMethod GetAntiAliasingMethod() const { return this->antiAliasingMethod; }
+
+    glm::vec2 GetScreenSize() const { return glm::vec2(this->windowWidth, this->windowHeight); }
+
+    static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
 protected:
     void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
     void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
@@ -139,8 +149,6 @@ protected:
     void SetupShaderValues();
 
     void BindNearestPointLights(const glm::vec3 &camPos);
-
-    static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
 
     glm::mat4 JitterProjection(const glm::mat4& projection, const int frameIndex);
 

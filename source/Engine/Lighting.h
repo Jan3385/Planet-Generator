@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "GLWrapper/Shader.h"
+#include "GLWrapper/BasicShaderProgram.h"
+#include "GLWrapper/FrameBuffer.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -32,11 +34,10 @@ public:
 
     struct DirectionLightSource {
         glm::vec3 direction;
-
         glm::vec3 color;
     };
 
-    Lighting() = default;
+    Lighting();
     ~Lighting() = default;
 
     void SetAmbientColor(const glm::vec3& color);
@@ -52,13 +53,23 @@ public:
     void AddPointLightSource(PointLightSource* pointLight);
     void RemovePointLightSource(PointLightSource* pointLight);
 
+    void InitializeShadowMapping();
+    void RenderShadowDirectionalLight();
+    GLuint GetShadowMapTextureID() const { return this->dlShadowFBO.GetDepthStorageID(); }
+
     void SetDirectionalLightSourceDirection(const glm::vec3& direction);
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
     void SetDirectionalLightSource(const glm::vec3& direction,
                                    const glm::vec3& color);  
 private:
+    GL::BasicShaderProgram shadowShader;
+
     std::vector<PointLightSource*> pointLightSources;
+
+    constexpr static unsigned int SHADOW_MAP_SIZE = 2048;
     DirectionLightSource directionalLightSource;
+    glm::mat4 lightSpaceMatrix;
+    GL::FrameBuffer dlShadowFBO;
 
     void TriggerShaderLightUpdateCallback();
     std::vector<GL::Shader*> shaderLightUpdateCallbackList;
