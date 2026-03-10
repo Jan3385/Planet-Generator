@@ -40,7 +40,26 @@ FrameBuffer::FrameBuffer(DepthBufferMode mode)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         
         glBindTexture(GL_TEXTURE_2D, 0);
-    } else{
+    } else if(mode == DepthBufferMode::Cubemap){
+        glGenTextures(1, &depthStorage);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthStorage);
+
+        // generate all faces
+        for (uint8_t i = 0; i < 6; i++){
+            GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+            glTexImage2D(face, 0, GL_DEPTH_COMPONENT, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+        }
+
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthStorage, 0);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        
+    } else {
         this->depthStorage = 0;
     }
 
@@ -56,8 +75,12 @@ FrameBuffer::~FrameBuffer()
     }
 }
 
-void FrameBuffer::AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type)
+void FrameBuffer::AddBufferTexture2D(GLenum internalFormat, GL::TextureFormat format, GLenum type)
 {
+    if(this->depthBufferType == DepthBufferMode::Cubemap) [[unlikely]] {
+        Debug::LogWarn("Adding a 2D texture to an FBO with cubemap depth buffer!");
+    }
+
     if(this->FBO == 0) [[unlikely]] {
         Debug::LogError("Trying to add texture to uninitialized framebuffer!");
         return;

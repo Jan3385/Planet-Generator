@@ -10,8 +10,9 @@ namespace GL
 {
 enum class DepthBufferMode : uint8_t{
     None = 0,
-    RenderBuffer = 1,
-    Texture = 2
+    RenderBuffer,
+    Texture,
+    Cubemap
 };
 class FrameBuffer{
 public:
@@ -19,7 +20,7 @@ public:
     FrameBuffer(DepthBufferMode mode);
     ~FrameBuffer();
 
-    void AddBufferTexture(GLenum internalFormat, GL::TextureFormat format, GLenum type);
+    void AddBufferTexture2D(GLenum internalFormat, GL::TextureFormat format, GLenum type);
     void DisableDrawRead();
     void CompleteSetup();
 

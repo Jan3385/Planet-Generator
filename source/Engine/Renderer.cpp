@@ -248,7 +248,7 @@ void Renderer::SetupPostProcessing()
     this->postProcessShader->SetInt("screenTexture", 0);
 
 this->postProcessFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
-    this->postProcessFramebuffer->AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    this->postProcessFramebuffer->AddBufferTexture2D(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     this->postProcessFramebuffer->CompleteSetup();
 }
 
@@ -257,13 +257,13 @@ void Renderer::SetupGeometryFramebuffer()
     this->geometryFramebuffer = new GL::FrameBuffer(GL::DepthBufferMode::RenderBuffer);
 
     // position color buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    this->geometryFramebuffer->AddBufferTexture2D(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // normal color buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
+    this->geometryFramebuffer->AddBufferTexture2D(GL_RGBA16F, GL::TextureFormat::RGBA, GL_FLOAT);
     // color - albedo buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
+    this->geometryFramebuffer->AddBufferTexture2D(GL_SRGB8_ALPHA8, GL::TextureFormat::RGBA, GL_UNSIGNED_BYTE);
     // metalicity, roughness buffer
-    this->geometryFramebuffer->AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    this->geometryFramebuffer->AddBufferTexture2D(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
 
     this->geometryFramebuffer->CompleteSetup();
 }
@@ -274,19 +274,19 @@ Renderer::MLAA_Components *Renderer::GenerateMLAAComponents()
     MLAA_Components *mlaa = new MLAA_Components();
 
     mlaa->edgeFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-    mlaa->edgeFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    mlaa->edgeFBO.AddBufferTexture2D(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
     mlaa->edgeFBO.CompleteSetup();
     mlaa->edgeShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/EdgeDetectionShader.frag", "Edge Detection Pass FBO");
     mlaa->edgeShader.SetInt("screenTexture", 0);
 
     mlaa->blendWeightFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-    mlaa->blendWeightFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    mlaa->blendWeightFBO.AddBufferTexture2D(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
     mlaa->blendWeightFBO.CompleteSetup();
     mlaa->blendWeightShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/BlendWeightShader.frag", "Blend Weight Calculation Pass FBO");
     mlaa->blendWeightShader.SetInt("uEdgeTex", 0);
 
     mlaa->neighborhoodBlendingFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-    mlaa->neighborhoodBlendingFBO.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    mlaa->neighborhoodBlendingFBO.AddBufferTexture2D(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     mlaa->neighborhoodBlendingFBO.CompleteSetup();
     mlaa->neighborhoodBlendingShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/NeighborhoodBlendingShader.frag", "Neighborhood Blending Pass FBO");
     mlaa->neighborhoodBlendingShader.SetInt("screenTexture", 0);
@@ -301,10 +301,10 @@ Renderer::TAA_Components *Renderer::GenerateTAAComponents()
     TAA_Components *taa = new TAA_Components();
 
     taa->TAA_FBO1 = GL::FrameBuffer(GL::DepthBufferMode::None);
-    taa->TAA_FBO1.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    taa->TAA_FBO1.AddBufferTexture2D(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     taa->TAA_FBO1.CompleteSetup();
     taa->TAA_FBO2 = GL::FrameBuffer(GL::DepthBufferMode::None);
-    taa->TAA_FBO2.AddBufferTexture(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
+    taa->TAA_FBO2.AddBufferTexture2D(GL_RGB16F, GL::TextureFormat::RGB, GL_FLOAT);
     taa->TAA_FBO2.CompleteSetup();
     taa->TAAShader = GL::BasicShaderProgram("post-processing/PostProcessShader.vert", "post-processing/TAABlendShader.frag", "TAA Blend Pass FBO");
     taa->TAAShader.SetInt("uCurrent", 0);
@@ -312,7 +312,7 @@ Renderer::TAA_Components *Renderer::GenerateTAAComponents()
     taa->TAAShader.SetInt("uVelocity", 2);
 
     taa->velocityFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
-    taa->velocityFBO.AddBufferTexture(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
+    taa->velocityFBO.AddBufferTexture2D(GL_RG16F, GL::TextureFormat::RED_GREEN, GL_FLOAT);
     taa->velocityFBO.CompleteSetup();
     taa->velocityShader = GL::BasicShaderProgram("post-processing/VelocityShader");
 
