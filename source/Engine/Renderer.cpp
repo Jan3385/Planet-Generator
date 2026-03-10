@@ -614,10 +614,12 @@ void Renderer::Update()
 
 void Renderer::RenderShadowMap(GL::Shader &s, Frustum &frustumPlanes)
 {
+    glDisable(GL_CULL_FACE); // avoid peter panning
     for(auto& callback : renderCallbacks) {
         if(callback->IsInsideFrustum(frustumPlanes))
             callback->RenderDepthOnly(s);
     }
+    glEnable(GL_CULL_FACE);
 }
 
 void Renderer::WireframeMode(bool enabled)

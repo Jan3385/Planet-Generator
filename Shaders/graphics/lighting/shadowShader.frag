@@ -1,4 +1,9 @@
+#define BACKFACE_BIAS 0.0001
+
+layout (depth_greater) out float gl_FragDepth;
+
 void main()
 {             
-    // ignore color, we only care about depth buffer
+    gl_FragDepth = gl_FragCoord.z;
+    gl_FragDepth += gl_FrontFacing ? BACKFACE_BIAS : 0;
 }  

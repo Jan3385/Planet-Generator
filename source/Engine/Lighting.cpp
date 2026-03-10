@@ -102,7 +102,7 @@ void Lighting::InitializeShadowMapping()
 
 void Lighting::RenderShadowDirectionalLight()
 {
-    constexpr float OrtographicBoxSize = 50.0f;
+    constexpr float OrtographicBoxSize = 35.0f;
     float nearPlane = 1.0f, farPlane = 300.0f;
     glm::mat4 lightProjection = glm::ortho(-OrtographicBoxSize, OrtographicBoxSize, -OrtographicBoxSize, OrtographicBoxSize, nearPlane, farPlane);
     glm::vec3 cameraPos = GameEngine::currentLevel->GetCamera()->GetPosition();
