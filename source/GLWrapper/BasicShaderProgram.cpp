@@ -12,12 +12,18 @@ const std::string BasicShaderProgram::SHADER_EXTENSION_VERT = ".vert";
 const std::string BasicShaderProgram::SHADER_EXTENSION_FRAG = ".frag";
 const std::string BasicShaderProgram::SHADER_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "RenderShaders/";
 
+/// @brief compiles frag and vert shaders with the same name
+/// @param shaderPathName (eg. "lighting" or "folder/interesting_shader") -> lighting will try to load `lighting.frag` and `lighting.vert` unside the shader directory
 BasicShaderProgram::BasicShaderProgram(const char* shaderPathName)
     : BasicShaderProgram(
         (shaderPathName + SHADER_EXTENSION_VERT).c_str(),
         (shaderPathName + SHADER_EXTENSION_FRAG).c_str(),
         std::string(shaderPathName)) { }
 
+/// @brief compiles specified vertex and fragment shader
+/// @param vertexPath eg. "lighting.vert"
+/// @param fragmentPath eg. "lighting.frag"
+/// @param shaderName shader name for debugging
 BasicShaderProgram::BasicShaderProgram(const char* vertexPath, const char* fragmentPath, std::string shaderName)
 {
     this->name = shaderName.empty() ? "Unnamed Render Shader" : shaderName;

@@ -93,11 +93,11 @@ Shader &GL::Shader::operator=(Shader &&other) noexcept
     return *this;
 }
 
-/// @brief Loads a shader file with support for includes
+/// @brief Loads a shader file with support for includes and other
 /// @param filePath The path to the shader file (must include extension and directory)
 /// @param shaderName The name of the shader
 /// @note Reset Shader::preprocessorAtFirstLine before executing another time
-/// @return The shader source code
+/// @return The modified shader source code
 std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePath, const std::string &shaderName)
 {
     std::ifstream shaderFile;
