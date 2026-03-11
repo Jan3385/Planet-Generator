@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <string>
+#include <glm/vec2.hpp>
 #include "GLWrapper/Texture.h"
 
 namespace GL
@@ -9,6 +10,7 @@ namespace GL
 class Cubemap{
 public:
     Cubemap();
+    Cubemap(bool blurred, bool sRGB, glm::vec2 size);
     Cubemap(const std::string filePaths[6], bool blurred, bool sRGB);
     ~Cubemap();
 

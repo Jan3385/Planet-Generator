@@ -29,6 +29,7 @@ protected:
         { return {typeid(Component::Transform)}; }
 private:
     Lighting::PointLightSource data;
+    GL::Cubemap shadowCubemap;
 
     void Awake() override;
     void OnDestroy() override;

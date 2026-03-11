@@ -2,6 +2,30 @@
 
 GL::Cubemap::Cubemap() : ID(0) { }
 
+/// @brief Creates an empty cubemap texture
+/// @param blurred if the textures should be blurred
+/// @param sRGB if the textures should be loaded within sRGB color space 
+GL::Cubemap::Cubemap(bool blurred, bool sRGB, glm::vec2 size)
+    : blurred(blurred)
+{
+    glGenTextures(1, &ID);
+
+    GLuint internalFormat = sRGB ? GL_SRGB8 : GL_RGB8;
+    GLuint filter = this->blurred ? GL_LINEAR : GL_NEAREST;
+
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        GLuint face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+        glTexImage2D(face, 0, internalFormat, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+    }
+}
+
 /// @brief Creates a cubemap texture from 6 image files
 /// @param filePaths array of 6 file paths with file names (ex. ["/images/banana.png", ..])
 /// @param blurred if the textures should be blurred
@@ -61,7 +85,8 @@ void GL::Cubemap::LoadCubemapFaces(const std::string filePaths[6], bool sRGB)
     {
         data = Texture::LoadImageFromPath(filePaths[i], width, height, nrChannels, true);
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        GLuint face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+        glTexImage2D(face, 0, internalFormat, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);

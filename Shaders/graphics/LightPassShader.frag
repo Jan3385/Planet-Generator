@@ -4,7 +4,10 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gMetalRough;
-uniform sampler2D shadowMap;
+
+uniform sampler2D dlShadowMap;
+
+uniform samplerCube plShadowMap
 
 #include "LightTypes.glsl"
 
@@ -28,7 +31,7 @@ uniform DirectionLightPBR directionalLight;
 
 out vec4 FragColor;
 
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
+float dlShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
     projCoords = projCoords * 0.5 + 0.5;
@@ -36,7 +39,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
     if(projCoords.z > 1.0) return 0.0;
     
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    vec2 texelSize = 1.0 / textureSize(dlShadowMap, 0);
 
     const float bias = max(0.002 * (1.0 - dot(normalize(Normal), normalize(lightDir))), 0.005);
     //const float bias = 0.005;
@@ -45,13 +48,42 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
 
     for(int x = -1; x <= 1; ++x){
         for(int y = -1; y <= 1; ++y){
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = texture(dlShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
 
     shadow = shadow / 9.0;
     
+    return shadow;
+}
+
+float plShadowCalculation(vec3 fragPos, float farPlane, vec3 lightPos, samplerCube plShadowMap){
+    vec3 fragToLight = fragPos - lightPos;
+
+    closestDepth *= farPlane;
+    float currentDepth = length(fragToLight);
+
+    float bias = 0.05; 
+    float shadow = 0.0;
+
+    float samples = 4.0;
+    float offset  = 0.1;
+    for(float x = -offset; x < offset; x += offset / (samples * 0.5))
+    {
+        for(float y = -offset; y < offset; y += offset / (samples * 0.5))
+        {
+            for(float z = -offset; z < offset; z += offset / (samples * 0.5))
+            {
+                float pfcDepth = texture(plShadowMap, fragToLight + vec3(x, y, z)).r;
+                pfcDepth *= farPlane;
+                shadow += currentDepth - bias > pfcDepth ? 1.0 : 0.0;
+            }
+        }
+    }
+
+    shadow /= (samples * samples * samples);
+
     return shadow;
 }
 
@@ -79,7 +111,7 @@ void main()
 
     // directional light
     vec3 dirLight = CalculateDirLightPBR(directionalLight, Normal, viewDir, Albedo, metallic, roughness);
-    dirLight *= 1 - ShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
+    dirLight *= 1 - dlShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
     light += dirLight;
 
     // ambient
@@ -98,7 +130,7 @@ void main()
     else if(SpecialRenderMode == 4)
         FragColor = vec4(roughness, 0.0f, 0.0f, 1.0f);
     else if(SpecialRenderMode == 5){
-        float shadow = ShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
+        float shadow = dlShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
         FragColor = vec4(vec3(shadow), 1.0f);
     }
 }

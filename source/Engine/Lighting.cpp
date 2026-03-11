@@ -97,7 +97,13 @@ void Lighting::InitializeShadowMapping()
     dlShadowFBO.CompleteSetup();
     dlShadowFBO.UpdateSize(glm::uvec2(SHADOW_MAP_SIZE));
 
-    shadowShader = GL::BasicShaderProgram("lighting/shadowShader");
+    dlShadowShader = GL::BasicShaderProgram("lighting/directionalShadowShader");
+
+    plShadowShader = GL::ComplexShaderProgram("Point light shader program");
+    plShadowShader.AddShader(GL::ShaderType::Vertex, "lighting/pointShadowShader.vert");
+    plShadowShader.AddShader(GL::ShaderType::Geometry, "lighting/pointShadowShader.geom");
+    plShadowShader.AddShader(GL::ShaderType::Fragment, "lighting/pointShadowShader.frag");
+    plShadowShader.Compile();
 }
 
 void Lighting::RenderShadowDirectionalLight()
@@ -119,10 +125,10 @@ void Lighting::RenderShadowDirectionalLight()
     dlShadowFBO.BindShaderFBO();
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    shadowShader.Use();
+    dlShadowShader.Use();
 
     Renderer::Frustum shadowFrustumPlanes = Renderer::CalculateFrustumPlanes(lightProjection, lightView);
-    GameEngine::renderer->RenderShadowMap(shadowShader, shadowFrustumPlanes);
+    GameEngine::renderer->RenderShadowMap(dlShadowShader, shadowFrustumPlanes);
 
     dlShadowFBO.UnbindShaderFBO();
 

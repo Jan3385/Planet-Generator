@@ -4,6 +4,7 @@
 
 #include "GLWrapper/Shader.h"
 #include "GLWrapper/BasicShaderProgram.h"
+#include "GLWrapper/ComplexShaderProgram.h"
 #include "GLWrapper/FrameBuffer.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -62,7 +63,8 @@ public:
     void SetDirectionalLightSource(const glm::vec3& direction,
                                    const glm::vec3& color);  
 private:
-    GL::BasicShaderProgram shadowShader;
+    GL::BasicShaderProgram dlShadowShader;
+    GL::ComplexShaderProgram plShadowShader;
 
     std::vector<PointLightSource*> pointLightSources;
 
