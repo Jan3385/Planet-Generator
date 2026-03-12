@@ -107,7 +107,7 @@ public:
     static void SetGammaCorrection(float value);
 
     void Update();
-    void RenderShadowMap(GL::Shader &s, Frustum &frustumPlanes);
+    void RenderShadowMap(GL::Shader &s, Frustum *frustumPlanes);
 
     void WireframeMode(bool enabled);
     void BackfaceCulling(bool enabled);
@@ -134,9 +134,9 @@ public:
 
     static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
 protected:
-    void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
-    void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes);
-    void ObjectsVelocityRenderPass(Frustum &frustumPlanes);
+    void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes);
+    void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes);
+    void ObjectsVelocityRenderPass(Frustum *frustumPlanes);
     void ObjectsFrustumDebugRenderPass();
     void ImGuiRenderPass();
 

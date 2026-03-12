@@ -3,6 +3,7 @@
 #include "Component/BaseComponent.h"
 #include "Component/Essential/TransformComponent.h"
 #include "Engine/Lighting.h"
+#include "GLWrapper/FrameBuffer.h"
 
 namespace Component {
 /**
@@ -22,14 +23,16 @@ public:
     PointLightSource* SetLightData(const PointLightData& newData);
     PointLightSource* SetLightData(glm::vec3 color, float linear, float quadratic, float radius);
 
+    void RenderShadowMap(GL::Shader& shadowShader);
+
     PointLightSource(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~PointLightSource() override = default;
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return {typeid(Component::Transform)}; }
 private:
-    Lighting::PointLightSource data;
-    GL::Cubemap shadowCubemap;
+    Lighting::PointLightSourceData data;
+    GL::FrameBuffer shadowFBO;
 
     void Awake() override;
     void OnDestroy() override;

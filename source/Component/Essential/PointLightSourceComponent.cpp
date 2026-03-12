@@ -23,6 +23,38 @@ Component::PointLightSource* Component::PointLightSource::SetLightData(glm::vec3
     return this;
 }
 
+void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
+{
+    glm::vec2 textureSize = this->shadowFBO.GetSize();
+    glViewport(0, 0, textureSize.x, textureSize.y);
+
+    float aspectRatio = textureSize.x / textureSize.y;
+    constexpr float nearPlane = 1.0f;
+    constexpr float farPlane = 35.0f;
+    glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
+
+    glm::mat4 shadowTransforms[6];
+    const glm::vec3& pos = this->data.position;
+    shadowTransforms[0] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+    shadowTransforms[1] = shadowProj * glm::lookAt(pos, pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+    shadowTransforms[2] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
+    shadowTransforms[3] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
+    shadowTransforms[4] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+    shadowTransforms[5] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+
+    this->shadowFBO.BindShaderFBO();
+    glClear(GL_DEPTH_BUFFER_BIT);
+    shadowShader.Use();
+
+    shadowShader.SetVec3("pointLightPos", pos);
+    shadowShader.SetFloat("farPlane", farPlane);
+
+    for (uint8_t i = 0; i < 6; i++)
+        shadowShader.SetMat4(std::format("shadowMatrices[{}]", i), shadowTransforms[i]);
+    
+    GameEngine::renderer->RenderShadowMap(shadowShader, nullptr);
+}
+
 void Component::PointLightSource::Awake()
 {
     if(!this->transform)

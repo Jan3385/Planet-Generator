@@ -42,6 +42,7 @@ public:
     FrameBuffer& operator=(FrameBuffer&&other) noexcept;
 
     void UpdateSize(const glm::uvec2& newSize);
+    glm::vec2 GetSize() const { return this->size; };
 
     bool HasDepthBuffer() const { return depthStorage != 0; };
     GLuint GetDepthStorageID() const { return depthStorage; };

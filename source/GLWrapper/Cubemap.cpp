@@ -6,7 +6,7 @@ GL::Cubemap::Cubemap() : ID(0) { }
 /// @param blurred if the textures should be blurred
 /// @param sRGB if the textures should be loaded within sRGB color space 
 GL::Cubemap::Cubemap(bool blurred, bool sRGB, glm::vec2 size)
-    : blurred(blurred)
+    : blurred(blurred), textureSize(size)
 {
     glGenTextures(1, &ID);
 
@@ -96,5 +96,6 @@ void GL::Cubemap::LoadCubemapFaces(const std::string filePaths[6], bool sRGB)
         
         Texture::FreeImageData(data);
     }
-    
+
+    this->textureSize = glm::vec2(width, height);
 }

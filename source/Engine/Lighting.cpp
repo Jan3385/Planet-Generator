@@ -56,16 +56,16 @@ void Lighting::UnregisterShaderLightUpdateCallback(GL::Shader *shader)
         this->shaderLightUpdateCallbackList.end());
 }
 
-std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> Lighting::GetClosestPointLights(const glm::vec3 &position)
+std::array<Lighting::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHTS> Lighting::GetClosestPointLights(const glm::vec3 &position)
 {
-    std::vector<Lighting::PointLightSource*> viableLights;
-    for (Lighting::PointLightSource* light : this->pointLightSources) {
+    std::vector<Lighting::PointLightSourceData*> viableLights;
+    for (Lighting::PointLightSourceData* light : this->pointLightSources) {
         viableLights.push_back(light);
     }
-    std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
+    std::array<Lighting::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
 
     // Sort viableLights by distance
-    std::sort(viableLights.begin(), viableLights.end(), [&position](Lighting::PointLightSource* a, Lighting::PointLightSource* b) {
+    std::sort(viableLights.begin(), viableLights.end(), [&position](Lighting::PointLightSourceData* a, Lighting::PointLightSourceData* b) {
         return glm::distance2(a->position, position) < glm::distance2(b->position, position);
     });
 
@@ -75,12 +75,12 @@ std::array<Lighting::PointLightSource *, Lighting::MAX_EFFECTING_POINT_LIGHTS> L
     return closestLights;
 }
 
-void Lighting::AddPointLightSource(PointLightSource *pointLight)
+void Lighting::AddPointLightSource(PointLightSourceData *pointLight)
 {
     this->pointLightSources.push_back(pointLight);
 }
 
-void Lighting::RemovePointLightSource(PointLightSource *pointLight)
+void Lighting::RemovePointLightSource(PointLightSourceData *pointLight)
 {
     this->pointLightSources.erase(
         std::remove(this->pointLightSources.begin(),
@@ -108,6 +108,7 @@ void Lighting::InitializeShadowMapping()
 
 void Lighting::RenderShadowDirectionalLight()
 {
+    // setup camera and matrices
     constexpr float OrtographicBoxSize = 35.0f;
     float nearPlane = 1.0f, farPlane = 300.0f;
     glm::mat4 lightProjection = glm::ortho(-OrtographicBoxSize, OrtographicBoxSize, -OrtographicBoxSize, OrtographicBoxSize, nearPlane, farPlane);
@@ -128,9 +129,11 @@ void Lighting::RenderShadowDirectionalLight()
     dlShadowShader.Use();
 
     Renderer::Frustum shadowFrustumPlanes = Renderer::CalculateFrustumPlanes(lightProjection, lightView);
-    GameEngine::renderer->RenderShadowMap(dlShadowShader, shadowFrustumPlanes);
+    GameEngine::renderer->RenderShadowMap(dlShadowShader, &shadowFrustumPlanes);
 
     dlShadowFBO.UnbindShaderFBO();
+
+    //TODO: render point lights
 
     glm::vec2 screenSize = GameEngine::renderer->GetScreenSize();
     glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));

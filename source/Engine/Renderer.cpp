@@ -24,15 +24,17 @@ void Renderer::StoreWindowSize(int width, int height)
     this->windowHeight = height;
 }
 
-void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes)
+void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes)
 {
     for(auto& callback : renderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
+        else
             callback->Render(projection, view);
     }
 }
 
-void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum &frustumPlanes)
+void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes)
 {
     Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
     if(skybox) {
@@ -42,7 +44,9 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     }
 
     for(auto& callback : noLightRenderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
+        else
             callback->Render(projection, view);
     }
 
@@ -63,22 +67,28 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     );
 
     for(auto& callback : transparentRenderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
+        else
             callback->Render(projection, view);
     }
 }
 
-void Renderer::ObjectsVelocityRenderPass(Frustum &frustumPlanes)
+void Renderer::ObjectsVelocityRenderPass(Frustum *frustumPlanes)
 {
     if(!this->taa) return;
 
     for(auto& callback : renderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderVelocity(this->taa->velocityShader);
+        else
             callback->RenderVelocity(this->taa->velocityShader);
     }
 
     for(auto& callback : noLightRenderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderVelocity(this->taa->velocityShader);
+        else
             callback->RenderVelocity(this->taa->velocityShader);
     }
 }
@@ -493,7 +503,7 @@ void Renderer::Update()
     this->geometryFramebuffer->BindShaderFBO();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(renderClearFlags);
-    ObjectGeometryRenderPass(projection, view, camPos, frustumPlanes);
+    ObjectGeometryRenderPass(projection, view, camPos, &frustumPlanes);
     this->geometryFramebuffer->UnbindShaderFBO();
 
     // 2. Light pass
@@ -516,7 +526,7 @@ void Renderer::Update()
     glEnable(GL_BLEND);
     this->geometryFramebuffer->CopyDepthToFBO(*this->postProcessFramebuffer);
     this->postProcessFramebuffer->BindShaderFBO();
-    ObjectsSpecialRenderPass(projection, view, camPos, frustumPlanes);
+    ObjectsSpecialRenderPass(projection, view, camPos, &frustumPlanes);
     GL::FrameBuffer *lastFBO = this->postProcessFramebuffer;
     
     // 3. Post-processing pass
@@ -563,7 +573,7 @@ void Renderer::Update()
         this->taa->velocityFBO.BindShaderFBO();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         this->taa->velocityShader.Use();
-        ObjectsVelocityRenderPass(frustumPlanes);
+        ObjectsVelocityRenderPass(&frustumPlanes);
         this->taa->velocityFBO.UnbindShaderFBO();
         glDisable(GL_DEPTH_TEST);
 
@@ -612,11 +622,13 @@ void Renderer::Update()
     firstFrame = false;
 }
 
-void Renderer::RenderShadowMap(GL::Shader &s, Frustum &frustumPlanes)
+void Renderer::RenderShadowMap(GL::Shader &s, Frustum *frustumPlanes)
 {
     glDisable(GL_CULL_FACE); // avoid peter panning
     for(auto& callback : renderCallbacks) {
-        if(callback->IsInsideFrustum(frustumPlanes))
+        if(frustumPlanes)
+            if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderDepthOnly(s);
+        else
             callback->RenderDepthOnly(s);
     }
     glEnable(GL_CULL_FACE);

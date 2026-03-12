@@ -14,7 +14,7 @@ public:
     static constexpr bool LOW_POLY_LIGHTING_FEEL = false;
     static constexpr int MAX_EFFECTING_POINT_LIGHTS = 16;
 
-    struct PointLightSource {
+    struct PointLightSourceData {
         glm::vec3 position;
 
         glm::vec3 color;
@@ -49,10 +49,10 @@ public:
     void RegisterShaderLightUpdateCallback(GL::Shader* shader);
     void UnregisterShaderLightUpdateCallback(GL::Shader* shader);
 
-    std::array<PointLightSource*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
+    std::array<PointLightSourceData*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
 
-    void AddPointLightSource(PointLightSource* pointLight);
-    void RemovePointLightSource(PointLightSource* pointLight);
+    void AddPointLightSource(PointLightSourceData* pointLight);
+    void RemovePointLightSource(PointLightSourceData* pointLight);
 
     void InitializeShadowMapping();
     void RenderShadowDirectionalLight();
@@ -66,7 +66,7 @@ private:
     GL::BasicShaderProgram dlShadowShader;
     GL::ComplexShaderProgram plShadowShader;
 
-    std::vector<PointLightSource*> pointLightSources;
+    std::vector<PointLightSourceData*> pointLightSources;
 
     constexpr static unsigned int SHADOW_MAP_SIZE = 2048;
     DirectionLightSource directionalLightSource;
