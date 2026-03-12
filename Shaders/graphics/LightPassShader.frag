@@ -7,7 +7,7 @@ uniform sampler2D gMetalRough;
 
 uniform sampler2D dlShadowMap;
 
-uniform samplerCube plShadowMap
+uniform samplerCube plShadowMap;
 
 #include "LightTypes.glsl"
 
@@ -61,7 +61,6 @@ float dlShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
 float plShadowCalculation(vec3 fragPos, float farPlane, vec3 lightPos, samplerCube plShadowMap){
     vec3 fragToLight = fragPos - lightPos;
 
-    closestDepth *= farPlane;
     float currentDepth = length(fragToLight);
 
     float bias = 0.05; 
