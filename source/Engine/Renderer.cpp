@@ -248,7 +248,8 @@ void Renderer::SetupLightShader()
     this->lightPassShader->SetInt("gNormal", 1);
     this->lightPassShader->SetInt("gAlbedo", 2);
     this->lightPassShader->SetInt("gMetalRough", 3);
-    this->lightPassShader->SetInt("shadowMap", 4);
+    this->lightPassShader->SetInt("dlShadowMap", 4);
+    this->lightPassShader->SetInt("plShadowMap", 5);
 }
 
 void Renderer::SetupPostProcessing()
