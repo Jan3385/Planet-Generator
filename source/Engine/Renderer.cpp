@@ -205,7 +205,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
-    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow", "Sampled Depth", "Calculated Depth" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));

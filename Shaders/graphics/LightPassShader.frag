@@ -132,18 +132,4 @@ void main()
         float shadow = dlShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
         FragColor = vec4(vec3(shadow), 1.0f);
     }
-    else if(SpecialRenderMode == 6) {
-        // shadow map sampled depth
-        vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-        projCoords = projCoords * 0.5 + 0.5;
-        float sampledDepth = texture(dlShadowMap, projCoords.xy).r;
-        FragColor = vec4(vec3(sampledDepth), 1.0f);
-    }
-    else if(SpecialRenderMode == 7) {
-        // calculated fragment depth in light space
-        vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-        projCoords = projCoords * 0.5 + 0.5;
-        float currentDepth = projCoords.z;
-        FragColor = vec4(vec3(currentDepth), 1.0f);
-    }
 }
