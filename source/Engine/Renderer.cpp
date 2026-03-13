@@ -27,10 +27,12 @@ void Renderer::StoreWindowSize(int width, int height)
 void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes)
 {
     for(auto& callback : renderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
-        else
+        }
+        else{
             callback->Render(projection, view);
+        }
     }
 }
 
@@ -44,10 +46,12 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     }
 
     for(auto& callback : noLightRenderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
-        else
+        }
+        else {
             callback->Render(projection, view);
+        }
     }
 
     // sort transparent objects
@@ -67,10 +71,12 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     );
 
     for(auto& callback : transparentRenderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->Render(projection, view);
-        else
+        }
+        else{
             callback->Render(projection, view);
+        }
     }
 }
 
@@ -79,17 +85,21 @@ void Renderer::ObjectsVelocityRenderPass(Frustum *frustumPlanes)
     if(!this->taa) return;
 
     for(auto& callback : renderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderVelocity(this->taa->velocityShader);
-        else
+        }
+        else{
             callback->RenderVelocity(this->taa->velocityShader);
+        }       
     }
 
     for(auto& callback : noLightRenderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderVelocity(this->taa->velocityShader);
-        else
+        }
+        else{
             callback->RenderVelocity(this->taa->velocityShader);
+        }
     }
 }
 
@@ -195,7 +205,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
-    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow", "Sampled Depth", "Calculated Depth" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
@@ -627,10 +637,12 @@ void Renderer::RenderShadowMap(GL::Shader &s, Frustum *frustumPlanes)
 {
     glDisable(GL_CULL_FACE); // avoid peter panning
     for(auto& callback : renderCallbacks) {
-        if(frustumPlanes)
+        if(frustumPlanes){
             if(callback->IsInsideFrustum(*frustumPlanes)) callback->RenderDepthOnly(s);
-        else
+        }
+        else{
             callback->RenderDepthOnly(s);
+        }
     }
     glEnable(GL_CULL_FACE);
 }
