@@ -1,12 +1,14 @@
 #include "Cubemap.h"
 
+#include "Debug/Logger.h"
+
 GL::Cubemap::Cubemap() : ID(0) { }
 
 /// @brief Creates an empty cubemap texture
 /// @param blurred if the textures should be blurred
 /// @param sRGB if the textures should be loaded within sRGB color space 
 GL::Cubemap::Cubemap(bool blurred, bool sRGB, glm::vec2 size)
-    : blurred(blurred), textureSize(size)
+    : textureSize(size), blurred(blurred)
 {
     glGenTextures(1, &ID);
 
@@ -48,6 +50,7 @@ GL::Cubemap::Cubemap(Cubemap &&other) noexcept
 {
     this->ID = other.ID;
     this->blurred = other.blurred;
+    this->textureSize = other.textureSize;
     other.ID = 0;
 }
 
@@ -57,6 +60,8 @@ GL::Cubemap &GL::Cubemap::operator=(GL::Cubemap &&other) noexcept
         if(this->ID != 0) glDeleteTextures(1, &this->ID);
         this->ID = other.ID;
         this->blurred = other.blurred;
+        this->textureSize = other.textureSize;
+
         other.ID = 0;
     }
     return *this;
@@ -64,6 +69,7 @@ GL::Cubemap &GL::Cubemap::operator=(GL::Cubemap &&other) noexcept
 
 void GL::Cubemap::Bind()
 {
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 }
 
@@ -83,19 +89,20 @@ void GL::Cubemap::LoadCubemapFaces(const std::string filePaths[6], bool sRGB)
 
     for (uint8_t i = 0; i < 6; i++)
     {
+        Debug::LogSpam("Loading cubemap face from " + filePaths[i]);
         data = Texture::LoadImageFromPath(filePaths[i], width, height, nrChannels, true);
 
         GLuint face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
         glTexImage2D(face, 0, internalFormat, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
         
         Texture::FreeImageData(data);
     }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
 
     this->textureSize = glm::vec2(width, height);
 }

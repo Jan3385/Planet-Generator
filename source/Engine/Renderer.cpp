@@ -10,6 +10,7 @@
 #include "Generator/MeshGenerator.h"
 #include "Component/BaseComponent.h"
 #include "Component/Planet/PlanetGenComponent.h"
+#include "Component/Essential/PointLightSourceComponent.h"
 #include "Math/Random.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)
@@ -520,14 +521,13 @@ void Renderer::Update()
     // 2. Light pass
     
     // 2.1 Shadow pass
-    GameEngine::lighting->RenderShadowDirectionalLight();
+    GameEngine::lighting->RenderShadowLights();
 
     // 2.2 Light accumulation pass
     glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, GameEngine::lighting->GetShadowMapTextureID());
+    GameEngine::lighting->BindShadowMaps(4);
     this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
     glClear(renderClearFlags);
@@ -674,6 +674,7 @@ void Renderer::SetupShaderValues()
     GL::Shader::AddShaderConstant("PLANET_SCALE", std::to_string(Component::PlanetGen::PLANET_SCALE));
     GL::Shader::AddShaderConstant("FXAA_ANTIALIASING", 
         this->antiAliasingMethod == EngineConfig::AntiAliasingMethod::FXAA ? "1" : "0");
+    GL::Shader::AddShaderConstant("plFarPlane", std::to_string(POINT_LIGHT_FAR_PLANE));
 
     GL::Shader::AddShaderVariable("mat4 projection", glm::mat4(1.0f));
     GL::Shader::AddShaderVariable("mat4 view", glm::mat4(1.0f));

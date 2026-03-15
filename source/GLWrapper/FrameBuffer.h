@@ -18,6 +18,7 @@ class FrameBuffer{
 public:
     FrameBuffer();
     FrameBuffer(DepthBufferMode mode);
+    FrameBuffer(DepthBufferMode mode, const glm::uvec2 size);
     ~FrameBuffer();
 
     void AddBufferTexture2D(GLenum internalFormat, GL::TextureFormat format, GLenum type);
@@ -47,6 +48,8 @@ public:
     bool HasDepthBuffer() const { return depthStorage != 0; };
     GLuint GetDepthStorageID() const { return depthStorage; };
     DepthBufferMode GetDepthBufferType() const { return this->depthBufferType; };
+
+    bool Initialized() const { return FBO != 0; };
 protected:
     GLuint FBO = 0;
 

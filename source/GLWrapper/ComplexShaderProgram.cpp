@@ -41,7 +41,9 @@ void GL::ComplexShaderProgram::Compile()
     {
         ShaderInfo f = this->uncompiledShaders.front();
 
-        std::string shaderCode = this->LoadFileWithShaderPreprocessor(f.path, this->name);
+        std::string shaderCode = this->LoadFileWithShaderPreprocessor(SHADER_DIRECTORY + f.path, this->name);
+        this->preprocessorAtFirstLine = true;
+        
         GLuint s = this->CompileShader(shaderCode.c_str(), this->name, f.type);
         glAttachShader(this->ID, s);
         shaderIDs.emplace(s);

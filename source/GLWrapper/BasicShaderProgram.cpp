@@ -10,7 +10,6 @@ using namespace GL;
 
 const std::string BasicShaderProgram::SHADER_EXTENSION_VERT = ".vert";
 const std::string BasicShaderProgram::SHADER_EXTENSION_FRAG = ".frag";
-const std::string BasicShaderProgram::SHADER_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "RenderShaders/";
 
 /// @brief compiles frag and vert shaders with the same name
 /// @param shaderPathName (eg. "lighting" or "folder/interesting_shader") -> lighting will try to load `lighting.frag` and `lighting.vert` unside the shader directory

@@ -54,10 +54,13 @@ void GameEngine::Run(const EngineConfig::Config& config)
     lighting->SetAmbientIntensity(0.02f);
 
     renderer = new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma);
+    GL::Shader::LogGLErrors("After Renderer Init");
+
     currentLevel = new Level();
     input = new Input();
 
     lighting->InitializeShadowMapping();
+    GL::Shader::LogGLErrors("After Shadow Mapping Init");
 
     Renderer::SetVSYNC(config.VSync);
 
@@ -66,6 +69,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     GL::BasicShaderProgram atmosphereShader("AtmosphereShader");
     lighting->RegisterShaderLightUpdateCallback(&atmosphereShader);
+    GL::Shader::LogGLErrors("After Engine Shaders");
 
     std::shared_ptr<GL::Mesh> cube;
     cube = MeshGenerator::GenerateCubeMesh();
@@ -85,6 +89,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
         "Images/Skybox/skybox-back.jpg"
     };
     skyboxRenderComp->LoadCubemap(cubemapPaths.data(), false, true);
+    GL::Shader::LogGLErrors("After Skybox Creation");
 
     // Normal obj
     Object::BaseObject *planet = currentLevel->CreateObject();
@@ -139,6 +144,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     modelRenderComp->SetMesh(modelMesh);
 
     modelObj->SetParent(planet);
+    GL::Shader::LogGLErrors("After Model Loading");
 
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
@@ -161,18 +167,21 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     lightObj->Disable();
     //lightObj2->Disable();
+    GL::Shader::LogGLErrors("After Creating Lights");
 
     // Camera obj
     Object::BaseObject *camObj = currentLevel->CreateObject();
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.5f, 2.5f));
     camObj->AddComponent<Component::Camera>();
     camObj->AddComponent<Component::Movement>();
+    GL::Shader::LogGLErrors("After Object Creation");
     // ---------
 
     Input::SetCursorMode(Input::CursorMode::Trapped);
 
     this->lastFrameTime = glfwGetTime();
 
+    GL::Shader::LogGLErrors("Before Main Loop");
     Debug::LogInfo("Starting main loop");
     while (!renderer->ShouldClose())
     {

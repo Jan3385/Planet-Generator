@@ -50,6 +50,8 @@ public:
     static void AddShaderVariable(const std::string& key, const uniformValue& value);
     static void UpdateShaderVariable(const std::string& key, const uniformValue& value);
 
+    static void LogGLErrors(const std::string& context);
+
     // Uniform setters
     void SetBool(const std::string &name, bool value);
     void SetUnsignedInt(const std::string &name, unsigned int value);
@@ -66,6 +68,8 @@ public:
     void SetUniformAny(const std::string &name, const T &value);
     void SetUniform(const std::string &name, const uniformValue &value);
 protected:
+    static const std::string SHADER_DIRECTORY;
+
     GLuint ID = 0;
 
     bool preprocessorAtFirstLine = true;

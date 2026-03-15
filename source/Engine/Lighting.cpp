@@ -56,16 +56,17 @@ void Lighting::UnregisterShaderLightUpdateCallback(GL::Shader *shader)
         this->shaderLightUpdateCallbackList.end());
 }
 
-std::array<Lighting::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHTS> Lighting::GetClosestPointLights(const glm::vec3 &position)
+std::array<Component::PointLightSource::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHTS> Lighting::GetClosestPointLights(const glm::vec3 &position)
 {
-    std::vector<Lighting::PointLightSourceData*> viableLights;
-    for (Lighting::PointLightSourceData* light : this->pointLightSources) {
-        viableLights.push_back(light);
+    using plSource = Component::PointLightSource::PointLightSourceData;
+    std::vector<plSource*> viableLights;
+    for (Component::PointLightSource* light : this->pointLightSources) {
+        viableLights.push_back(light->GetLightData());
     }
-    std::array<Lighting::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
+    std::array<plSource*, Lighting::MAX_EFFECTING_POINT_LIGHTS> closestLights = {nullptr};
 
     // Sort viableLights by distance
-    std::sort(viableLights.begin(), viableLights.end(), [&position](Lighting::PointLightSourceData* a, Lighting::PointLightSourceData* b) {
+    std::sort(viableLights.begin(), viableLights.end(), [&position](const plSource* a, const plSource* b) {
         return glm::distance2(a->position, position) < glm::distance2(b->position, position);
     });
 
@@ -75,12 +76,12 @@ std::array<Lighting::PointLightSourceData *, Lighting::MAX_EFFECTING_POINT_LIGHT
     return closestLights;
 }
 
-void Lighting::AddPointLightSource(PointLightSourceData *pointLight)
+void Lighting::AddPointLightSource(Component::PointLightSource *pointLight)
 {
     this->pointLightSources.push_back(pointLight);
 }
 
-void Lighting::RemovePointLightSource(PointLightSourceData *pointLight)
+void Lighting::RemovePointLightSource(Component::PointLightSource *pointLight)
 {
     this->pointLightSources.erase(
         std::remove(this->pointLightSources.begin(),
@@ -106,7 +107,7 @@ void Lighting::InitializeShadowMapping()
     plShadowShader.Compile();
 }
 
-void Lighting::RenderShadowDirectionalLight()
+void Lighting::RenderShadowLights()
 {
     // setup camera and matrices
     constexpr float OrtographicBoxSize = 35.0f;
@@ -138,10 +139,21 @@ void Lighting::RenderShadowDirectionalLight()
 
     dlShadowFBO.UnbindShaderFBO();
 
-    //TODO: render point lights
+    for (Component::PointLightSource* pointLight : this->pointLightSources) {
+        pointLight->RenderShadowMap(plShadowShader);
+    }
 
     glm::vec2 screenSize = GameEngine::renderer->GetScreenSize();
     glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
+}
+
+void Lighting::BindShadowMaps(uint8_t startIndex)
+{
+    glActiveTexture(GL_TEXTURE0 + startIndex);
+    glBindTexture(GL_TEXTURE_2D, this->dlShadowFBO.GetDepthStorageID());
+
+    //TODO: temp
+    this->pointLightSources[0]->BindShadowMap(startIndex + 1);
 }
 
 void Lighting::SetDirectionalLightSourceDirection(const glm::vec3 &direction)

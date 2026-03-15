@@ -13,6 +13,8 @@ uniform samplerCube plShadowMap;
 
 #get PI
 
+#get plFarPlane
+
 #get MAX_POINT_LIGHTS
 uniform int numPointLights;
 uniform PointLightPBR pointLights[MAX_POINT_LIGHTS];
@@ -105,7 +107,8 @@ void main()
 
     // point lights
     for(int i = 0; i < numPointLights; ++i){
-        light += CalculatePointLightPBR(pointLights[i], Normal, FragPos, viewDir, Albedo, metallic, roughness);
+        float shadow = plShadowCalculation(FragPos, plFarPlane, pointLights[i].position, plShadowMap);
+        light += CalculatePointLightPBR(pointLights[i], Normal, FragPos, viewDir, Albedo, metallic, roughness) * (1 - shadow); //TODO: cubemap too small?
     }
 
     // directional light

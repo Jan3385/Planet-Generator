@@ -9,29 +9,12 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "Component/Essential/PointLightSourceComponent.h"
+
 class Lighting {
 public:
     static constexpr bool LOW_POLY_LIGHTING_FEEL = false;
     static constexpr int MAX_EFFECTING_POINT_LIGHTS = 16;
-
-    struct PointLightSourceData {
-        glm::vec3 position;
-
-        glm::vec3 color;
-
-        float constant;
-        float linear;
-        float quadratic;
-
-        void Bind(GL::Shader& shader, int index) const{
-            std::string baseName = "pointLights[" + std::to_string(index) + "]";
-            shader.SetVec3(baseName + ".position", this->position);
-            shader.SetVec3(baseName + ".light", this->color);
-            shader.SetFloat(baseName + ".constant", this->constant);
-            shader.SetFloat(baseName + ".linear", this->linear);
-            shader.SetFloat(baseName + ".quadratic", this->quadratic);
-        };
-    };
 
     struct DirectionLightSource {
         glm::vec3 direction;
@@ -49,14 +32,14 @@ public:
     void RegisterShaderLightUpdateCallback(GL::Shader* shader);
     void UnregisterShaderLightUpdateCallback(GL::Shader* shader);
 
-    std::array<PointLightSourceData*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
+    std::array<Component::PointLightSource::PointLightSourceData*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
 
-    void AddPointLightSource(PointLightSourceData* pointLight);
-    void RemovePointLightSource(PointLightSourceData* pointLight);
+    void AddPointLightSource(Component::PointLightSource* pointLight);
+    void RemovePointLightSource(Component::PointLightSource* pointLight);
 
     void InitializeShadowMapping();
-    void RenderShadowDirectionalLight();
-    GLuint GetShadowMapTextureID() const { return this->dlShadowFBO.GetDepthStorageID(); }
+    void RenderShadowLights();
+    void BindShadowMaps(uint8_t startIndex);
 
     void SetDirectionalLightSourceDirection(const glm::vec3& direction);
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
@@ -66,7 +49,7 @@ private:
     GL::BasicShaderProgram dlShadowShader;
     GL::ComplexShaderProgram plShadowShader;
 
-    std::vector<PointLightSourceData*> pointLightSources;
+    std::vector<Component::PointLightSource*> pointLightSources;
 
     constexpr static unsigned int SHADOW_MAP_SIZE = 2048;
     DirectionLightSource directionalLightSource;

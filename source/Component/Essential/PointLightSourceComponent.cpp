@@ -4,6 +4,8 @@
 #include "Engine/Engine.h"
 #include "Debug/Logger.h"
 
+constexpr unsigned int SHADOW_MAP_SIZE = 512;
+
 Component::PointLightSource* Component::PointLightSource::SetLightData(const PointLightData &newData)
 {
     this->data.color = newData.color * newData.intensity;
@@ -25,12 +27,14 @@ Component::PointLightSource* Component::PointLightSource::SetLightData(glm::vec3
 
 void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
 {
+    if(!this->shadowFBO.Initialized()) return;
+
     glm::vec2 textureSize = this->shadowFBO.GetSize();
     glViewport(0, 0, textureSize.x, textureSize.y);
 
     float aspectRatio = textureSize.x / textureSize.y;
     constexpr float nearPlane = 1.0f;
-    constexpr float farPlane = 35.0f;
+    constexpr float farPlane = POINT_LIGHT_FAR_PLANE;
     glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
 
     glm::mat4 shadowTransforms[6];
@@ -47,12 +51,20 @@ void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
     shadowShader.Use();
 
     shadowShader.SetVec3("pointLightPos", pos);
-    shadowShader.SetFloat("farPlane", farPlane);
+    shadowShader.SetFloat("farPlane", POINT_LIGHT_FAR_PLANE);
 
     for (uint8_t i = 0; i < 6; i++)
         shadowShader.SetMat4(std::format("shadowMatrices[{}]", i), shadowTransforms[i]);
     
     GameEngine::renderer->RenderShadowMap(shadowShader, nullptr);
+
+    this->shadowFBO.UnbindShaderFBO();
+}
+
+void Component::PointLightSource::BindShadowMap(uint8_t textureIndex) const
+{
+    glActiveTexture(GL_TEXTURE0 + textureIndex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->shadowFBO.GetDepthStorageID());
 }
 
 void Component::PointLightSource::Awake()
@@ -62,22 +74,27 @@ void Component::PointLightSource::Awake()
 
     this->data.position = this->transform->GetPos();
 
-    GameEngine::lighting->AddPointLightSource(&this->data);
+    if(!this->shadowFBO.Initialized()){
+        this->shadowFBO = GL::FrameBuffer(GL::DepthBufferMode::Cubemap, glm::uvec2(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE));
+        this->shadowFBO.CompleteSetup();
+    }
+
+    GameEngine::lighting->AddPointLightSource(this);
 }
 
 void Component::PointLightSource::OnDestroy()
 {
-    GameEngine::lighting->RemovePointLightSource(&this->data);
+    GameEngine::lighting->RemovePointLightSource(this);
 }
 
 void Component::PointLightSource::OnEnable()
 {
-    GameEngine::lighting->AddPointLightSource(&this->data);
+    GameEngine::lighting->AddPointLightSource(this);
 }
 
 void Component::PointLightSource::OnDisable()
 {
-    GameEngine::lighting->RemovePointLightSource(&this->data);
+    GameEngine::lighting->RemovePointLightSource(this);
 }
 
 void Component::PointLightSource::Update()

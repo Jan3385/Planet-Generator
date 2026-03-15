@@ -1,4 +1,4 @@
-in vec3 FragPos;
+in vec4 FragPos;
 
 uniform vec3 pointLightPos;
 uniform float farPlane;

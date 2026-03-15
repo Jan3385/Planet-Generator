@@ -15,6 +15,7 @@ const std::string GL::Shader::SHADER_VERSION = "460";
 const std::string GL::Shader::SHADER_DEFAULT_DIRECTORY = "Shaders/";
 const std::string GL::Shader::SHADER_INCLUDE_EXTENSION = ".glsl";
 const std::string GL::Shader::SHADER_INCLUDE_DIRECTORY = Shader::SHADER_DEFAULT_DIRECTORY + "Includes/";
+const std::string GL::Shader::SHADER_DIRECTORY =         Shader::SHADER_DEFAULT_DIRECTORY + "RenderShaders/";
 
 std::unordered_map<std::string, std::string> GL::Shader::shaderConstants = {};
 std::unordered_map<std::string, GL::Shader::uniformValue> GL::Shader::shaderVariables = {};
@@ -32,10 +33,7 @@ GLuint GL::Shader::activeShaderID = 0;
 
 void GL::Shader::Use()
 {
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        Debug::LogError("[OnUSE-" + this->name + "] GL error: [" + std::to_string(err) + "]");
-    }
+    Shader::LogGLErrors("Before using " + this->name);
 
     if (ID == 0)
         Debug::LogFatal("Shader with ID 0 is invalid. Name: " + this->name);
@@ -106,6 +104,11 @@ std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePa
     std::stringstream source;
     try{
         shaderFile.open(filePath);
+
+        if (!shaderFile.is_open()) {
+            Debug::LogError(shaderName + ": Failed to open shader file: " + filePath);
+            return "";
+        }
         
         std::string line;
 
@@ -142,7 +145,7 @@ std::string GL::Shader::LoadFileWithShaderPreprocessor(const std::string &filePa
         }   
     }
     catch (const std::ifstream::failure& e) {
-        Debug::LogError(shaderName + " Error reading shader files: \n" + e.what());
+        Debug::LogError(shaderName + ": Error reading shader files: \n" + e.what());
     }
 
     return source.str();
@@ -189,6 +192,14 @@ void GL::Shader::AddShaderVariable(const std::string &key, const uniformValue &v
 void GL::Shader::UpdateShaderVariable(const std::string &key, const uniformValue &value)
 {
     shaderVariables[key] = value;
+}
+
+void GL::Shader::LogGLErrors(const std::string &context)
+{
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        Debug::LogError("[" + context + "] GL error: [" + std::to_string(err) + "]");
+    }
 }
 
 void GL::Shader::SetBool(const std::string &name, bool value)
