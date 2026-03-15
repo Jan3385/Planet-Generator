@@ -148,8 +148,6 @@ protected:
 
     void SetupShaderValues();
 
-    void BindNearestPointLights(const glm::vec3 &camPos);
-
     glm::mat4 JitterProjection(const glm::mat4& projection, const int frameIndex);
 
     GL::VertexArray *quadVAO;

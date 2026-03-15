@@ -165,7 +165,14 @@ void GameEngine::Run(const EngineConfig::Config& config)
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -1.5f, 2.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
-    lightObj->Disable();
+    Object::GameObject *shadowCaster = currentLevel->CreateGameObject();
+    shadowCaster->GetTransform()
+        ->SetPos(glm::vec3(0.0f, -1.1f, 2.1f))
+        ->SetScale(glm::vec3(0.2f));
+    shadowCaster->GetRenderComponent()->SetMesh(cube);
+    shadowCaster->GetRenderComponent()->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+
+    //lightObj->Disable();
     //lightObj2->Disable();
     GL::Shader::LogGLErrors("After Creating Lights");
 

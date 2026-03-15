@@ -32,20 +32,24 @@ public:
     void RegisterShaderLightUpdateCallback(GL::Shader* shader);
     void UnregisterShaderLightUpdateCallback(GL::Shader* shader);
 
-    std::array<Component::PointLightSource::PointLightSourceData*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
+    void RecalculateClosedPointLights(const glm::vec3& position);
+    void BindClosestPointLights(uint8_t startIndex, GL::Shader& lightPassShader);
+    void BindShadowMaps(uint8_t startIndex);
+    std::array<Component::PointLightSource*, MAX_EFFECTING_POINT_LIGHTS> GetClosestPointLights(const glm::vec3& position);
 
     void AddPointLightSource(Component::PointLightSource* pointLight);
     void RemovePointLightSource(Component::PointLightSource* pointLight);
 
     void InitializeShadowMapping();
     void RenderShadowLights();
-    void BindShadowMaps(uint8_t startIndex);
 
     void SetDirectionalLightSourceDirection(const glm::vec3& direction);
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
     void SetDirectionalLightSource(const glm::vec3& direction,
                                    const glm::vec3& color);  
 private:
+    std::array<Component::PointLightSource*, MAX_EFFECTING_POINT_LIGHTS> closestPLights;
+
     GL::BasicShaderProgram dlShadowShader;
     GL::ComplexShaderProgram plShadowShader;
 

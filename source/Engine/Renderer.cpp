@@ -260,7 +260,10 @@ void Renderer::SetupLightShader()
     this->lightPassShader->SetInt("gAlbedo", 2);
     this->lightPassShader->SetInt("gMetalRough", 3);
     this->lightPassShader->SetInt("dlShadowMap", 4);
-    this->lightPassShader->SetInt("plShadowMap", 5);
+
+    for(int i = 0; i < Lighting::MAX_EFFECTING_POINT_LIGHTS; ++i){
+        this->lightPassShader->SetInt(std::format("plShadowMap[{}]", i), 5 + i);
+    }
 }
 
 void Renderer::SetupPostProcessing()
@@ -447,20 +450,6 @@ void Renderer::SetGammaCorrection(float value)
     GL::Shader::UpdateShaderVariable("float gamma", value);
 }
 
-void Renderer::BindNearestPointLights(const glm::vec3 &camPos)
-{
-    auto closestPLights = GameEngine::lighting->GetClosestPointLights(camPos);
-    int pointLightCount = 0;
-    this->GetLightPassShader().Use();
-    for (auto* pointLight : closestPLights) {
-        if (pointLight != nullptr) {
-            pointLight->Bind(this->GetLightPassShader(), pointLightCount);
-            pointLightCount++;
-        }
-    }
-    this->GetLightPassShader().SetInt("numPointLights", pointLightCount);
-}
-
 /// @brief Renders the scene
 void Renderer::Update()
 {
@@ -474,7 +463,8 @@ void Renderer::Update()
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
     // bind N nearest point lights to the shader
-    this->BindNearestPointLights(camera->GetPosition());
+    GameEngine::lighting->RecalculateClosedPointLights(camera->GetPosition());
+    GameEngine::lighting->BindClosestPointLights(0, this->GetLightPassShader());
 
     // setup projections etc
     glm::mat4 projection = camera->GetProjection();

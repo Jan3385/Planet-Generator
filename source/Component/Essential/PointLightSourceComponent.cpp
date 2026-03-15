@@ -33,7 +33,7 @@ void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
     glViewport(0, 0, textureSize.x, textureSize.y);
 
     float aspectRatio = textureSize.x / textureSize.y;
-    constexpr float nearPlane = 1.0f;
+    constexpr float nearPlane = 0.1f;
     constexpr float farPlane = POINT_LIGHT_FAR_PLANE;
     glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
 

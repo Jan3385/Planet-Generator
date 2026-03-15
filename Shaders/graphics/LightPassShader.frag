@@ -7,8 +7,6 @@ uniform sampler2D gMetalRough;
 
 uniform sampler2D dlShadowMap;
 
-uniform samplerCube plShadowMap;
-
 #include "LightTypes.glsl"
 
 #get PI
@@ -18,6 +16,7 @@ uniform samplerCube plShadowMap;
 #get MAX_POINT_LIGHTS
 uniform int numPointLights;
 uniform PointLightPBR pointLights[MAX_POINT_LIGHTS];
+uniform samplerCube plShadowMap[MAX_POINT_LIGHTS];
 uniform DirectionLightPBR directionalLight;
 
 #var mat4 dirLightSpaceMatrix
@@ -107,8 +106,8 @@ void main()
 
     // point lights
     for(int i = 0; i < numPointLights; ++i){
-        float shadow = plShadowCalculation(FragPos, plFarPlane, pointLights[i].position, plShadowMap);
-        light += CalculatePointLightPBR(pointLights[i], Normal, FragPos, viewDir, Albedo, metallic, roughness) * (1 - shadow); //TODO: cubemap too small?
+        float shadow = plShadowCalculation(FragPos, plFarPlane, pointLights[i].position, plShadowMap[i]);
+        light += CalculatePointLightPBR(pointLights[i], Normal, FragPos, viewDir, Albedo, metallic, roughness) * (1 - shadow);
     }
 
     // directional light
