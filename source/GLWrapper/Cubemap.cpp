@@ -29,7 +29,7 @@ GL::Cubemap::Cubemap(bool blurred, bool sRGB, glm::vec2 size)
 }
 
 /// @brief Creates a cubemap texture from 6 image files
-/// @param filePaths array of 6 file paths with file names (ex. ["/images/banana.png", ..])
+/// @param filePaths array of 6 file paths with file names (ex. ["images/banana.png", ..])
 /// @param blurred if the textures should be blurred
 /// @param sRGB if the textures should be loaded within sRGB color space
 /// @note Order of images: right, left, bottom, top, front, back
@@ -74,7 +74,7 @@ void GL::Cubemap::Bind()
 }
 
 /// @brief Loads all 6 cubemap faces from 6 image files
-/// @param filePaths array of 6 file paths with file names (ex. ["/images/banana.png", ..])
+/// @param filePaths array of 6 file paths with file names (ex. ["images/banana.png", ..])
 /// @param sRGB if the textures should be loaded within sRGB color space
 /// @note Order of images: right, left, bottom, top, front, back
 void GL::Cubemap::LoadCubemapFaces(const std::string filePaths[6], bool sRGB)

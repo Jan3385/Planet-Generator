@@ -199,7 +199,7 @@ void GL::Texture::BindToUnit(uint8_t unit)
 }
 
 /// @brief Loads raw pixel data from an image file
-/// @param filePath path and file to use (ex. "/images/banana.png")
+/// @param filePath path and file to use (ex. "images/banana.png")
 /// @param width reference to a width variable to load into
 /// @param height reference to a height variable to load into
 /// @param nrChannels reference to an nrChannels variable to load into
