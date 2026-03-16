@@ -33,7 +33,7 @@ void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
     glViewport(0, 0, textureSize.x, textureSize.y);
 
     float aspectRatio = textureSize.x / textureSize.y;
-    constexpr float nearPlane = 0.1f;
+    constexpr float nearPlane = 0.05f;
     constexpr float farPlane = POINT_LIGHT_FAR_PLANE;
     glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
 
@@ -44,7 +44,7 @@ void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
     shadowTransforms[2] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f));
     shadowTransforms[3] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f));
     shadowTransforms[4] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
-    shadowTransforms[5] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 1.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
+    shadowTransforms[5] = shadowProj * glm::lookAt(pos, pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f));
 
     this->shadowFBO.BindShaderFBO();
     glClear(GL_DEPTH_BUFFER_BIT);

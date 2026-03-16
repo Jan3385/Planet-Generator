@@ -157,18 +157,18 @@ void GameEngine::Run(const EngineConfig::Config& config)
     //floor->Disable();
 
     // lights
-    Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0));
-    lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.8f, 0.8f, 0.8f));
+    Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), 3.5f);
+    lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(1.0f, -1.2f, 2.5f));
     lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
-    Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255));
-    lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -1.5f, 2.5f));
+    Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255), 2.5f);
+    lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -1.2f, 2.5f));
     lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
 
     Object::GameObject *shadowCaster = currentLevel->CreateGameObject();
     shadowCaster->GetTransform()
-        ->SetPos(glm::vec3(0.0f, -1.1f, 2.1f))
-        ->SetScale(glm::vec3(0.2f));
+        ->SetPos(glm::vec3(0.5f, -1.5f, 2.8f))
+        ->SetScale(glm::vec3(0.3f));
     shadowCaster->GetRenderComponent()->SetMesh(cube);
     shadowCaster->GetRenderComponent()->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
 
@@ -181,6 +181,13 @@ void GameEngine::Run(const EngineConfig::Config& config)
     camObj->AddComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, 0.5f, 2.5f));
     camObj->AddComponent<Component::Camera>();
     camObj->AddComponent<Component::Movement>();
+
+    // makes the player a point light source
+    //Component::PointLightSource *pointLight = camObj->AddComponent<Component::PointLightSource>();
+    //Component::PointLightSource::PointLightData lightData;
+    //lightData.color = glm::vec3(1.0f, 1.0f, 1.0f);
+    //pointLight->SetLightData(lightData);
+
     GL::Shader::LogGLErrors("After Object Creation");
     // ---------
 

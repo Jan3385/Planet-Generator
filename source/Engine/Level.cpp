@@ -25,7 +25,7 @@ Object::GameObject *Level::CreateGameObject()
     return gameObjectPtr;
 }
 
-Object::BaseObject *Level::CreateLightObject(Math::RGB color)
+Object::BaseObject *Level::CreateLightObject(Math::RGB color, float intensity)
 {
     auto lightObject = std::make_unique<Object::BaseObject>(this);
 
@@ -35,7 +35,7 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color)
 
     Component::ColorMeshRender *lightRenderer = lightObject->AddComponent<Component::ColorMeshRender>();
         
-    lightRenderer->color = glm::vec3(color.ToVec3());
+    lightRenderer->color = glm::vec3(color.ToVec3()) * intensity;
 
     Component::PointLightSource *pointLight = lightObject->AddComponent<Component::PointLightSource>();
     

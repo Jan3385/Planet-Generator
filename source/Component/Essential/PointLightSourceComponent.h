@@ -4,7 +4,7 @@
 #include "Component/Essential/TransformComponent.h"
 #include "GLWrapper/FrameBuffer.h"
 
-constexpr float POINT_LIGHT_FAR_PLANE = 35.0f;
+constexpr float POINT_LIGHT_FAR_PLANE = 50.0f;
 
 namespace Component {
 /**

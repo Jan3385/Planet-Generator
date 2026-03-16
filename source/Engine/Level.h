@@ -10,7 +10,7 @@ class Level {
 public:
     Object::BaseObject* CreateObject();
     Object::GameObject* CreateGameObject();
-    Object::BaseObject* CreateLightObject(Math::RGB color);
+    Object::BaseObject* CreateLightObject(Math::RGB color, float intensity = 1.0f);
     void ObjectDestroy(Object::BaseObject* object);
 
     void Update();

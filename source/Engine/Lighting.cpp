@@ -171,9 +171,10 @@ void Lighting::BindShadowMaps(uint8_t startIndex)
     glActiveTexture(GL_TEXTURE0 + startIndex);
     glBindTexture(GL_TEXTURE_2D, this->dlShadowFBO.GetDepthStorageID());
 
+    int i = 0;
     for (Component::PointLightSource* pointLight : this->closestPLights) {
         if(pointLight != nullptr)
-            pointLight->BindShadowMap(startIndex + 1);
+            pointLight->BindShadowMap(startIndex + 1 + i++);
     }
 }
 

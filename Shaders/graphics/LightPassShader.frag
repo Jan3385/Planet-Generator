@@ -59,30 +59,35 @@ float dlShadowCalculation(vec4 fragPosLightSpace, vec3 Normal, vec3 lightDir){
     return shadow;
 }
 
-float plShadowCalculation(vec3 fragPos, float farPlane, vec3 lightPos, samplerCube plShadowMap){
+#define PL_SHADOW_SAMPLES 20
+vec3 sampleOffsetDirections[PL_SHADOW_SAMPLES] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);  
+
+float plShadowCalculation(vec3 fragPos, vec3 viewPos, float farPlane, vec3 lightPos, samplerCube plShadowMap){
     vec3 fragToLight = fragPos - lightPos;
 
     float currentDepth = length(fragToLight);
 
-    float bias = 0.05; 
     float shadow = 0.0;
 
-    float samples = 4.0;
-    float offset  = 0.1;
-    for(float x = -offset; x < offset; x += offset / (samples * 0.5))
-    {
-        for(float y = -offset; y < offset; y += offset / (samples * 0.5))
-        {
-            for(float z = -offset; z < offset; z += offset / (samples * 0.5))
-            {
-                float pfcDepth = texture(plShadowMap, fragToLight + vec3(x, y, z)).r;
-                pfcDepth *= farPlane;
-                shadow += currentDepth - bias > pfcDepth ? 1.0 : 0.0;
-            }
-        }
+    float bias = 0.05; 
+    float viewDistance = length(viewPos - fragPos);
+    float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
+    for(int i = 0; i < PL_SHADOW_SAMPLES; ++i){
+        float closestDepth = texture(plShadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= farPlane;
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
     }
+    
 
-    shadow /= (samples * samples * samples);
+    shadow /= float(PL_SHADOW_SAMPLES);
 
     return shadow;
 }
@@ -106,7 +111,7 @@ void main()
 
     // point lights
     for(int i = 0; i < numPointLights; ++i){
-        float shadow = plShadowCalculation(FragPos, plFarPlane, pointLights[i].position, plShadowMap[i]);
+        float shadow = plShadowCalculation(FragPos, viewPos, plFarPlane, pointLights[i].position, plShadowMap[i]);
         light += CalculatePointLightPBR(pointLights[i], Normal, FragPos, viewDir, Albedo, metallic, roughness) * (1 - shadow);
     }
 
