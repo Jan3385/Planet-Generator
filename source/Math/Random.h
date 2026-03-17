@@ -26,8 +26,8 @@ public:
     void SetSeed(uint32_t seed);
     uint32_t GetSeed() const { return seed; }
 
-    float GetFloat(float min, float max);
-    int32_t GetInt(int32_t min, int32_t max);
+    float GetFloat(float min = std::numeric_limits<float>::min(), float max = std::numeric_limits<float>::max());
+    int32_t GetInt(int32_t min = std::numeric_limits<int32_t>::min(), int32_t max = std::numeric_limits<int32_t>::max());
     bool GetBool();
     bool GetBool(float trueProbability);
 

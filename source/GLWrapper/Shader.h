@@ -62,7 +62,9 @@ public:
     void SetVec2(const std::string &name, glm::vec2 value);
     void SetIVec2(const std::string &name, glm::ivec2 value);
     void SetVec3(const std::string &name, glm::vec3 value);
+    void SetVec3(const std::string &name, glm::vec3* first, int count);
     void SetVec4(const std::string &name, glm::vec4 value);
+    void SetVec4(const std::string &name, glm::vec4* first, int count);
 
     template<typename T>
     void SetUniformAny(const std::string &name, const T &value);

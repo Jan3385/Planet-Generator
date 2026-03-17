@@ -246,9 +246,19 @@ void GL::Shader::SetVec3(const std::string &name, glm::vec3 value)
     glUniform3fv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
 }
 
+void GL::Shader::SetVec3(const std::string &name, glm::vec3 *first, int count)
+{
+    glUniform3fv(this->GetUniformLocation(name.c_str()), count, &first[0][0]);
+}
+
 void GL::Shader::SetVec4(const std::string &name, glm::vec4 value)
 {
     glUniform4fv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
+}
+
+void GL::Shader::SetVec4(const std::string &name, glm::vec4 *first, int count)
+{
+    glUniform4fv(this->GetUniformLocation(name.c_str()), count, &first[0][0]);
 }
 
 void GL::Shader::SetUniform(const std::string &name, const uniformValue &value)

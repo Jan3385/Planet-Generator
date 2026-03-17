@@ -196,6 +196,8 @@ void GL::Texture::BindToUnit(uint8_t unit)
 
     glActiveTexture(GL_TEXTURE0 + unit);
     this->Bind();
+
+    glActiveTexture(GL_TEXTURE0);
 }
 
 /// @brief Loads raw pixel data from an image file

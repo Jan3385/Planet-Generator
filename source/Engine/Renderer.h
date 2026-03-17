@@ -48,6 +48,14 @@ public:
 
         friend class Renderer;
     };
+    struct SSAO_Components{
+        GL::Texture ssaoNoiseTexture;
+
+        GL::FrameBuffer ssaoFBO;
+        GL::BasicShaderProgram ssaoShader;
+        GL::FrameBuffer ssaoBlurFBO;
+        GL::BasicShaderProgram ssaoBlurShader;
+    };
     struct MLAA_Components{
         GL::FrameBuffer edgeFBO;
         GL::BasicShaderProgram edgeShader;
@@ -174,6 +182,7 @@ private:
 
     MLAA_Components* GenerateMLAAComponents();
     TAA_Components* GenerateTAAComponents();
+    SSAO_Components* GenerateSSAOComponents();
 
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;
@@ -189,6 +198,9 @@ private:
 
     MLAA_Components *mlaa = nullptr;
     TAA_Components *taa = nullptr;
+
+    SSAO_Components *ssao = nullptr;
+    GL::Texture noSSAOTexture;
 
     int windowWidth = 800;
     int windowHeight = 600;

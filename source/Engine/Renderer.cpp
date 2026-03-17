@@ -206,7 +206,7 @@ void Renderer::DrawImGuiWindows()
         GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
     }
     
-    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow" };
+    const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow", "Ambient Occlusion" };
     static int currentRenderMode = 0;
     if(ImGui::Combo("Render Mode", &currentRenderMode, renderModes, IM_ARRAYSIZE(renderModes))){
         this->SetSpecialRenderMode(static_cast<SpecialRenderMode>(currentRenderMode));
@@ -259,10 +259,11 @@ void Renderer::SetupLightShader()
     this->lightPassShader->SetInt("gNormal", 1);
     this->lightPassShader->SetInt("gAlbedo", 2);
     this->lightPassShader->SetInt("gMetalRough", 3);
-    this->lightPassShader->SetInt("dlShadowMap", 4);
+    this->lightPassShader->SetInt("SSAO", 4);
+    this->lightPassShader->SetInt("dlShadowMap", 5);
 
     for(int i = 0; i < Lighting::MAX_EFFECTING_POINT_LIGHTS; ++i){
-        this->lightPassShader->SetInt(std::format("plShadowMap[{}]", i), 5 + i);
+        this->lightPassShader->SetInt(std::format("plShadowMap[{}]", i), 6 + i);
     }
 }
 
@@ -344,6 +345,79 @@ Renderer::TAA_Components *Renderer::GenerateTAAComponents()
     return taa;
 }
 
+// helper function lerp
+float lerp(float a, float b, float t) { return a + t * (b - a); };
+
+Renderer::SSAO_Components *Renderer::GenerateSSAOComponents()
+{
+    SSAO_Components *ssao = new SSAO_Components();
+
+    // generate SSAO kernel
+    Math::Random r(1234);
+    std::array<glm::vec3, 64> ssaoKernel;
+    for (uint8_t i = 0; i < 64; ++i){
+        glm::vec3 sample(
+            r.GetFloat(-1.0f, 1.0f),
+            r.GetFloat(-1.0f, 1.0f),
+            r.GetFloat(0.0f, 1.0f)
+        );
+        sample = glm::normalize(sample);
+        sample *= r.GetFloat(0.0f, 1.0f);
+
+        float scale = static_cast<float>(i) / 64.0f;
+        scale = lerp(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+
+        ssaoKernel[i] = sample;
+    }
+
+    std::vector<glm::vec3> ssaoNoise;
+    for (uint8_t i = 0; i < 16; ++i){
+        glm::vec3 noise(
+            r.GetFloat(-1.0f, 1.0f),
+            r.GetFloat(-1.0f, 1.0f),
+            0.0f
+        );
+        ssaoNoise.push_back(noise);
+    }
+
+    // create noise texture
+    ssao->ssaoNoiseTexture = GL::Texture(GL::TextureWrapMode::Repeat, GL::MipmapMode::None, false);
+    ssao->ssaoNoiseTexture.GenTexture(GL::TextureFormat::RGB, GL_RGB16F, GL_FLOAT, 
+        reinterpret_cast<unsigned char*>(ssaoNoise.data()), 
+        4, 4
+    );
+
+    // create shaders
+    ssao->ssaoShader = GL::BasicShaderProgram(
+        "post-processing/SSAO/ssaoVert.vert",
+        "post-processing/SSAO/ssaoShader.frag",
+        "SSAO Pass FBO"
+    );
+    ssao->ssaoShader.SetVec3("samples", ssaoKernel.data(), 64);
+    ssao->ssaoShader.SetInt("gPosition", 0);
+    ssao->ssaoShader.SetInt("gNormal", 1);
+    ssao->ssaoShader.SetInt("texNoise", 2);
+
+    ssao->ssaoBlurShader = GL::BasicShaderProgram(
+        "post-processing/SSAO/ssaoVert.vert",
+        "post-processing/SSAO/ssaoBlur.frag",
+        "SSAO Blur Pass FBO"
+    );
+    ssao->ssaoBlurShader.SetInt("ssaoInput", 0);
+
+    // create FBOs
+    ssao->ssaoFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    ssao->ssaoFBO.AddBufferTexture2D(GL_RED, GL::TextureFormat::RED, GL_FLOAT);
+    ssao->ssaoFBO.CompleteSetup();
+
+    ssao->ssaoBlurFBO = GL::FrameBuffer(GL::DepthBufferMode::None);
+    ssao->ssaoBlurFBO.AddBufferTexture2D(GL_RED, GL::TextureFormat::RED, GL_FLOAT);
+    ssao->ssaoBlurFBO.CompleteSetup();
+
+    return ssao;
+}
+
 Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma)
  : antiAliasingMethod(antialiasing)
 {
@@ -405,6 +479,11 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
         this->taa = this->GenerateTAAComponents();
     }
 
+    this->ssao = this->GenerateSSAOComponents();
+    this->noSSAOTexture = GL::Texture(GL::TextureWrapMode::Repeat, GL::MipmapMode::None, false);
+    unsigned char data = 255;
+    this->noSSAOTexture.GenTexture(GL::TextureFormat::RED, GL_RED, GL_FLOAT, &data, 1, 1);
+
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
         Debug::LogError("OpenGL error during renderer initialization: " + std::to_string(err));
@@ -431,6 +510,7 @@ Renderer::~Renderer()
 
     if(this->mlaa) delete this->mlaa;
     if(this->taa) delete this->taa;
+    if(this->ssao) delete this->ssao;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -508,6 +588,35 @@ void Renderer::Update()
     ObjectGeometryRenderPass(projection, view, camPos, &frustumPlanes);
     this->geometryFramebuffer->UnbindShaderFBO();
 
+    // 1.5 SSAO pass
+    if(this->ssao){
+        this->ssao->ssaoFBO.UpdateSize(screenSize);
+        this->ssao->ssaoBlurFBO.UpdateSize(screenSize);
+
+        // SSAO rendering -------
+        this->ssao->ssaoFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->ssao->ssaoShader.Use();
+
+        // gPosition, gNormal, ...
+        this->geometryFramebuffer->BindTextures();
+        this->ssao->ssaoNoiseTexture.BindToUnit(2);
+        this->GLDrawScreenQuad();
+        this->ssao->ssaoFBO.UnbindShaderFBO();
+
+        // SSAO blur ------------
+        this->ssao->ssaoBlurFBO.BindShaderFBO();
+        glClear(GL_COLOR_BUFFER_BIT);
+        this->ssao->ssaoBlurShader.Use();
+        this->ssao->ssaoFBO.BindTextures();
+        this->GLDrawScreenQuad();
+        this->ssao->ssaoBlurFBO.UnbindShaderFBO();
+
+        this->ssao->ssaoBlurFBO.BindTextures(4);
+    }else{
+        this->noSSAOTexture.BindToUnit(4);
+    }
+
     // 2. Light pass
     
     // 2.1 Shadow pass
@@ -517,7 +626,7 @@ void Renderer::Update()
     glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
-    GameEngine::lighting->BindShadowMaps(4);
+    GameEngine::lighting->BindShadowMaps(5);
     this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
     glClear(renderClearFlags);

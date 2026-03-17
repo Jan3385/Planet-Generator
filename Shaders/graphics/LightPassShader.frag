@@ -4,6 +4,7 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gMetalRough;
+uniform sampler2D SSAO;
 
 uniform sampler2D dlShadowMap;
 
@@ -104,7 +105,7 @@ void main()
     float metallic = MetalRough.x;
     float roughness = MetalRough.y;
 
-    float ao = 1.0; //TODO: add SSAO
+    float ao = texture(SSAO, TexCoords).r;
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 light = vec3(0.0);
@@ -138,5 +139,8 @@ void main()
     else if(SpecialRenderMode == 5){
         float shadow = dlShadowCalculation(fragPosLightSpace, Normal, directionalLight.direction);
         FragColor = vec4(vec3(shadow), 1.0f);
+    }
+    else if(SpecialRenderMode == 6){
+        FragColor = vec4(vec3(ao), 1.0f);
     }
 }
