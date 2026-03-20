@@ -11,7 +11,7 @@ uniform vec3 samples[KERNEL_SIZE];
 #var mat4 view
 
 #var vec2 screenSize
-const vec2 noiseScale = screenSize / 4.0;
+vec2 noiseScale = screenSize / 4.0;
 
 out float FragColor;
 
