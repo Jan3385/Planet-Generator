@@ -115,7 +115,7 @@ target_link_libraries(PlanetGenerator
 
 set(SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/Shaders/graphics")
 set(INCLUDE_SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/Shaders/include")
-set(IMAGES_FOLDER "${CMAKE_SOURCE_DIR}/Images")
+set(IMAGES_FOLDER "${CMAKE_SOURCE_DIR}/images")
 set(MODEL_FOLDER "${CMAKE_SOURCE_DIR}/Models")
 
 add_custom_target(copy_assets ALL
