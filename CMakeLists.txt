@@ -1,19 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+include (FetchContent)
 
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 endif()
 
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-  message(FATAL_ERROR "CMAKE_TOOLCHAIN_FILE is not defined. Make sure you specify it with DCMAKE_TOOLCHAIN_FILE")
+  message(FATAL_ERROR "CMAKE_TOOLCHAIN_FILE is not defined. Make sure you specify it with -DCMAKE_TOOLCHAIN_FILE")
 endif()
+
+project(PlanetGenerator LANGUAGES C CXX)
 
 message(STATUS "triplet: ${VCPKG_TARGET_TRIPLET}")
 message(STATUS "Using generator: ${CMAKE_GENERATOR}")
@@ -30,8 +31,6 @@ target_include_directories(
   external/glad/include
 )
 
-include (FetchContent)
-
 # ImGui
 message(STATUS "Fetching ImGui library")
 FetchContent_Declare(
@@ -45,7 +44,6 @@ add_library(imgui STATIC
   ${imgui_SOURCE_DIR}/imgui_draw.cpp
   ${imgui_SOURCE_DIR}/imgui_tables.cpp
   ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-  ${imgui_SOURCE_DIR}/imgui_demo.cpp
   ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
   ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 )
@@ -54,8 +52,6 @@ target_include_directories(imgui PUBLIC
   ${imgui_SOURCE_DIR}/backends
 )
 target_link_libraries(imgui PUBLIC glfw)
-
-project(PlanetGenerator LANGUAGES C CXX)
 
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
@@ -72,14 +68,18 @@ target_include_directories(PlanetGenerator
 find_package(glm CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+
 if(UNIX)
+  # Static linking on Linux
+  target_link_options(PlanetGenerator PRIVATE -static-libgcc -static-libstdc++)
+
   find_package(PkgConfig QUIET)
 
-  if (NOT PkgConfig_FOUND)
+  if(NOT PkgConfig_FOUND)
     message(FATAL_ERROR "PkgConfig not found, please install it.")
   endif()
 
-  pkg_check_modules(WAYLAND REQUIRED wayland-client)
+  pkg_check_modules(WAYLAND QUIET wayland-client)
 
   if(WAYLAND_FOUND)
     message(STATUS "Running under Wayland, checking for system GLFW")
@@ -90,19 +90,20 @@ if(UNIX)
       message(FATAL_ERROR "GLFW with Wayland support not found! Please install GLFW with Wayland support.")
     else()
       message(STATUS "System GLFW found")
-      include_directories(${GLFW3_INCLUDE_DIRS})
-      link_directories(${GLFW3_LIBRARY_DIRS})
+      target_include_directories(PlanetGenerator PRIVATE ${GLFW3_INCLUDE_DIRS})
+      target_link_directories(PlanetGenerator PRIVATE ${GLFW3_LIBRARY_DIRS})
     endif()
   else()
+    message(STATUS "Wayland not found, using vcpkg GLFW")
     find_package(glfw3 CONFIG REQUIRED)
   endif()
 
-  list(APPEND EXTRA_LIBS m)
+  target_link_libraries(PlanetGenerator PRIVATE m)
 elseif(WIN32)
   find_package(glfw3 CONFIG REQUIRED)
 endif()
 
-target_link_libraries( PlanetGenerator
+target_link_libraries(PlanetGenerator
   PRIVATE
     glad
     glm::glm
@@ -119,13 +120,15 @@ set(MODEL_FOLDER "${CMAKE_SOURCE_DIR}/Models")
 
 add_custom_target(copy_assets ALL
   # Shaders
-  COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Shaders
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Shaders/RenderShaders
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${INCLUDE_SHADERS_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Shaders/Includes
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/Shaders
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_FOLDER} ${CMAKE_BINARY_DIR}/Shaders/RenderShaders
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${INCLUDE_SHADERS_FOLDER} ${CMAKE_BINARY_DIR}/Shaders/Includes
   # Images
-  COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Images
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${IMAGES_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Images
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/Images
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${IMAGES_FOLDER} ${CMAKE_BINARY_DIR}/Images
   # Models
-  COMMAND ${CMAKE_COMMAND} -E rm -rf $<TARGET_FILE_DIR:PlanetGenerator>/Models
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODEL_FOLDER} $<TARGET_FILE_DIR:PlanetGenerator>/Models
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/Models
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODEL_FOLDER} ${CMAKE_BINARY_DIR}/Models
 )
+
+add_dependencies(PlanetGenerator copy_assets)

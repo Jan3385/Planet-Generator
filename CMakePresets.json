@@ -2,41 +2,55 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "debug",
-            "hidden": false,
-            "description": "Debug configuration",
+            "name": "base",
+            "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
-                    "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Wno-unused-parameter -g -fno-omit-frame-pointer",
-                    "CMAKE_CXX_FLAGS_DEBUG": "-g -fno-omit-frame-pointer",
-                    "CMAKE_VERBOSE_MAKEFILE": "ON",
-                    "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
+                "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic -Wno-unused-parameter",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -fno-omit-frame-pointer"
+            }
+        },
+        {
+            "name": "debug",
+            "inherits": "base",
+            "hidden": false,
+            "description": "Debug configuration - Windows",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
             }
         },
         {
             "name": "release",
+            "inherits": "base",
             "hidden": false,
-            "description": "Release configuration",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build",
+            "description": "Release configuration - Windows",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
                 "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
             }
         },
         {
             "name": "release-linux",
+            "inherits": "base",
             "hidden": false,
-            "description": "Release configuration",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build",
+            "description": "Release configuration - Linux",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "VCPKG_TARGET_TRIPLET": "x64-linux"
+            }
+        },
+        {
+            "name": "debug-linux",
+            "inherits": "base",
+            "hidden": false,
+            "description": "Debug configuration - Linux",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
                 "VCPKG_TARGET_TRIPLET": "x64-linux"
             }
         }
