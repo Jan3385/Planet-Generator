@@ -167,7 +167,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     Object::GameObject *shadowCaster = currentLevel->CreateGameObject();
     shadowCaster->GetTransform()
-        ->SetPos(glm::vec3(0.5f, -1.5f, 2.8f))
+        ->SetPos(glm::vec3(0.5f, -1.8f, 2.8f))
         ->SetScale(glm::vec3(0.3f));
     shadowCaster->GetRenderComponent()->SetMesh(cube);
     shadowCaster->GetRenderComponent()->SetMaterial(GetMaterial(MatIndex::WhitePlastic));

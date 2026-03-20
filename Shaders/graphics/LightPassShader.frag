@@ -107,6 +107,9 @@ void main()
 
     float ao = texture(SSAO, TexCoords).r;
 
+    // increasing the ambient occlusion constrast
+    ao = pow(ao, 1.5);
+
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 light = vec3(0.0);
 
