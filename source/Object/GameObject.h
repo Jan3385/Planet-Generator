@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component/Essential/TransformComponent.h"
-#include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
+#include "Component/Essential/Renderer/MeshRenderComponent.h"
 #include "Object/BaseObject.h"
 
 /**
@@ -30,9 +30,9 @@ public:
     };
 
     Component::Transform* GetTransform();
-    Component::PhongMeshRender* GetRenderComponent();
+    Component::MeshRender* GetRenderComponent();
 private:
     Component::Transform* transform = nullptr;
-    Component::PhongMeshRender* renderComponent = nullptr;
+    Component::MeshRender* renderComponent = nullptr;
 };
 }

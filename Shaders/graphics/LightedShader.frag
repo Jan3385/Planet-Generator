@@ -14,6 +14,6 @@ void main()
 
     gAlbedo.rgb = material.color.rgb;
 
-    gMetalRough.r = material.MetalRought.r;
-    gMetalRough.g = material.MetalRought.g;
+    gMetalRough.r = material.MetalRough.r;
+    gMetalRough.g = material.MetalRough.g;
 } 

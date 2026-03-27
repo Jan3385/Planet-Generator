@@ -7,7 +7,7 @@ struct MaterialOld {
 
 struct Material {
     vec4 color;
-    vec4 MetalRought; // .r = metallic, .g = roughness
+    vec4 MetalRough; // .r = metallic, .g = roughness
 };
 
 struct PointLight {

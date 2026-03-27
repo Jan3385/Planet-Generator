@@ -37,12 +37,21 @@ public:
         return *this;
     };
 
+    /// @brief Adds a component of the specified type to the object
+    /// @tparam ComponentType
+    /// @return Pointer to the added component
     template<class ComponentType>
     ComponentType* AddComponent();
 
+    /// @brief Gets the first component of the specified type
+    /// @tparam ComponentType 
+    /// @return Pointer to the component if found, nullptr otherwise
     template<class ComponentType>
     ComponentType* GetComponent();
 
+    /// @brief Gets all components of the specified type
+    /// @tparam ComponentType 
+    /// @return Vector of pointers to the components found, empty vector if none found
     template<class ComponentType>
     std::vector<ComponentType*> GetComponents();
 

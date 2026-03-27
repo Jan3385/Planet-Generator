@@ -5,6 +5,7 @@
 #include "Engine/Input.h"
 #include "Engine/Lighting.h"
 #include "Engine/Config.h"
+#include "Object/Material/MaterialLibrary.h"
 
 #define FPS_HISTORY_SIZE 100
 
@@ -15,6 +16,7 @@ public:
     static Level* currentLevel;
     static Input* input;
     static Lighting* lighting;
+    static MaterialLibrary* materialLibrary;
 
     GameEngine();
     ~GameEngine();

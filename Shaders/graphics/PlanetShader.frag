@@ -21,14 +21,14 @@ layout(std140, binding = 0) uniform palette {
 
 Material multMaterial(Material a, float factor) {
     a.color *= factor;
-    a.MetalRought *= factor;
+    a.MetalRough *= factor;
     return a;
 }
 
 Material mixMaterial(Material a, Material b, float t) {
     Material result;
     result.color  = mix(a.color,  b.color,  t);
-    result.MetalRought  = mix(a.MetalRought,  b.MetalRought,  t);
+    result.MetalRough  = mix(a.MetalRough,  b.MetalRough,  t);
     return result;
 }
 
@@ -71,6 +71,6 @@ void main()
     
     gAlbedo.rgb = mat.color.rgb;
 
-    gMetalRough.r = mat.MetalRought.r;
-    gMetalRough.g = mat.MetalRought.g;
+    gMetalRough.r = mat.MetalRough.r;
+    gMetalRough.g = mat.MetalRough.g;
 } 

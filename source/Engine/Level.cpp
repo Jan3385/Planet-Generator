@@ -33,14 +33,13 @@ Object::BaseObject *Level::CreateLightObject(Math::RGB color, float intensity)
 
     lightTransform->SetScale(glm::vec3(0.2f));
 
-    Component::ColorMeshRender *lightRenderer = lightObject->AddComponent<Component::ColorMeshRender>();
-        
-    lightRenderer->color = glm::vec3(color.ToVec3()) * intensity;
+    lightObject->AddComponent<Component::MeshRender>()
+        ->SetTransform(lightTransform);
 
     Component::PointLightSource *pointLight = lightObject->AddComponent<Component::PointLightSource>();
     
     Component::PointLightSource::PointLightData lightData;
-    lightData.color = lightRenderer->color;
+    lightData.color = glm::vec3(color.ToVec3()) * intensity;
 
     pointLight->SetLightData(lightData);
     

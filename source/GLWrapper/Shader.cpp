@@ -222,6 +222,16 @@ void GL::Shader::SetFloat(const std::string &name, float value)
     glUniform1f(this->GetUniformLocation(name.c_str()), value);
 }
 
+void GL::Shader::SetDouble(const std::string &name, double value)
+{
+    glUniform1d(this->GetUniformLocation(name.c_str()), value);
+}
+
+void GL::Shader::SetMat2(const std::string &name, glm::mat2 value)
+{
+    glUniformMatrix2fv(this->GetUniformLocation(name.c_str()), 1, GL_FALSE, &value[0][0]);
+}
+
 void GL::Shader::SetMat3(const std::string &name, glm::mat3 value)
 {
     glUniformMatrix3fv(this->GetUniformLocation(name.c_str()), 1, GL_FALSE, &value[0][0]);
@@ -251,6 +261,11 @@ void GL::Shader::SetVec3(const std::string &name, glm::vec3 *first, int count)
     glUniform3fv(this->GetUniformLocation(name.c_str()), count, &first[0][0]);
 }
 
+void GL::Shader::SetIVec3(const std::string &name, glm::ivec3 value)
+{
+    glUniform3iv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
+}
+
 void GL::Shader::SetVec4(const std::string &name, glm::vec4 value)
 {
     glUniform4fv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
@@ -259,6 +274,11 @@ void GL::Shader::SetVec4(const std::string &name, glm::vec4 value)
 void GL::Shader::SetVec4(const std::string &name, glm::vec4 *first, int count)
 {
     glUniform4fv(this->GetUniformLocation(name.c_str()), count, &first[0][0]);
+}
+
+void GL::Shader::SetIVec4(const std::string &name, glm::ivec4 value)
+{
+    glUniform4iv(this->GetUniformLocation(name.c_str()), 1, &value[0]);
 }
 
 void GL::Shader::SetUniform(const std::string &name, const uniformValue &value)

@@ -41,9 +41,10 @@ public:
 
     GLint GetUniformLocation(const std::string &name);
 
-    using uniformValue = 
-        std::variant<bool, unsigned int, int, float, 
-            glm::mat3, glm::mat4, glm::vec2, glm::ivec2, glm::vec3, glm::vec4>;
+    using uniformValue = std::variant<
+        bool, unsigned int, int, float, double,
+        glm::mat2, glm::mat3, glm::mat4,
+        glm::vec2, glm::ivec2, glm::vec3, glm::ivec3, glm::vec4, glm::ivec4>;
 
 
     static void AddShaderConstant(const std::string& key, const std::string& value);
@@ -57,14 +58,18 @@ public:
     void SetUnsignedInt(const std::string &name, unsigned int value);
     void SetInt(const std::string &name, int value);
     void SetFloat(const std::string &name, float value);
+    void SetDouble(const std::string &name, double value);
+    void SetMat2(const std::string &name, glm::mat2 value);
     void SetMat3(const std::string &name, glm::mat3 value);
     void SetMat4(const std::string &name, glm::mat4 value);
     void SetVec2(const std::string &name, glm::vec2 value);
     void SetIVec2(const std::string &name, glm::ivec2 value);
     void SetVec3(const std::string &name, glm::vec3 value);
     void SetVec3(const std::string &name, glm::vec3* first, int count);
+    void SetIVec3(const std::string &name, glm::ivec3 value);
     void SetVec4(const std::string &name, glm::vec4 value);
     void SetVec4(const std::string &name, glm::vec4* first, int count);
+    void SetIVec4(const std::string &name, glm::ivec4 value);
 
     template<typename T>
     void SetUniformAny(const std::string &name, const T &value);
@@ -112,6 +117,10 @@ void GL::Shader::SetUniformAny(const std::string &name, const T &value)
         this->SetInt(name, value);
     } else if constexpr (std::is_same_v<T, float>) {
         this->SetFloat(name, value);
+    } else if constexpr (std::is_same_v<T, double>) {
+        this->SetDouble(name, value);
+    } else if constexpr (std::is_same_v<T, glm::mat2>) {
+        this->SetMat2(name, value);
     } else if constexpr (std::is_same_v<T, glm::mat3>) {
         this->SetMat3(name, value);
     } else if constexpr (std::is_same_v<T, glm::mat4>) {
@@ -122,8 +131,12 @@ void GL::Shader::SetUniformAny(const std::string &name, const T &value)
         this->SetIVec2(name, value);
     } else if constexpr (std::is_same_v<T, glm::vec3>) {
         this->SetVec3(name, value);
+    } else if constexpr (std::is_same_v<T, glm::ivec3>) {
+        this->SetIVec3(name, value);
     } else if constexpr (std::is_same_v<T, glm::vec4>) {
         this->SetVec4(name, value);
+    } else if constexpr (std::is_same_v<T, glm::ivec4>) {
+        this->SetIVec4(name, value);
     } else {
         static_assert(!std::is_same_v<T, T>, "Unsupported uniform type in SetUniformAny");
     }

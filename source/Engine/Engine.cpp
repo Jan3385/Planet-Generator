@@ -6,7 +6,6 @@
 #include "Debug/Logger.h"
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/Model.h"
-#include "Component/Essential/Renderer/PhongMeshRenderComponent.h"
 #include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 #include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
@@ -23,6 +22,7 @@ Renderer* GameEngine::renderer = nullptr;
 Level* GameEngine::currentLevel = nullptr;
 Input* GameEngine::input = nullptr;
 Lighting* GameEngine::lighting = nullptr;
+MaterialLibrary* GameEngine::materialLibrary = nullptr;
 
 GameEngine::GameEngine()
 {
@@ -35,7 +35,7 @@ GameEngine::~GameEngine()
     delete input;
     delete lighting;
     delete renderer;
-
+    delete materialLibrary;
     glfwTerminate();
 }
 
@@ -63,6 +63,17 @@ void GameEngine::Run(const EngineConfig::Config& config)
     GL::Shader::LogGLErrors("After Shadow Mapping Init");
 
     Renderer::SetVSYNC(config.VSync);
+
+    materialLibrary = new MaterialLibrary();
+    materialLibrary->CreateMaterial("red", &renderer->GetDefaultColorShader())
+        ->SetValue("objectColor", glm::vec3(1.0f, 0.0f, 0.0f))
+        ->SetTransparency(Object::Material::Transparency::OpaqueNoLight)
+        ->attributes = Object::Material::RenderAttributes::Default;
+
+    materialLibrary->CreateMaterial("white", &renderer->GetDefaultColorShader())
+        ->SetValue("objectColor", glm::vec3(1.0f, 1.0f, 1.0f))
+        ->SetTransparency(Object::Material::Transparency::OpaqueNoLight)
+        ->attributes = Object::Material::RenderAttributes::Default;
 
     // temp ----
     GL::BasicShaderProgram planetShader("PlanetShader");
@@ -138,8 +149,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
         ->SetScale(glm::vec3(0.25f))
         ->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
 
-    Component::PhongMeshRender *modelRenderComp = modelObj->GetRenderComponent();
-    modelRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+    Component::MeshRender *modelRenderComp = modelObj->GetRenderComponent();
     std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
     modelRenderComp->SetMesh(modelMesh);
 
@@ -151,29 +161,33 @@ void GameEngine::Run(const EngineConfig::Config& config)
     floor->GetTransform()
         ->SetScale(glm::vec3(80.0f, 0.1f, 80.0f))
         ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
-    Component::PhongMeshRender *floorRenderComp = floor->GetRenderComponent();
-    floorRenderComp->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
+    Component::MeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMesh(cube);
-    //floor->Disable();
 
     // lights
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), 3.5f);
     lightObj->GetComponent<Component::Transform>()->SetPos(glm::vec3(1.0f, -1.2f, 2.5f));
-    lightObj->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
+    lightObj->GetComponent<Component::MeshRender>()
+        ->SetMesh(cube)
+        ->SetMaterial(materialLibrary->GetMaterial("red"));
 
     Object::BaseObject *lightObj2 = currentLevel->CreateLightObject(Math::RGB(255, 255, 255), 2.5f);
     lightObj2->GetComponent<Component::Transform>()->SetPos(glm::vec3(0.0f, -1.2f, 2.5f));
-    lightObj2->GetComponent<Component::ColorMeshRender>()->SetMesh(cube);
+    lightObj2->GetComponent<Component::MeshRender>()
+        ->SetMesh(cube)
+        ->SetMaterial(materialLibrary->GetMaterial("white"));
 
     Object::GameObject *shadowCaster = currentLevel->CreateGameObject();
     shadowCaster->GetTransform()
         ->SetPos(glm::vec3(0.5f, -1.8f, 2.8f))
         ->SetScale(glm::vec3(0.3f));
     shadowCaster->GetRenderComponent()->SetMesh(cube);
-    shadowCaster->GetRenderComponent()->SetMaterial(GetMaterial(MatIndex::WhitePlastic));
 
     //lightObj->Disable();
     //lightObj2->Disable();
+    //shadowCaster->Disable();
+    //floor->Disable();
+    //modelObj->Disable();
     GL::Shader::LogGLErrors("After Creating Lights");
 
     // Camera obj

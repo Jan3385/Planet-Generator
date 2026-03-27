@@ -1,11 +1,14 @@
 #include "GameObject.h"
 
 #include "Debug/Logger.h"
+#include "Engine/Engine.h"
 
 Object::GameObject::GameObject(Level* level) : BaseObject(level)
 {
     this->transform = this->AddComponent<Component::Transform>();
-    this->renderComponent = this->AddComponent<Component::PhongMeshRender>();
+    this->renderComponent = this->AddComponent<Component::MeshRender>()
+        ->SetTransform(this->transform)
+        ->SetMaterial(GameEngine::materialLibrary->GetDefaultMaterial());
 }
 
 Component::Transform *Object::GameObject::GetTransform()
@@ -18,7 +21,7 @@ Component::Transform *Object::GameObject::GetTransform()
     return this->transform;
 }
 
-Component::PhongMeshRender *Object::GameObject::GetRenderComponent()
+Component::MeshRender *Object::GameObject::GetRenderComponent()
 {
     if(this->renderComponent == nullptr) {
         Debug::LogError("GameObject has no RenderComponent component!");
