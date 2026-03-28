@@ -4,6 +4,7 @@
 #include "Object/GameObject.h"
 #include "Component/Essential/CameraComponent.h"
 #include "Component/Essential/Renderer/SkyboxRenderComponent.h"
+#include "Engine/Renderer.h"
 #include "Math/Color.h"
 
 class Level {
@@ -17,11 +18,11 @@ public:
 
     void SetCamera(Component::Camera* camera) { this->mainCamera = camera; }
     Component::Camera* GetCamera() const { return mainCamera; }
-    void SetSkybox(Component::SkyboxRender* skybox) { this->skybox = skybox; }
-    Component::SkyboxRender* GetSkybox() const { return skybox; }
+    void SetSkybox(Renderer::IRendererCallback* skybox) { this->skybox = skybox; }
+    Renderer::IRendererCallback* GetSkybox() const { return skybox; }
 private:
     Component::Camera* mainCamera = nullptr;
-    Component::SkyboxRender* skybox = nullptr;
+    Renderer::IRendererCallback* skybox = nullptr;
 
     std::vector<std::unique_ptr<Object::BaseObject>> objects;
 

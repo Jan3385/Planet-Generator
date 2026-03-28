@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GLWrapper/Shader.h"
+#include "GLWrapper/Texture.h"
 
 namespace Object {
 class Material {
@@ -20,6 +21,8 @@ public:
         ReverseFaceCulling      = 1 << 3,
         OriginPos               = 1 << 4,
         ViewMatrix              = 1 << 5,
+        ViewNoTransformMatrix   = 1 << 6,
+        Depth_LEQUAL            = 1 << 7,
         Default                 = Transform | NormalMatrix,
     };
 
@@ -34,6 +37,9 @@ public:
     Material* SetValue(const std::string& name, const GL::Shader::uniformValue& value);
     GL::Shader::uniformValue GetValue(const std::string& name) const;
 
+    Material* SetTexture(GL::ITexture* texture) { this->texture = texture; return this; }
+    GL::ITexture* GetTexture() const { return this->texture; }
+
     Material* SetTransparency(Transparency transparency) { this->transparency = transparency; return this; }
 
     Transparency transparency = Transparency::Opaque;
@@ -41,6 +47,7 @@ public:
     // flags for shader attributes
     RenderAttributes attributes = RenderAttributes::None;
 private:
+    GL::ITexture* texture = nullptr;
     GL::Shader* shader;
     std::unordered_map<std::string, GL::Shader::uniformValue> localShaderValues;
 };

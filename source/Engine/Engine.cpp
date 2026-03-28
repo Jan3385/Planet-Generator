@@ -6,7 +6,6 @@
 #include "Debug/Logger.h"
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/Model.h"
-#include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
 #include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
 #include "Component/Essential/Renderer/SkyboxRenderComponent.h"
@@ -75,6 +74,21 @@ void GameEngine::Run(const EngineConfig::Config& config)
         ->SetTransparency(Object::Material::Transparency::OpaqueNoLight)
         ->attributes = Object::Material::RenderAttributes::Default;
 
+    std::vector<std::string> cubemapPaths{
+        "Images/Skybox/skybox-right.jpg",
+        "Images/Skybox/skybox-left.jpg",
+        "Images/Skybox/skybox-bottom.jpg",
+        "Images/Skybox/skybox-top.jpg",
+        "Images/Skybox/skybox-front.jpg",
+        "Images/Skybox/skybox-back.jpg"
+    };
+    GL::Cubemap skyboxCubemap(cubemapPaths.data(), false, true);
+    materialLibrary->CreateMaterial("skybox", &renderer->GetSkyboxShader())
+        ->SetTransparency(Object::Material::Transparency::Special)
+        ->SetTexture(&skyboxCubemap)
+        ->attributes = Object::Material::RenderAttributes::ReverseFaceCulling | 
+            Object::Material::RenderAttributes::ViewNoTransformMatrix | Object::Material::RenderAttributes::Depth_LEQUAL;  
+
     // temp ----
     GL::BasicShaderProgram planetShader("PlanetShader");
 
@@ -90,16 +104,10 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     // Skybox
     Object::BaseObject *skyboxObj = currentLevel->CreateObject();
-    Component::SkyboxRender *skyboxRenderComp = skyboxObj->AddComponent<Component::SkyboxRender>();
-    std::vector<std::string> cubemapPaths{
-        "Images/Skybox/skybox-right.jpg",
-        "Images/Skybox/skybox-left.jpg",
-        "Images/Skybox/skybox-bottom.jpg",
-        "Images/Skybox/skybox-top.jpg",
-        "Images/Skybox/skybox-front.jpg",
-        "Images/Skybox/skybox-back.jpg"
-    };
-    skyboxRenderComp->LoadCubemap(cubemapPaths.data(), false, true);
+    Component::MeshRender* skyboxMeshRenderer = skyboxObj->AddComponent<Component::MeshRender>()
+        ->SetMaterial(materialLibrary->GetMaterial("skybox"))
+        ->SetMesh(cube);
+    currentLevel->SetSkybox(skyboxMeshRenderer);
     GL::Shader::LogGLErrors("After Skybox Creation");
 
     // Normal obj

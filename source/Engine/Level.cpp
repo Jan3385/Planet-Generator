@@ -1,7 +1,6 @@
 #include "Level.h"
 
 #include "Generator/MeshGenerator.h"
-#include "Component/Essential/Renderer/ColorMeshRenderComponent.h"
 #include "Component/Essential/PointLightSourceComponent.h"
 #include <memory>
 

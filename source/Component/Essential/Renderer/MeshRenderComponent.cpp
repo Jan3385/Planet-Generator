@@ -4,16 +4,23 @@
 
 void Component::MeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 {
-    if(!this->transform) { Debug::LogSpam("MeshRender: No transform found for rendering!"); return; }
     if(!this->mesh)      { Debug::LogSpam("MeshRender: No mesh found for rendering!"); return; }
     if(!this->material)  { Debug::LogSpam("MeshRender: No material found for rendering!"); return; }
-
+    
     Object::Material* mat = this->material;
+
+    if(!this->transform && mat->HasAttribute(Object::Material::RenderAttributes::Transform)) { 
+        Debug::LogSpam("MeshRender: No transform found for rendering!"); return; 
+    }
+
     GL::Shader* shader = mat->GetShader();
 
     shader->Use();
     
-    glm::mat4 model = this->transform->GetMatrixTransform();
+    glm::mat4 model(1.0f);
+    if(this->transform)
+        model = this->transform->GetMatrixTransform();
+
     if(mat->HasAttribute(Object::Material::RenderAttributes::Transform)){
         shader->SetMat4("transform", model);
     }
@@ -34,6 +41,12 @@ void Component::MeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     if(mat->HasAttribute(Object::Material::RenderAttributes::ViewMatrix)){
         shader->SetMat4("view", view);
     }
+    if(mat->HasAttribute(Object::Material::RenderAttributes::ViewNoTransformMatrix)){
+        shader->SetMat4("viewNoTransform", glm::mat4(glm::mat3(view)));
+    }
+    if(mat->HasAttribute(Object::Material::RenderAttributes::Depth_LEQUAL)){
+        glDepthFunc(GL_LEQUAL);
+    }
 
     mat->Bind(*shader);
 
@@ -41,6 +54,9 @@ void Component::MeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
 
     if(mat->HasAttribute(Object::Material::RenderAttributes::ReverseFaceCulling)){
         Renderer::SetReverseFaceCulling(false);
+    }
+    if(mat->HasAttribute(Object::Material::RenderAttributes::Depth_LEQUAL)){
+        glDepthFunc(GL_LESS);
     }
 }
 

@@ -11,6 +11,8 @@ void Object::Material::Bind(GL::Shader &shader) const
     for (const auto& [name, value] : this->localShaderValues) {
         shader.SetUniform(name, value);
     }
+    
+    if(this->texture) this->texture->Bind();
 }
 
 Object::Material *Object::Material::SetValue(const std::string &name, const GL::Shader::uniformValue &value)

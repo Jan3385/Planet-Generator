@@ -7,7 +7,7 @@
 
 namespace GL
 {
-class Cubemap{
+class Cubemap : public ITexture{
 public:
     Cubemap();
     Cubemap(bool blurred, bool sRGB, glm::vec2 size);
@@ -22,8 +22,11 @@ public:
     Cubemap(Cubemap&&other) noexcept;
     Cubemap& operator=(Cubemap&&other) noexcept;
 
-    void Bind();
-    static void Unbind() { glBindTexture(GL_TEXTURE_CUBE_MAP, 0); };
+    void Bind() override;
+    void Unbind() override { glBindTexture(GL_TEXTURE_CUBE_MAP, 0); };
+    void BindToUnit(uint8_t unit) override;
+
+    GLuint GetID() const override { return this->ID; };
 
     bool isBlurred()  { return this->blurred; };
     bool isInitialized() { return this->ID != 0; };

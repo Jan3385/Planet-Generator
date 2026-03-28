@@ -73,6 +73,12 @@ void GL::Cubemap::Bind()
     glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
 }
 
+void GL::Cubemap::BindToUnit(uint8_t unit)
+{
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+}
+
 /// @brief Loads all 6 cubemap faces from 6 image files
 /// @param filePaths array of 6 file paths with file names (ex. ["images/banana.png", ..])
 /// @param sRGB if the textures should be loaded within sRGB color space

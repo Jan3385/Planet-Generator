@@ -39,7 +39,7 @@ void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, 
 
 void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes)
 {
-    Component::SkyboxRender* skybox = GameEngine::currentLevel->GetSkybox();
+    IRendererCallback* skybox = GameEngine::currentLevel->GetSkybox();
     if(skybox) {
         if(this->isWireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // temp disable wireframe mode for skybox
         skybox->Render(projection, view);

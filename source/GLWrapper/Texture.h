@@ -36,7 +36,15 @@ enum class TextureFormat{
     DEPTH_STENCIL = GL_DEPTH_STENCIL
 };
 
-class Texture{
+class ITexture{
+public:
+    virtual void Bind() = 0;
+    virtual void Unbind() = 0;
+    virtual void BindToUnit(uint8_t unit) = 0;
+    virtual GLuint GetID() const = 0;
+};
+
+class Texture : public ITexture{
 public:
     Texture();
     Texture(TextureWrapMode wrap, MipmapMode mipmap, bool blurred);
@@ -56,11 +64,11 @@ public:
 
     void Resize(int width, int height);
 
-    void Bind();
-    static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); };
-    void BindToUnit(uint8_t unit);
+    void Bind() override;
+    void Unbind() override { glBindTexture(GL_TEXTURE_2D, 0); };
+    void BindToUnit(uint8_t unit) override;
 
-    GLuint GetID() const { return ID; };
+    GLuint GetID() const override { return ID; };
     
     bool hasMipmaps() { return this->generateMipmaps; };
     bool isBlurred()  { return this->blurred; };
