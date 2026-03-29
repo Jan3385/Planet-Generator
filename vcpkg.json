@@ -6,7 +6,11 @@
     "glfw3",
     "glm",
     "assimp",
-    "joltphysics"
+    "joltphysics",
+    {
+      "name": "imgui",
+      "features": ["glfw-binding", "opengl3-binding"]
+    }
   ],
   "builtin-baseline": "b91c3336aee7f32412508f7dd351ae2cabdb8819"
 }
