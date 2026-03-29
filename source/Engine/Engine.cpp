@@ -65,12 +65,12 @@ void GameEngine::Run(const EngineConfig::Config& config)
     materialLibrary->CreateMaterial("red", &renderer->GetDefaultColorShader())
         ->SetValue("objectColor", glm::vec3(1.0f, 0.0f, 0.0f))
         ->SetTransparency(Object::Material::Transparency::OpaqueNoLight)
-        ->attributes = Object::Material::RenderAttributes::Default;
+        ->attributes = Object::Material::RenderAttributes::Transform;
 
     materialLibrary->CreateMaterial("white", &renderer->GetDefaultColorShader())
         ->SetValue("objectColor", glm::vec3(1.0f, 1.0f, 1.0f))
         ->SetTransparency(Object::Material::Transparency::OpaqueNoLight)
-        ->attributes = Object::Material::RenderAttributes::Default;
+        ->attributes = Object::Material::RenderAttributes::Transform;
 
     std::vector<std::string> cubemapPaths{
         "Images/Skybox/skybox-right.jpg",
