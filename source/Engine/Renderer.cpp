@@ -9,8 +9,8 @@
 #include "Engine/Engine.h"
 #include "Generator/MeshGenerator.h"
 #include "Component/BaseComponent.h"
-#include "Component/Planet/PlanetGenComponent.h"
-#include "Component/Essential/PointLightSourceComponent.h"
+#include "Component/Game/Planet/PlanetGenComponent.h"
+#include "Component/Engine/PointLightSourceComponent.h"
 #include "Math/Random.h"
 
 void UpdateViewport(GLFWwindow* window, int width, int height)

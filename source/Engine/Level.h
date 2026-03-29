@@ -2,7 +2,7 @@
 
 #include "Object/BaseObject.h"
 #include "Object/GameObject.h"
-#include "Component/Essential/CameraComponent.h"
+#include "Component/Engine/CameraComponent.h"
 #include "Engine/Renderer.h"
 #include "Math/Color.h"
 

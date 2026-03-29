@@ -2,7 +2,7 @@
 
 #include "Debug/Logger.h"
 #include "Engine/Lighting.h"
-#include "Component/Planet/PlanetGenComponent.h"
+#include "Component/Game/Planet/PlanetGenComponent.h"
 
 #include <stdexcept>
 #include <iostream>

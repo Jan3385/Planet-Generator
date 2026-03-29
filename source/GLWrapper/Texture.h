@@ -38,6 +38,8 @@ enum class TextureFormat{
 
 class ITexture{
 public:
+    virtual ~ITexture() = default;
+
     virtual void Bind() = 0;
     virtual void Unbind() = 0;
     virtual void BindToUnit(uint8_t unit) = 0;

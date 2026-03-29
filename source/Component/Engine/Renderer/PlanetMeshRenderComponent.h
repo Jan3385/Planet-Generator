@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GLWrapper/ColorMesh.h"
-#include "Component/Essential/Renderer/BaseMeshRenderComponent.h"
+#include "Component/Engine/Renderer/BaseMeshRenderComponent.h"
 
 namespace Component {
 /**

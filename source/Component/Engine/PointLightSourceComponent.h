@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component/BaseComponent.h"
-#include "Component/Essential/TransformComponent.h"
+#include "Component/Engine/TransformComponent.h"
 #include "GLWrapper/FrameBuffer.h"
 
 constexpr float POINT_LIGHT_FAR_PLANE = 50.0f;

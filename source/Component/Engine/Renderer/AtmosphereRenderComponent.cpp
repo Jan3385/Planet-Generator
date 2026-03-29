@@ -2,7 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Generator/MeshGenerator.h"
-#include "Component/Planet/PlanetGenComponent.h"
+#include "Component/Game/Planet/PlanetGenComponent.h"
 
 Component::AtmosphereRender::AtmosphereRender(Object::BaseObject *owner)
         : BaseMeshRender(owner)

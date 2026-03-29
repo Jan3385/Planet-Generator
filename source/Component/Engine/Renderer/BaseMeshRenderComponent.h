@@ -3,7 +3,7 @@
 #include "Engine/Renderer.h"
 
 #include "Component/BaseComponent.h"
-#include "Component/Essential/TransformComponent.h"
+#include "Component/Engine/TransformComponent.h"
 
 #include "GLWrapper/Buffer.h"
 #include "GLWrapper/VertexArray.h"

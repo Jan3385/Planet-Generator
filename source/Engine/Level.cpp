@@ -1,7 +1,7 @@
 #include "Level.h"
 
 #include "Generator/MeshGenerator.h"
-#include "Component/Essential/PointLightSourceComponent.h"
+#include "Component/Engine/PointLightSourceComponent.h"
 #include <memory>
 
 Object::BaseObject *Level::CreateObject()

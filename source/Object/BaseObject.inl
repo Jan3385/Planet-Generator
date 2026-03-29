@@ -1,6 +1,6 @@
 #include "BaseObject.h"
 
-#include "Component/Essential/TransformComponent.h"
+#include "Component/Engine/TransformComponent.h"
 #include "Debug/Logger.h"
 
 using namespace Object;

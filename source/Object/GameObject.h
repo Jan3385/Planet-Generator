@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Component/Essential/TransformComponent.h"
-#include "Component/Essential/Renderer/MeshRenderComponent.h"
+#include "Component/Engine/TransformComponent.h"
+#include "Component/Engine/Renderer/MeshRenderComponent.h"
 #include "Object/BaseObject.h"
 
 /**

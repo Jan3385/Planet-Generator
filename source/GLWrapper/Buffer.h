@@ -23,7 +23,7 @@ public:
     virtual bool IsInitialized() const { return ID != 0; }
 
     virtual void Bind() const = 0;
-    static void Unbind() { };
+    virtual void BindBufferBase(GLuint binding) const = 0;
 protected:
     GLuint ID;
     std::string name;
@@ -46,7 +46,7 @@ public:
     Buffer(Buffer&& other) noexcept;
     Buffer& operator=(Buffer&& other) noexcept;
 
-    void Bind() const;
+    void Bind() const override;
     static void Unbind();
 
     void SetData(const T& data, GLenum usage);
@@ -58,7 +58,7 @@ public:
     template <BufferTarget otherTarget>
     void UploadBufferIn(GLuint copyOffset, GLuint writeOffset, Buffer<T, otherTarget>& buffer, GLuint size) const;
 
-    void BindBufferBase(GLuint binding) const;
+    void BindBufferBase(GLuint binding) const override;
 
     void ClearBuffer();
     void ClearBuffer(const GLuint newSize, GLenum usage);

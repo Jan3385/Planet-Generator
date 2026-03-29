@@ -1,7 +1,11 @@
 #pragma once
 
+#include <utility>
+#include <unordered_map>
+
 #include "GLWrapper/Shader.h"
 #include "GLWrapper/Texture.h"
+#include "GLWrapper/Buffer.h"
 
 namespace Object {
 class Material {
@@ -40,6 +44,9 @@ public:
     Material* SetTexture(GL::ITexture* texture) { this->texture = texture; return this; }
     GL::ITexture* GetTexture() const { return this->texture; }
 
+    Material* SetUniformBuffer(const std::string& name, GL::BufferBase* buffer, GLuint binding);
+    std::pair<GL::BufferBase*, GLuint> GetUniformBuffer(const std::string& name) const;
+
     Material* SetTransparency(Transparency transparency) { this->transparency = transparency; return this; }
 
     Transparency transparency = Transparency::Opaque;
@@ -49,6 +56,8 @@ public:
 private:
     GL::ITexture* texture = nullptr;
     GL::Shader* shader;
+
+    std::unordered_map<std::string, std::pair<GL::BufferBase*, GLuint>> uniformBuffers;
     std::unordered_map<std::string, GL::Shader::uniformValue> localShaderValues;
 };
 }

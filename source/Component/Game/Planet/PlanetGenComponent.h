@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Component/BaseComponent.h"
-#include "Component/Essential/TransformComponent.h"
-#include "Component/Essential/Renderer/PlanetMeshRenderComponent.h"
-#include "Component/Essential/Renderer/AtmosphereRenderComponent.h"
+#include "Component/Engine/TransformComponent.h"
+#include "Component/Engine/Renderer/PlanetMeshRenderComponent.h"
+#include "Component/Engine/Renderer/AtmosphereRenderComponent.h"
 #include "Math/Color.h"
 
 namespace Component {

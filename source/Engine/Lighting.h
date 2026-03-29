@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "Component/Essential/PointLightSourceComponent.h"
+#include "Component/Engine/PointLightSourceComponent.h"
 
 class Lighting {
 public:

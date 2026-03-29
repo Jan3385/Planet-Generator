@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Component/BaseComponent.h"
-#include "Component/Essential/TransformComponent.h"
-#include "Component/Essential/CameraComponent.h"
+#include "Component/Engine/TransformComponent.h"
+#include "Component/Engine/CameraComponent.h"
 
 namespace Component {
 /**

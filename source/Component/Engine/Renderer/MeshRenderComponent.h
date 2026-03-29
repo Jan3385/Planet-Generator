@@ -4,7 +4,7 @@
 
 #include "Object/Material/Material.h"
 #include "Component/BaseComponent.h"
-#include "Component/Essential/TransformComponent.h"
+#include "Component/Engine/TransformComponent.h"
 
 namespace Component {
 class MeshRender : public BaseComponent, public Renderer::IRendererCallback  {
