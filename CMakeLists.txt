@@ -59,6 +59,8 @@ add_executable(PlanetGenerator
     ${PROJECT_SOURCES}
 )
 
+target_precompile_headers(PlanetGenerator PRIVATE pch.h)
+
 target_include_directories(PlanetGenerator
     PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/source
@@ -103,6 +105,8 @@ elseif(WIN32)
   find_package(glfw3 CONFIG REQUIRED)
 endif()
 
+find_package(Jolt CONFIG REQUIRED)
+
 target_link_libraries(PlanetGenerator
   PRIVATE
     glad
@@ -111,6 +115,7 @@ target_link_libraries(PlanetGenerator
     OpenGL::GL
     assimp::assimp
     imgui
+    Jolt::Jolt
 )
 
 set(SHADERS_FOLDER "${CMAKE_SOURCE_DIR}/Shaders/graphics")

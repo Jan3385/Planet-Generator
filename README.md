@@ -21,13 +21,14 @@ The entire rendering pipeline is made from custom OpenGL wrappers which were des
 They can streamline manipulating with OpenGL buffers, shaders, framebuffers, vertex arrays and more
 
 ## List of used libraries
- - OpenGL     - rendering
- - glfw       - basic window & input management
- - glad       - access to OpenGL functions
- - glm        - OpenGL math library
- - Dear ImGui - testing UI
- - stb image  - image decoding
- - assimp     - model loading
+ - OpenGL      - rendering
+ - glfw        - basic window & input management
+ - glad        - access to OpenGL functions
+ - glm         - OpenGL math library
+ - Dear ImGui  - testing UI
+ - stb image   - image decoding
+ - assimp      - model loading
+ - JoltPhysics - 3D physics simulation
 
 ## Compiling & Building
 
