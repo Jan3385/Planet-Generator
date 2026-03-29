@@ -65,9 +65,15 @@ std::pair<GL::BufferBase *, GLuint> Object::Material::GetUniformBuffer(const std
     return {nullptr, 0};
 }
 
-Object::Material *Object::Material::Clone() const
+/// @brief  Create a clone of this material with a unique name
+/// @param outputCloneID outputCloneID will store the unique ID of the clone, which can be used to get the material from the library
+/// @return pointer to the new cloned material
+Object::Material *Object::Material::Clone(cloneID *outputCloneID) const
 {
-    std::string uniqueName = "clone_" + std::to_string(rand()); //FIXME: this will cause crashes in the future btw
+    cloneID newCloneID = GameEngine::materialLibrary->GenCloneID();
+    if(outputCloneID) *outputCloneID = newCloneID;
+    std::string uniqueName = MaterialLibrary::GenCloneName(newCloneID);
+
     Material* clone = GameEngine::materialLibrary->CreateMaterial(uniqueName, this->shader);
     clone->texture = this->texture;
     clone->transparency = this->transparency;

@@ -54,7 +54,9 @@ public:
     // flags for shader attributes
     RenderAttributes attributes = RenderAttributes::None;
 
-    Material* Clone() const;
+    using cloneID = uint32_t;
+
+    Material* Clone(cloneID *cloneID = nullptr) const;
 private:
     GL::ITexture* texture = nullptr;
     GL::Shader* shader;
