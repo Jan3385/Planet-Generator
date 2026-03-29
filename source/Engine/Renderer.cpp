@@ -58,11 +58,8 @@ void Renderer::ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, 
     // sort transparent objects
     std::sort(transparentRenderCallbacks.begin(), transparentRenderCallbacks.end(),
         [camPos](IRendererCallback* a, IRendererCallback* b) {
-            Component::BaseMeshRender* renderA = dynamic_cast<Component::BaseMeshRender*>(a);
-            Component::BaseMeshRender* renderB = dynamic_cast<Component::BaseMeshRender*>(b);
-
-            glm::vec3 posA = renderA->GetOwner()->GetComponent<Component::Transform>()->GetPos();
-            glm::vec3 posB = renderB->GetOwner()->GetComponent<Component::Transform>()->GetPos();
+            glm::vec3 posA = a->GetPosition();
+            glm::vec3 posB = b->GetPosition();
 
             float distA = glm::dot(camPos - posA, camPos - posA);
             float distB = glm::dot(camPos - posB, camPos - posB);

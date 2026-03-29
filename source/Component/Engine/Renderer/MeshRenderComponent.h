@@ -19,6 +19,8 @@ public:
     virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override;
     virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) override;
 
+    virtual glm::vec3 GetPosition() const override;
+
     MeshRender* SetMesh(std::shared_ptr<GL::IMeshRenderable> mesh)  { this->mesh = mesh; return this; }
     MeshRender* SetTransform(Component::Transform* transform)       { this->transform = transform; return this; }
     MeshRender* SetMaterial(Object::Material* material);

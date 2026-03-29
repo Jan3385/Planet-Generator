@@ -30,6 +30,8 @@ public:
     virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override;
 
     virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) override;
+
+    virtual glm::vec3 GetPosition() const override;
 protected:
     std::vector<std::type_index> GetDependencies() const override 
         { return { }; }

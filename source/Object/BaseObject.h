@@ -43,6 +43,12 @@ public:
     template<class ComponentType>
     ComponentType* AddComponent();
 
+    /// @brief Gets the first component of the specified type, or adds it if it doesn't exist
+    /// @tparam ComponentType 
+    /// @return Pointer to the component
+    template<class ComponentType>
+    ComponentType* GetOrAddComponent();
+
     /// @brief Gets the first component of the specified type
     /// @tparam ComponentType 
     /// @return Pointer to the component if found, nullptr otherwise

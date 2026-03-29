@@ -117,6 +117,13 @@ bool Component::MeshRender::GetFrustumData(glm::vec3 &centroid, double &radius, 
     return true;
 }
 
+glm::vec3 Component::MeshRender::GetPosition() const
+{
+    if(!this->transform) return glm::vec3(0.0f);
+
+    return this->transform->GetPos();
+}
+
 Component::MeshRender *Component::MeshRender::SetMaterial(Object::Material *material)
 {
     if(this->material && this->material->transparency == material->transparency){

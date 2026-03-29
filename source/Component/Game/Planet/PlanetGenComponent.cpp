@@ -2,6 +2,7 @@
 
 #include "Object/BaseObject.h"
 #include "Generator/NoiseGenerator.h"
+#include "Generator/MeshGenerator.h"
 #include "Math/Random.h"
 #include "Engine/Engine.h"
 
@@ -10,7 +11,7 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
     Debug::LogTrace("PlanetGen: Planetifying mesh with seed " + std::to_string(seed));
     constexpr float desiredAvgHeight = 0.030f * PLANET_SCALE;
 
-    GL::Mesh* mesh = renderComponent->GetMesh()->GetMeshes()[0];
+    GL::Mesh* mesh = planetMesh.get();
     std::vector<GL::VertexObj> vertices = mesh->vertices;
 
     Generator::ValueNoise noise(seed);
@@ -42,6 +43,36 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
     mesh->UpdateMeshBuffers();
 }
 
+void Component::PlanetGen::SetMaterials(std::string planetMatName, std::string atmosphereMatName)
+{
+    Object::Material* planetMat = GameEngine::instance->materialLibrary->GetMaterial(planetMatName);
+    if(planetMat){
+        planetMat = planetMat->Clone();
+        planetMat->SetUniformBuffer("PlanetPalette", &this->planetPaletteBuffer, 0);
+        this->planetRenderComponent->SetMaterial(planetMat);
+    }
+    else Debug::LogError("PlanetGen: Failed to set planet material, material not found: " + planetMatName);
+
+    Object::Material* atmosphereMat = GameEngine::instance->materialLibrary->GetMaterial(atmosphereMatName);
+    if(atmosphereMat){
+        atmosphereMat = atmosphereMat->Clone();
+        atmosphereMat->SetUniformBuffer("AtmospherePalette", &this->atmospherePaletteBuffer, 0);
+        this->atmosphereRenderComponent->SetMaterial(atmosphereMat);
+    }
+    else Debug::LogError("PlanetGen: Failed to set atmosphere material, material not found: " + atmosphereMatName);
+}
+
+void Component::PlanetGen::SetAtmosphereColors(const glm::vec4 &horizonColor, const glm::vec4 &zenithColor)
+{
+    this->atmospherePaletteBuffer.SetData({horizonColor, zenithColor}, GL_STATIC_DRAW);
+}
+
+void Component::PlanetGen::SetPlanetColors(const MaterialSTD140 &deepOcean, const MaterialSTD140 &shallowOcean, const MaterialSTD140 &sand, const MaterialSTD140 &grass, const MaterialSTD140 &rock, const MaterialSTD140 &snow)
+{
+    planetPalette palette{deepOcean, shallowOcean, sand, grass, rock, snow};
+    this->planetPaletteBuffer.SetData(palette, GL_STATIC_DRAW);
+}
+
 void Component::PlanetGen::ImGuiUpdate()
 {
     ImGui::Begin("Planet Generator");
@@ -56,7 +87,26 @@ void Component::PlanetGen::ImGuiUpdate()
 void Component::PlanetGen::Awake()
 {
     transform = GetOwner()->GetComponent<Component::Transform>();
-    renderComponent = GetOwner()->GetComponent<Component::PlanetMeshRender>();
+
+    Object::BaseObject* child = GameEngine::currentLevel->CreateObject();
+    child->SetParent(GetOwner());
+    Transform* childTransform = child->AddComponent<Component::Transform>();
+    childTransform->SetScale(glm::vec3(1.0f + (PLANET_SCALE * 0.11f)));
+    
+    this->planetRenderComponent = GetOwner()->AddComponent<Component::MeshRender>();
+    this->atmosphereRenderComponent = child->AddComponent<Component::MeshRender>();
+
+    this->planetMesh = MeshGenerator::GenerateSpherifiedCubeMesh(60);
+    this->atmosphereMesh = MeshGenerator::GenerateSpherifiedCubeMesh(10);
+
+    this->atmospherePaletteBuffer = GL::Buffer<atmospherePalette, GL::BufferTarget::UniformBuffer>("AtmospherePaletteBuffer");
+    this->planetPaletteBuffer = GL::Buffer<planetPalette, GL::BufferTarget::UniformBuffer>("PlanetPaletteBuffer");
+
+    this->planetRenderComponent
+        ->SetMesh(planetMesh);
+
+    this->atmosphereRenderComponent
+        ->SetMesh(atmosphereMesh);
 }
 
 void Component::PlanetGen::OnDestroy()

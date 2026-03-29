@@ -1,5 +1,8 @@
 #include "Material.h"
 
+#include "Object/Material/MaterialLibrary.h"
+#include "Engine/Engine.h"
+
 Object::Material::Material(GL::Shader *shader) :
     shader(shader)
 {
@@ -60,4 +63,16 @@ std::pair<GL::BufferBase *, GLuint> Object::Material::GetUniformBuffer(const std
         return it->second;
     }
     return {nullptr, 0};
+}
+
+Object::Material *Object::Material::Clone() const
+{
+    std::string uniqueName = "clone_" + std::to_string(rand()); //FIXME: this will cause crashes in the future btw
+    Material* clone = GameEngine::materialLibrary->CreateMaterial(uniqueName, this->shader);
+    clone->texture = this->texture;
+    clone->transparency = this->transparency;
+    clone->attributes = this->attributes;
+    clone->localShaderValues = this->localShaderValues;
+    clone->uniformBuffers = this->uniformBuffers;
+    return clone;
 }

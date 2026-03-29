@@ -44,6 +44,8 @@ public:
         /// @return true if the object data could be loaded, false otherwise
         virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) = 0;
 
+        virtual glm::vec3 GetPosition() const = 0;
+
         virtual ~IRendererCallback() = default;
 
         friend class Renderer;

@@ -28,6 +28,15 @@ ComponentType* BaseObject::AddComponent()
 }
 
 template <class ComponentType>
+inline ComponentType *Object::BaseObject::GetOrAddComponent()
+{
+    ComponentType* component = GetComponent<ComponentType>();
+    if(component) return component;
+
+    return AddComponent<ComponentType>();
+}
+
+template <class ComponentType>
 inline ComponentType *Object::BaseObject::GetComponent()
 {
     for(const auto& component : components) {

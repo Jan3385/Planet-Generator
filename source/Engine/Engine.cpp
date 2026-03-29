@@ -7,8 +7,6 @@
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/Model.h"
 #include "GLWrapper/Cubemap.h"
-#include "Component/Engine/Renderer/PlanetMeshRenderComponent.h"
-#include "Component/Engine/Renderer/AtmosphereRenderComponent.h"
 #include "Component/Game/Player/MovementComponent.h"
 #include "Component/Game/Planet/PlanetGenComponent.h"
 #include "Component/Engine/PointLightSourceComponent.h"
@@ -110,45 +108,41 @@ void GameEngine::Run(const EngineConfig::Config& config)
     currentLevel->SetSkybox(skyboxMeshRenderer);
     GL::Shader::LogGLErrors("After Skybox Creation");
 
-    // Normal obj
-    Object::BaseObject *planet = currentLevel->CreateObject();
+    // Planet obj
     constexpr float planetScale = 2.0f;
+    Material *planetMat = materialLibrary->CreateMaterial("planet", &planetShader);
+    Material *atmosphereMat = materialLibrary->CreateMaterial("atmosphere", &atmosphereShader);
+
+    planetMat
+        ->SetTransparency(Object::Material::Transparency::Opaque)
+        ->attributes = Object::Material::RenderAttributes::Default;
+    atmosphereMat
+        ->SetTransparency(Object::Material::Transparency::Transparent)
+        ->attributes = 
+            Object::Material::RenderAttributes::Transform | Object::Material::RenderAttributes::NormalMatrix | 
+            Object::Material::RenderAttributes::ReverseFaceCulling | Object::Material::RenderAttributes::OriginPos;
+
+
+    Object::BaseObject *planet = currentLevel->CreateObject();
     planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
 
-    Component::PlanetMeshRender *renderComp = planet->AddComponent<Component::PlanetMeshRender>();
-    renderComp->SetRenderShader(&planetShader);
-    renderComp->SetMesh(spherifiedCube);
+    Component::PlanetGen *planetGenComp = planet->AddComponent<Component::PlanetGen>();
+    planetGenComp->SetMaterials("planet", "atmosphere");
+    planetGenComp->SetAtmosphereColors(
+        glm::vec4(0.2f, 0.5f, 1.0f, 1.0f), 
+        glm::vec4(0.0f, 0.0f, 0.5f, 1.0f)
+    );
+    planetGenComp->SetPlanetColors(
+        { glm::vec3(0.0f, 0.3f, 1.0f),    glm::vec2(0.1f, 0.5f)},
+        { glm::vec3(0.04f, 0.55f, 1.0f),  glm::vec2(0.1f, 0.375f)},
+        { glm::vec3(0.76f, 0.70f, 0.50f), glm::vec2(0.0f, 0.0625f)},
+        { glm::vec3(0.1f, 0.55f, 0.1f),   glm::vec2(0.0f, 0.03125f)},
+        { glm::vec3(0.5f, 0.5f, 0.5f),    glm::vec2(0.15f, 0.04f)},
+        { glm::vec3(1.0f, 1.0f, 1.0f),    glm::vec2(0.0f, 0.02f)}
+    );
 
-    using Component::PlanetMeshRender;
-
-    PlanetMeshRender::planetPalette palette{
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.0f, 0.3f, 1.0f),
-            glm::vec2(0.1f, 0.5f)),
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.04f, 0.55f, 1.0f),
-            glm::vec2(0.1f, 0.375f)),
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.76f, 0.70f, 0.50f),
-            glm::vec2(0.0f, 0.0625f)),
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.1f, 0.55f, 0.1f),
-            glm::vec2(0.0f, 0.03125f)),
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec2(0.15f, 0.04f)),
-        PlanetMeshRender::MaterialSTD140(
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec2(0.0f, 0.02f))
-    };
-
-    renderComp->SetColorPalette(palette);
-
-    Component::AtmosphereRender *atmosphereRenderComp = planet->AddComponent<Component::AtmosphereRender>();
-    atmosphereRenderComp->SetRenderShader(&atmosphereShader);
-    atmosphereRenderComp->SetColorPalette({ glm::vec4(0.2f, 0.5f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 0.5f, 1.0f) });
-
-    planet->AddComponent<Component::PlanetGen>()->PlanetifyMesh(rand());
+    planetGenComp->PlanetifyMesh(rand());
+    // -----
 
     // model import
     Object::GameObject *modelObj = currentLevel->CreateGameObject();
