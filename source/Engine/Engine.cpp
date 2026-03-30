@@ -19,6 +19,7 @@ Renderer* GameEngine::renderer = nullptr;
 Level* GameEngine::currentLevel = nullptr;
 Input* GameEngine::input = nullptr;
 Lighting* GameEngine::lighting = nullptr;
+Physics* GameEngine::physics = nullptr;
 MaterialLibrary* GameEngine::materialLibrary = nullptr;
 
 GameEngine::GameEngine()
@@ -32,6 +33,7 @@ GameEngine::~GameEngine()
     delete input;
     delete lighting;
     delete renderer;
+    delete physics;
     delete materialLibrary;
     glfwTerminate();
 }
@@ -60,6 +62,8 @@ void GameEngine::Run(const EngineConfig::Config& config)
     GL::Shader::LogGLErrors("After Shadow Mapping Init");
 
     Renderer::SetVSYNC(config.VSync);
+
+    physics = new Physics();
 
     materialLibrary = new MaterialLibrary();
     materialLibrary->CreateMaterial("red", &renderer->GetDefaultColorShader())

@@ -4,6 +4,7 @@
 #include "Engine/Renderer.h"
 #include "Engine/Input.h"
 #include "Engine/Lighting.h"
+#include "Engine/Physics.h"
 #include "Engine/Config.h"
 #include "Object/Material/MaterialLibrary.h"
 
@@ -16,6 +17,7 @@ public:
     static Level* currentLevel;
     static Input* input;
     static Lighting* lighting;
+    static Physics* physics;
     static MaterialLibrary* materialLibrary;
 
     GameEngine();
