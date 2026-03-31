@@ -15,7 +15,6 @@ namespace Component {
 /**
  * @brief Render component class
  * @details Handles rendering of the object
- * @warning On Awake tries to find a transform and mesh automatically. If transform is found and later deleted, it can cause a crash!
  */
 class BaseMeshRender : public BaseComponent, public Renderer::IRendererCallback {
 public:

@@ -1,7 +1,8 @@
 #pragma once
 
 #define ENABLE_LOGGING
-#define KEEP_SPAM_LOGGING 1
+#define ENABLE_ASSERTS
+#define KEEP_SPAM_LOG
 #define LOG_TIME_ENABLED
 
 #define DBG_CONSOLE_LOG_DEFAULT_ENABLED
@@ -25,7 +26,7 @@
 #include <fstream>
 
 namespace Debug{
-#if KEEP_SPAM_LOGGING == 1
+#ifdef KEEP_SPAM_LOG
     void LogSpam(const std::string& message);
 #else
     inline void LogSpam(const std::string&) {}
@@ -36,6 +37,14 @@ namespace Debug{
     void LogInfo(const std::string& message);
     void LogWarn(const std::string& message);
     void LogError(const std::string& message);
+
+#ifdef ENABLE_ASSERTS
+    void Assert(bool condition, const std::string& message);
+    void AssertNot(bool condition, const std::string& message);
+#else
+    inline void Assert(bool, const std::string&) {}
+    inline void AssertNot(bool, const std::string&) {}
+#endif
 
     // Fatal error instantly terminates the program after logging
     void LogFatal(const std::string& message);

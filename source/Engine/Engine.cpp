@@ -10,6 +10,7 @@
 #include "Component/Game/Player/MovementComponent.h"
 #include "Component/Game/Planet/PlanetGenComponent.h"
 #include "Component/Engine/PointLightSourceComponent.h"
+#include "Component/Engine/Physics/BoxColliderComponent.h"
 #include "Object/GameObject.h"
 
 #include "Generator/MeshGenerator.h"

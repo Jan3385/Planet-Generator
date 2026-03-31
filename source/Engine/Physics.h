@@ -18,6 +18,19 @@ public:
     ~Physics();
 
     void Update(float deltaTime);
+
+    JPH::BodyID CreateBody(const JPH::BodyCreationSettings &settings);
+    void EnableBody(JPH::BodyID bodyID);
+    void DisableBody(JPH::BodyID bodyID);
+    void RemoveBody(JPH::BodyID bodyID);
+
+    JPH::BodyInterface& GetBodyInterface() { return this->physicsSystem->GetBodyInterface(); }
+
+    void UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation);
+    glm::vec3 GetBodyPosition(JPH::BodyID bodyID);
+    glm::quat GetBodyRotation(JPH::BodyID bodyID);
+
+    static JPH::EMotionType GetMotionType(Layer layer);
 private:
     std::unique_ptr<JPH::PhysicsSystem> physicsSystem;
 

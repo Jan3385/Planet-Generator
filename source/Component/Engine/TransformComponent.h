@@ -30,6 +30,8 @@ public:
     Transform* SetRot(const glm::vec2& newRot, bool local = false);
     // euler angles
     Transform* SetRot(const glm::vec3& newRot, bool local = false);
+    // quaternion
+    Transform* SetRot(const glm::quat& newRot, bool local = false);
 
     Transform* SetScale(const glm::vec3& newScale, bool local = false);
 

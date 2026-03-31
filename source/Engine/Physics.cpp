@@ -130,3 +130,78 @@ void Physics::Update(float deltaTime)
         this->jobSystem.get()
     );
 }
+
+JPH::BodyID Physics::CreateBody(const JPH::BodyCreationSettings &settings)
+{
+    JPH::BodyInterface& bodyInterface = this->physicsSystem->GetBodyInterface();
+
+    return bodyInterface.CreateAndAddBody(
+        settings,
+        JPH::EActivation::Activate
+    );
+}
+
+void Physics::EnableBody(JPH::BodyID bodyID)
+{
+    if(bodyID.IsInvalid()) [[unlikely]] {
+        Debug::LogWarn("[JPH] Attempted to enable an invalid body ID");
+        return;
+    }
+
+    this->physicsSystem->GetBodyInterface().ActivateBody(bodyID);
+}
+
+void Physics::DisableBody(JPH::BodyID bodyID)
+{
+    if(bodyID.IsInvalid()) [[unlikely]] {
+        Debug::LogWarn("[JPH] Attempted to disable an invalid body ID");
+        return;
+    }
+
+    this->physicsSystem->GetBodyInterface().DeactivateBody(bodyID);
+}
+
+void Physics::RemoveBody(JPH::BodyID bodyID)
+{
+    if(bodyID.IsInvalid()) [[unlikely]] {
+        Debug::LogWarn("[JPH] Attempted to remove an invalid body ID");
+        return;
+    }
+
+    this->physicsSystem->GetBodyInterface().RemoveBody(bodyID);
+    this->physicsSystem->GetBodyInterface().DestroyBody(bodyID);
+}
+
+void Physics::UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation)
+{
+    this->physicsSystem->GetBodyInterface().SetPositionAndRotation(bodyID, position, rotation, JPH::EActivation::DontActivate);
+}
+
+glm::vec3 Physics::GetBodyPosition(JPH::BodyID bodyID)
+{
+    const JPH::RVec3 pos = this->physicsSystem->GetBodyInterface().GetPosition(bodyID);
+
+    return glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+}
+
+glm::quat Physics::GetBodyRotation(JPH::BodyID bodyID)
+{
+    const JPH::Quat rot = this->physicsSystem->GetBodyInterface().GetRotation(bodyID);
+
+    return glm::quat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
+}
+
+JPH::EMotionType Physics::GetMotionType(Layer layer)
+{
+    switch (layer)
+    {
+        case Layer::Static:
+        case Layer::Terrain:
+            return JPH::EMotionType::Static;
+        case Layer::Dynamic:
+            return JPH::EMotionType::Dynamic;
+        default:
+            Debug::LogFatal("[JPH] Invalid object layer: " + std::to_string(static_cast<int>(layer)));
+            return JPH::EMotionType::Static;
+    }
+}

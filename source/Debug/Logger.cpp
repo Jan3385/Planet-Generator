@@ -171,7 +171,7 @@ void Logger::WriteToSinks(const LogMessage &message)
     }
 }
 
-#if KEEP_SPAM_LOGGING == 1
+#ifdef KEEP_SPAM_LOG
 void Debug::LogSpam(const std::string &message)
 {
     std::string coloredMessage = LOG_SPAM_COLOR_MSG + message + LOG_END_SEQUENCE;
@@ -203,6 +203,18 @@ void Debug::LogError(const std::string &message)
     std::string coloredMessage = LOG_IMPORTANT_COLOR_MSG + message + LOG_END_SEQUENCE;
     Logger::Instance().Log(Logger::Level::ERROR, coloredMessage);
 }
+
+#ifdef ENABLE_ASSERTS
+void Debug::Assert(bool condition, const std::string &message)
+{
+    if(!condition) [[unlikely]] LogFatal("Assertion failed: " + message);
+}
+
+void Debug::AssertNot(bool condition, const std::string &message)
+{
+    if(condition) [[unlikely]] LogFatal("Negated Assertion failed: " + message);
+}
+#endif
 
 void Debug::LogFatal(const std::string &message)
 {

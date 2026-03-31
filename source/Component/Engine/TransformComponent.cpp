@@ -86,6 +86,21 @@ Component::Transform* Component::Transform::SetRot(const glm::vec3 &newRot, bool
     return this;
 }
 
+Component::Transform *Component::Transform::SetRot(const glm::quat &newRot, bool local)
+{
+    dirtyTransform = true;
+
+    if(local)
+        this->rotation = newRot;
+    else{
+        glm::mat4 rotMatrix = glm::mat4_cast(newRot);
+        glm::mat4 localRotMatrix = this->invParentMatrixTransform * rotMatrix;
+        this->rotation = glm::quat_cast(localRotMatrix);
+    }
+
+    return this;
+}
+
 Component::Transform* Component::Transform::RotateBy(const glm::vec2 &deltaRot, bool local)
 {
     if(deltaRot == glm::vec2(0.0f)) return this;
