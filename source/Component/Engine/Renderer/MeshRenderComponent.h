@@ -2,14 +2,15 @@
 
 #include "Engine/Renderer.h"
 
+#include "Component/Engine/Renderer/BaseMeshRenderComponent.h"
 #include "Object/Material/Material.h"
 #include "Component/BaseComponent.h"
 #include "Component/Engine/TransformComponent.h"
 
 namespace Component {
-class MeshRender : public BaseComponent, public Renderer::IRendererCallback  {
+class MeshRender : public BaseMeshRender {
 public:
-    MeshRender(Object::BaseObject* owner) : BaseComponent(owner) {};
+    MeshRender(Object::BaseObject* owner) : BaseMeshRender(owner) {};
 
     virtual void Render(glm::mat4 &projection, glm::mat4 &view) override;
 
@@ -19,21 +20,14 @@ public:
     virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) override;
     virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) override;
 
-    virtual glm::vec3 GetPosition() const override;
-
     MeshRender* SetMesh(std::shared_ptr<GL::IMeshRenderable> mesh)  { this->mesh = mesh; return this; }
     MeshRender* SetTransform(Component::Transform* transform)       { this->transform = transform; return this; }
     MeshRender* SetMaterial(Object::Material* material);
-protected:
-    static bool IsSphereInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius);
 private:
     std::vector<std::type_index> GetDependencies() const override 
         { return { }; }
 
-    std::shared_ptr<GL::IMeshRenderable> mesh = nullptr;
     Object::Material* material = nullptr;
-
-    Component::Transform* transform = nullptr;
 
     void Awake() override;
     void OnDestroy() override;

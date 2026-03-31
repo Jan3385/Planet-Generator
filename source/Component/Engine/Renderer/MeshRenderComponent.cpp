@@ -116,13 +116,6 @@ bool Component::MeshRender::GetFrustumData(glm::vec3 &centroid, double &radius, 
     return true;
 }
 
-glm::vec3 Component::MeshRender::GetPosition() const
-{
-    if(!this->transform) return glm::vec3(0.0f);
-
-    return this->transform->GetPos();
-}
-
 Component::MeshRender *Component::MeshRender::SetMaterial(Object::Material *material)
 {
     if(this->material && this->material->transparency == material->transparency){
@@ -134,17 +127,6 @@ Component::MeshRender *Component::MeshRender::SetMaterial(Object::Material *mate
     this->material = material;
     this->SetRenderCallback();
     return this;
-}
-
-bool Component::MeshRender::IsSphereInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes, glm::vec3 &centroid, double radius)
-{
-    for (const auto& plane : frustumPlanes) {
-        if (glm::dot(glm::vec3(plane), centroid) + plane.w < -radius) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 void Component::MeshRender::Awake()
