@@ -216,7 +216,7 @@ glm::mat4 Component::Transform::GetMatrixTransform() const
 
 glm::mat4 Component::Transform::GetPreviousMatrixTransform() const
 {
-    return this->
+    return this->prevMatrixTransform;
 }
 
 glm::quat Component::Transform::ReconstructRotationFromEuler(const glm::vec3 &euler)

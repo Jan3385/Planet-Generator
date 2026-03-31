@@ -11,7 +11,7 @@ namespace Component {
  * @details Handles position, rotation and scale of the object
  * @note Once inserted into an object, it should not be removed
  */
-class Transform : public BaseComponent, public IOffsetUpdatable {
+class Transform : public BaseComponent, public Component::IOffsetUpdatable {
 public:
 
     Transform(Object::BaseObject* owner) : BaseComponent(owner) {};

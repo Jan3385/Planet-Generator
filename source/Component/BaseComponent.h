@@ -55,12 +55,13 @@ protected:
     friend class Object::BaseObject;
 };
 class IOffsetUpdatable{
+protected:
     virtual void EarlyUpdate() = 0;
     virtual void LateUpdate() = 0;
     virtual ~IOffsetUpdatable() = default;
 
     friend class Object::BaseObject;
-}
+};
 class IImGuiUpdatable {
 public:
     virtual void ImGuiUpdate() = 0;
