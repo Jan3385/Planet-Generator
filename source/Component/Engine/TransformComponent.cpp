@@ -196,6 +196,8 @@ glm::mat4 Component::Transform::UpdateMatrixTransform()
         }
     }
 
+    // if the transform was modified all children need to recalculate their world transform too
+    // FIXME: a chain of parented objects can result in a change taking a long time to propagate through the hierarchy
     std::vector<Object::BaseObject*> children = this->GetOwner()->GetChildren();
     for(Object::BaseObject* child : children){
         Component::Transform* childTransform = child->GetComponent<Component::Transform>();
@@ -209,11 +211,17 @@ glm::mat4 Component::Transform::UpdateMatrixTransform()
     return this->matrixTransform;
 }
 
+/// @brief Gets the world transform matrix
+/// @note Updated during EarlyUpdate, Calling this function before or during EarlyUpdate will result in unpredictable behaviour
+/// @return world transform matrix
 glm::mat4 Component::Transform::GetMatrixTransform() const
 {
     return this->matrixTransform;
 }
 
+/// @brief Gets the world transform matrix from the previous frame
+/// @note Updated during EarlyUpdate, Calling this function before or during EarlyUpdate will result in unpredictable behaviour
+/// @return world transform matrix
 glm::mat4 Component::Transform::GetPreviousMatrixTransform() const
 {
     return this->prevMatrixTransform;
