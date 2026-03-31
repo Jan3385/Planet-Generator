@@ -67,7 +67,9 @@ public:
     template<class ComponentType>
     void RemoveComponents();
 
+    void EarlyUpdate();
     void Update();
+    void LateUpdate();
 
     void SetParent(BaseObject* newParent);
 
@@ -90,6 +92,7 @@ private:
 
     std::vector<std::unique_ptr<Component::BaseComponent>> components;
     std::vector<Component::IUpdatable*> updatables;
+    std::vector<Component::IOffsetUpdatable*> offsetUpdatables;
 
     std::queue<Component::BaseComponent*> startables;
 };

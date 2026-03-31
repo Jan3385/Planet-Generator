@@ -34,7 +34,6 @@ private:
     Object::Material* material = nullptr;
 
     Component::Transform* transform = nullptr;
-    glm::mat4 prevMatrixTransform = glm::mat4(1.0f);
 
     void Awake() override;
     void OnDestroy() override;

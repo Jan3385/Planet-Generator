@@ -177,7 +177,7 @@ Component::Transform* Component::Transform::SetUpDirection(glm::vec3 newUp)
     return this;
 }
 
-glm::mat4 Component::Transform::GetMatrixTransform()
+glm::mat4 Component::Transform::UpdateMatrixTransform()
 {
     if(!dirtyTransform) return matrixTransform;
 
@@ -191,7 +191,7 @@ glm::mat4 Component::Transform::GetMatrixTransform()
     if(parent){
         Component::Transform* parentTransform = parent->GetComponent<Component::Transform>();
         if(parentTransform) {
-            this->invParentMatrixTransform = glm::inverse(parentTransform->GetMatrixTransform());
+            this->invParentMatrixTransform = glm::inverse(parentTransform->GetMatrixTransform()); //FIXME:
             this->matrixTransform = parentTransform->GetMatrixTransform() * this->matrixTransform;
         }
     }
@@ -207,6 +207,16 @@ glm::mat4 Component::Transform::GetMatrixTransform()
     dirtyTransform = false;
 
     return this->matrixTransform;
+}
+
+glm::mat4 Component::Transform::GetMatrixTransform() const
+{
+    return this->matrixTransform;
+}
+
+glm::mat4 Component::Transform::GetPreviousMatrixTransform() const
+{
+    return this->
 }
 
 glm::quat Component::Transform::ReconstructRotationFromEuler(const glm::vec3 &euler)
@@ -248,4 +258,14 @@ glm::quat Component::Transform::UpdateRotationFromEuler(const glm::vec3 &deltaEu
     this->modelRight   = q * glm::vec3(1.0f, 0.0f, 0.0f);
 
     return q;
+}
+
+void Component::Transform::EarlyUpdate()
+{
+    this->prevMatrixTransform = this->GetMatrixTransform();
+    this->UpdateMatrixTransform();
+}
+
+void Component::Transform::LateUpdate()
+{
 }

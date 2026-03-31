@@ -11,7 +11,7 @@ namespace Component {
  * @details Handles position, rotation and scale of the object
  * @note Once inserted into an object, it should not be removed
  */
-class Transform : public BaseComponent {
+class Transform : public BaseComponent, public IOffsetUpdatable {
 public:
 
     Transform(Object::BaseObject* owner) : BaseComponent(owner) {};
@@ -48,16 +48,22 @@ public:
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
 
-    glm::mat4 GetMatrixTransform();
+    glm::mat4 GetMatrixTransform() const;
+    glm::mat4 GetPreviousMatrixTransform() const;
 
     std::vector<std::type_index> GetDependencies() const override 
         { return {}; }
 protected:
+    glm::mat4 UpdateMatrixTransform();
+
     glm::quat ReconstructRotationFromEuler(const glm::vec3& euler);
     glm::quat UpdateRotationFromEuler(const glm::vec3& deltaEuler);
 
     void MarkDirty() { dirtyTransform = true; }
 private:
+    void EarlyUpdate();
+    void LateUpdate();
+
     glm::vec3 position = glm::vec3(0.0f);
 
     glm::vec3 modelUp =      glm::vec3(0.0f, 1.0f, 0.0f);
@@ -71,5 +77,6 @@ private:
     bool dirtyTransform = true;
     glm::mat4 matrixTransform;
     glm::mat4 invParentMatrixTransform = glm::inverse(glm::mat4(1.0f));
+    glm::mat4 prevMatrixTransform = glm::mat4(1.0f);
 };
 }

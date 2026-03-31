@@ -38,12 +38,7 @@ bool Object::BaseObject::HasAllComponentTypes(const std::vector<std::type_index>
     return true;
 }
 
-/**
- * @brief Updates the Object
- * @details Calls Start on all components that need it and then calls Update on all updatable components
- * @note Should be only called by the engine
- */
-void Object::BaseObject::Update()
+void Object::BaseObject::EarlyUpdate()
 {
     while(!startables.empty()){
         Component::BaseComponent* component = startables.front();
@@ -55,8 +50,29 @@ void Object::BaseObject::Update()
         }
     }
 
-    for (auto* updatable : updatables) {
+    for (auto *earlyUpdatable : offsetUpdatables)
+    {
+        earlyUpdatable->EarlyUpdate();
+    }
+}
+
+/**
+ * @brief Updates the Object
+ * @details Calls Start on all components that need it and then calls Update on all updatable components
+ * @note Should be only called by the engine
+ */
+void Object::BaseObject::Update()
+{
+    for (auto *updatable : updatables)
+    {
         updatable->Update();
+    }
+}
+void Object::BaseObject::LateUpdate()
+{
+    for (auto *lateUpdatable : offsetUpdatables)
+    {
+        lateUpdatable->EarlyUpdate();
     }
 }
 

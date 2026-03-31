@@ -74,7 +74,17 @@ void Level::Update()
 
     for(const auto& object : objects) {
         if(object->IsEnabled()) {
+            object->EarlyUpdate();
+        }
+    }
+    for(const auto& object : objects) {
+        if(object->IsEnabled()) {
             object->Update();
+        }
+    }
+    for(const auto& object : objects) {
+        if(object->IsEnabled()) {
+            object->LateUpdate();
         }
     }
 }

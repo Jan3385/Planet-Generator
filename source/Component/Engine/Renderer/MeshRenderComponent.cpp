@@ -18,15 +18,18 @@ void Component::MeshRender::Render(glm::mat4 &projection, glm::mat4 &view)
     shader->Use();
     
     glm::mat4 model(1.0f);
-    if(this->transform)
+    glm::mat4 prevModel(1.0f);
+    if(this->transform){
         model = this->transform->GetMatrixTransform();
+        prevModel = this->transform->GetPreviousMatrixTransform();
+    }
+
 
     if(mat->HasAttribute(Object::Material::RenderAttributes::Transform)){
         shader->SetMat4("transform", model);
     }
     if(mat->HasAttribute(Object::Material::RenderAttributes::PreviousTransform)){
-        shader->SetMat4("prevTransform", this->prevMatrixTransform);
-        this->prevMatrixTransform = this->transform->GetMatrixTransform();
+        shader->SetMat4("prevTransform", prevModel);
     }
     if(mat->HasAttribute(Object::Material::RenderAttributes::NormalMatrix)){
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
@@ -66,11 +69,8 @@ void Component::MeshRender::RenderVelocity(GL::Shader &s)
 
     Renderer::SetReverseFaceCulling(true);
 
-    //FIXME: GetMatrixTransform can destroy the prevMatrix sync in other render components
-    glm::mat4 model = this->transform->GetMatrixTransform();
-    s.SetMat4("transform", model);
-    s.SetMat4("prevTransform", this->prevMatrixTransform);
-    this->prevMatrixTransform = model;
+    s.SetMat4("transform", this->transform->GetMatrixTransform());
+    s.SetMat4("prevTransform", this->transform->GetPreviousMatrixTransform());
 
     this->mesh->Draw();
 
@@ -81,8 +81,7 @@ void Component::MeshRender::RenderDepthOnly(GL::Shader &s)
 {
     if(!this->transform || !this->mesh) return;
 
-    glm::mat4 model = this->transform->GetMatrixTransform();
-    s.SetMat4("transform", model);
+    s.SetMat4("transform", this->transform->GetMatrixTransform());
 
     this->mesh->Draw();
 }

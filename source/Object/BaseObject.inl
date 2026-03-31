@@ -18,6 +18,9 @@ ComponentType* BaseObject::AddComponent()
     if constexpr (std::is_base_of_v<Component::IUpdatable, ComponentType>) {
         updatables.push_back(componentPtr);
     }
+    if constexpr (std::is_base_of_v<Component::IOffsetUpdatable, ComponentType>) {
+        offsetUpdatables.push_back(componentPtr);
+    }
 
     componentPtr->awake = true;
     componentPtr->Awake();
