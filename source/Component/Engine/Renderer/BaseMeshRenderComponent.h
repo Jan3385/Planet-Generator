@@ -4,6 +4,7 @@
 
 #include "Component/BaseComponent.h"
 #include "Component/Engine/TransformComponent.h"
+#include "Object/Material/Material.h"
 
 #include "GLWrapper/Buffer.h"
 #include "GLWrapper/VertexArray.h"
@@ -33,6 +34,11 @@ protected:
     std::shared_ptr<GL::IMeshRenderable> mesh = nullptr;
     Component::Transform* transform = nullptr;
 
+    void SetRenderCallback(Object::Material::Transparency transparency);
+    void UnsetRenderCallback();
+
+private:
+    Object::Material::Transparency transparencyCallbackType = Object::Material::Transparency::Special;
     friend class Object::BaseObject;
 };
 }

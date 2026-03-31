@@ -124,8 +124,12 @@ Component::MeshRender *Component::MeshRender::SetMaterial(Object::Material *mate
     }
 
     this->UnsetRenderCallback();
+
     this->material = material;
-    this->SetRenderCallback();
+
+    if(this->material)
+        this->SetRenderCallback(this->material->transparency);
+
     return this;
 }
 
@@ -133,7 +137,8 @@ void Component::MeshRender::Awake()
 {
     this->transform = this->GetOwner()->GetComponent<Component::Transform>();
 
-    this->SetRenderCallback();
+    if(this->material)
+        this->SetRenderCallback(this->material->transparency);
 }
 
 void Component::MeshRender::OnDestroy()
@@ -141,48 +146,8 @@ void Component::MeshRender::OnDestroy()
     this->UnsetRenderCallback();
 }
 
-void Component::MeshRender::SetRenderCallback()
+void Component::MeshRender::OnEnable()
 {
-    if(!this->material) return;
-
-    switch (this->material->transparency)
-    {
-    case Object::Material::Transparency::Special:
-        break;
-    case Object::Material::Transparency::Opaque:
-        GameEngine::renderer->AddRenderCallback(this);
-        break;
-    case Object::Material::Transparency::Transparent:
-        GameEngine::renderer->AddTransparentRenderCallback(this);
-        break;
-    case Object::Material::Transparency::OpaqueNoLight:
-        GameEngine::renderer->AddNoLightRenderCallback(this);
-        break;
-    default:
-        Debug::LogWarn("MeshRender: Unknown transparency type in SetRenderCallback");
-        break;
-    }
-}
-
-void Component::MeshRender::UnsetRenderCallback()
-{
-    if(!this->material) return;
-
-    switch (this->material->transparency)
-    {
-    case Object::Material::Transparency::Special:
-        break;
-    case Object::Material::Transparency::Opaque:
-        GameEngine::renderer->RemoveRenderCallback(this);
-        break;
-    case Object::Material::Transparency::Transparent:
-        GameEngine::renderer->RemoveTransparentRenderCallback(this);
-        break;
-    case Object::Material::Transparency::OpaqueNoLight:
-        GameEngine::renderer->RemoveNoLightRenderCallback(this);
-        break;
-    default:
-        Debug::LogWarn("MeshRender: Unknown transparency type in UnsetRenderCallback");
-        break;
-    }
+    if(this->material)
+        this->SetRenderCallback(this->material->transparency);
 }

@@ -3,9 +3,6 @@
 #include "Engine/Renderer.h"
 
 #include "Component/Engine/Renderer/BaseMeshRenderComponent.h"
-#include "Object/Material/Material.h"
-#include "Component/BaseComponent.h"
-#include "Component/Engine/TransformComponent.h"
 
 namespace Component {
 class MeshRender : public BaseMeshRender {
@@ -32,11 +29,8 @@ private:
     void Awake() override;
     void OnDestroy() override;
 
-    void OnEnable() override  { this->SetRenderCallback();   };
+    void OnEnable() override;
     void OnDisable() override { this->UnsetRenderCallback(); };
-
-    void SetRenderCallback();
-    void UnsetRenderCallback();
 
     friend class Object::BaseObject;
 };
