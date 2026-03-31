@@ -76,6 +76,14 @@ void Object::BaseObject::LateUpdate()
     }
 }
 
+void Object::BaseObject::FixedUpdate()
+{
+    for (auto *updatable : updatables)
+    {
+        updatable->FixedUpdate();
+    }
+}
+
 /// @brief Sets the parent of this object
 /// @param newParent pointer to the new parent, nullptr to make root object
 void Object::BaseObject::SetParent(BaseObject *newParent)

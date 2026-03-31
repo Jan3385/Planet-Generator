@@ -48,18 +48,25 @@ private:
 };
 class IUpdatable {
 protected:
+    /// @brief Called every frame if the component is enabled
     virtual void Update() = 0;
-    virtual void FixedUpdate() = 0;
-    virtual ~IUpdatable() = default;
 
+    /// @brief Called at a fixed time interval if the component is enabled
+    /// @note This runs in the same thread as Update, so no concurrency issues arise
+    virtual void FixedUpdate() = 0;
+
+    virtual ~IUpdatable() = default;
     friend class Object::BaseObject;
 };
 class IOffsetUpdatable{
 protected:
+    /// @brief Called before `Update` if the component is enabled
     virtual void EarlyUpdate() = 0;
-    virtual void LateUpdate() = 0;
-    virtual ~IOffsetUpdatable() = default;
 
+    /// @brief Called after `Update` if the component is enabled
+    virtual void LateUpdate() = 0;
+
+    virtual ~IOffsetUpdatable() = default;
     friend class Object::BaseObject;
 };
 class IImGuiUpdatable {

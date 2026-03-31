@@ -1,8 +1,10 @@
 #include "Level.h"
 
+#include <memory>
+
+#include "Engine/Engine.h"
 #include "Generator/MeshGenerator.h"
 #include "Component/Engine/PointLightSourceComponent.h"
-#include <memory>
 
 Object::BaseObject *Level::CreateObject()
 {
@@ -72,16 +74,39 @@ void Level::Update()
         });
     }
 
+    // Early Update
     for(const auto& object : objects) {
         if(object->IsEnabled()) {
             object->EarlyUpdate();
         }
     }
+
+    // Update
     for(const auto& object : objects) {
         if(object->IsEnabled()) {
             object->Update();
         }
     }
+
+    // Fixed Update
+    clock::time_point currentTime = clock::now();
+    double deltaTime = std::chrono::duration<double>(currentTime - previousTime).count();
+    previousTime = currentTime;
+    
+    // Clamping to avoid spiral of death
+    if (this->fixedUpdateClamp > 0.0f && deltaTime > this->fixedUpdateClamp) deltaTime = this->fixedUpdateClamp;
+    accumulator += deltaTime;
+
+    while (accumulator >= GameEngine::FIXED_UPDATE_INTERVAL) {
+        for(const auto& object : objects) {
+            if(object->IsEnabled()) {
+                object->FixedUpdate();
+            }
+        }
+        accumulator -= GameEngine::FIXED_UPDATE_INTERVAL;
+    }
+
+    // Late Update
     for(const auto& object : objects) {
         if(object->IsEnabled()) {
             object->LateUpdate();

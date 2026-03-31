@@ -35,6 +35,9 @@ public:
         /// @param s Shader used
         virtual void RenderDepthOnly(GL::Shader &s) = 0;
 
+        /// @brief Checks if the object is inside the view frustum for culling
+        /// @param frustumPlanes Array of 6 planes representing the view frustum
+        /// @return true if the object is inside the frustum, false otherwise
         virtual bool IsInsideFrustum(const std::array<glm::vec4, 6> &frustumPlanes) = 0;
 
         /// @brief Gets the centroid and radius of the object for frustum culling
@@ -44,6 +47,7 @@ public:
         /// @return true if the object data could be loaded, false otherwise
         virtual bool GetFrustumData(glm::vec3 &centroid, double &radius, size_t meshIndex) = 0;
 
+        /// @brief Gets the position of the object for sorting transparent objects
         virtual glm::vec3 GetPosition() const = 0;
 
         virtual ~IRendererCallback() = default;

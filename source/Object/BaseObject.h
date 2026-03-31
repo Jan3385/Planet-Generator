@@ -71,6 +71,8 @@ public:
     void Update();
     void LateUpdate();
 
+    void FixedUpdate();
+
     void SetParent(BaseObject* newParent);
 
     /// @return The parent object / nullptr if root object

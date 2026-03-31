@@ -12,6 +12,8 @@
 
 class GameEngine{
 public:
+    static constexpr float FIXED_UPDATE_INTERVAL = 1.0f / 60.0f; // 60 FPS fixed update
+
     static GameEngine* instance;
     static Renderer* renderer;
     static Level* currentLevel;
@@ -26,6 +28,7 @@ public:
     void Run(const EngineConfig::Config& config);
 
     float DeltaTime() const { return deltaTime; }
+    static constexpr float FixedDeltaTime() { return FIXED_UPDATE_INTERVAL; }
     float GetFPS() const { return this->FPS; }
     float GetAvgFPS() const { return this->avgFPS; }
 private:
