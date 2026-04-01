@@ -16,26 +16,9 @@ void Component::BoxCollider::Generate(const glm::vec3 &halfExtents, Physics::Lay
 {
     JPH::ShapeRefC shape = new JPH::BoxShape(JPH::Vec3(halfExtents.x, halfExtents.y, halfExtents.z), 0.0f);
 
-    if(offset != glm::vec3(0.0f) || rotation != glm::quat(1.0f, 0.0f, 0.0f, 0.0f)){
-        JPH::RotatedTranslatedShapeSettings offsetShape(
-            JPH::RVec3(offset.x, offset.y, offset.z),
-            JPH::Quat(rotation.x, rotation.y, rotation.z, rotation.w),
-            shape
-        );
-        shape = offsetShape.Create().Get();
-    }
+    shape = ApplyOffset(shape, offset, rotation);
 
     glm::vec3 pos = this->transform->GetPos();
     glm::quat rot = this->transform->GetRot();
-    JPH::EMotionType motionType = Physics::GetMotionType(layer);
-    JPH::BodyCreationSettings settings(
-        shape, 
-        JPH::RVec3(pos.x, pos.y, pos.z), 
-        JPH::Quat(rot.x, rot.y, rot.z, rot.w), 
-        motionType, 
-        static_cast<JPH::ObjectLayer>(layer)
-    );
-    this->SetStatic(motionType == JPH::EMotionType::Static);
-
-    this->bodyID = GameEngine::physics->CreateBody(settings);
+    this->bodyID = this->CreateBody(shape, pos, rot, layer);
 }

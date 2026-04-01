@@ -2,6 +2,35 @@
 
 #include "Engine/Engine.h"
 
+JPH::ShapeRefC Component::BaseCollider::ApplyOffset(JPH::ShapeRefC ref, glm::vec3 pos, glm::quat rot)
+{
+    if(pos != glm::vec3(0.0f) || rot != glm::quat(1.0f, 0.0f, 0.0f, 0.0f)){
+        JPH::RotatedTranslatedShapeSettings offsetShape(
+            JPH::RVec3(offset.x, offset.y, offset.z),
+            JPH::Quat(rotation.x, rotation.y, rotation.z, rotation.w),
+            ref
+        );
+        return offsetShape.Create().Get();
+    }
+
+    return ref;
+}
+
+JPH::BodyID Component::BaseCollider::CreateBody(JPH::ShapeRefC shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer)
+{
+    JPH::EMotionType motionType = Physics::GetMotionType(layer);
+    JPH::BodyCreationSettings settings(
+        shape, 
+        JPH::RVec3(pos.x, pos.y, pos.z), 
+        JPH::Quat(rot.x, rot.y, rot.z, rot.w), 
+        motionType, 
+        static_cast<JPH::ObjectLayer>(layer)
+    );
+    this->SetStatic(motionType == JPH::EMotionType::Static);
+
+    return GameEngine::physics->CreateBody(settings);
+}
+
 void Component::BaseCollider::Awake()
 {
     transform = GetOwner()->GetComponent<Component::Transform>();
