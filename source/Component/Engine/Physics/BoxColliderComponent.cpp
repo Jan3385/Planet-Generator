@@ -1,9 +1,5 @@
 #include "BoxColliderComponent.h"
 
-#include "Engine/Engine.h"
-
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
 /// @brief Generates a box collider for the component

@@ -2,6 +2,9 @@
 
 #include "Engine/Engine.h"
 
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
+
 JPH::ShapeRefC Component::BaseCollider::ApplyOffset(JPH::ShapeRefC ref, glm::vec3 pos, glm::quat rot)
 {
     if(pos != glm::vec3(0.0f) || rot != glm::quat(1.0f, 0.0f, 0.0f, 0.0f)){
