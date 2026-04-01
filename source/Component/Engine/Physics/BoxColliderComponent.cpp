@@ -27,13 +27,15 @@ void Component::BoxCollider::Generate(const glm::vec3 &halfExtents, Physics::Lay
 
     glm::vec3 pos = this->transform->GetPos();
     glm::quat rot = this->transform->GetRot();
+    JPH::EMotionType motionType = Physics::GetMotionType(layer);
     JPH::BodyCreationSettings settings(
         shape, 
         JPH::RVec3(pos.x, pos.y, pos.z), 
         JPH::Quat(rot.x, rot.y, rot.z, rot.w), 
-        Physics::GetMotionType(layer), 
+        motionType, 
         static_cast<JPH::ObjectLayer>(layer)
     );
+    this->SetStatic(motionType == JPH::EMotionType::Static);
 
     this->bodyID = GameEngine::physics->CreateBody(settings);
 }

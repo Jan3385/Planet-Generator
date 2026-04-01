@@ -39,6 +39,14 @@ void Component::BaseCollider::SyncToTransform()
     );
 }
 
+void Component::BaseCollider::LateUpdate()
+{
+    if(this->isStatic)
+        this->SyncToTransform();
+    else
+        this->UpdateTransform();
+}
+
 void Component::BaseCollider::UpdateTransform()
 {
     glm::vec3 pos = GameEngine::physics->GetBodyPosition(this->bodyID);

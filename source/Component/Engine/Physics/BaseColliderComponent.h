@@ -11,8 +11,9 @@ namespace Component {
 /**
  * @brief Base Collider class
  * @details Handles collision detection for the object
+ * @note Updates the transform component during LateUpdate
  */
-class BaseCollider : public BaseComponent {
+class BaseCollider : public BaseComponent, public Component::IOffsetUpdatable {
 public:
     BaseCollider(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~BaseCollider() override = default;
@@ -29,18 +30,31 @@ public:
     glm::vec3 GetAngularVelocity() const;
 
     void SyncToTransform();
-    void UpdateTransform(); //TODO: update transform during LateUpdate
 protected:
     std::vector<std::type_index> GetDependencies() const override 
-        { return {typeid(Component::Transform)}; }
-
+    { return {typeid(Component::Transform)}; }
+    
     void Awake()     override;
     void OnDestroy() override;
     void OnEnable()  override;
     void OnDisable() override;
+    
+    virtual void EarlyUpdate() { };
+    virtual void LateUpdate();
+
+    void UpdateTransform();
 
     Component::Transform* transform = nullptr;
 
+    /// @brief Sets the object as static or non-static
+    /// @param isStatic 
+    /// @note static: transform -> physics
+    /// @note non-static: physics -> transform
+    void SetStatic(bool isStatic) { this->isStatic = isStatic; }
+    bool IsStatic() { return this->isStatic; }
+
     JPH::BodyID bodyID = JPH::BodyID();
+private:
+    bool isStatic = true;
 };
 }
