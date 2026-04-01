@@ -9,8 +9,8 @@ JPH::ShapeRefC Component::BaseCollider::ApplyOffset(JPH::ShapeRefC ref, glm::vec
 {
     if(pos != glm::vec3(0.0f) || rot != glm::quat(1.0f, 0.0f, 0.0f, 0.0f)){
         JPH::RotatedTranslatedShapeSettings offsetShape(
-            JPH::RVec3(offset.x, offset.y, offset.z),
-            JPH::Quat(rotation.x, rotation.y, rotation.z, rotation.w),
+            JPH::RVec3(pos.x, pos.y, pos.z),
+            JPH::Quat(rot.x, rot.y, rot.z, rot.w),
             ref
         );
         return offsetShape.Create().Get();
