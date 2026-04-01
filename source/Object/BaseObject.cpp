@@ -72,7 +72,7 @@ void Object::BaseObject::LateUpdate()
 {
     for (auto *lateUpdatable : offsetUpdatables)
     {
-        lateUpdatable->EarlyUpdate();
+        lateUpdatable->LateUpdate();
     }
 }
 

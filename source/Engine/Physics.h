@@ -19,6 +19,8 @@ public:
 
     void Update(float deltaTime);
 
+    void SetGlobalGravity(const glm::vec3 &gravity);
+
     JPH::BodyID CreateBody(const JPH::BodyCreationSettings &settings);
     void EnableBody(JPH::BodyID bodyID);
     void DisableBody(JPH::BodyID bodyID);

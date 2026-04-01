@@ -8,7 +8,7 @@ public:
     BoxCollider(Object::BaseObject* owner) : BaseCollider(owner) {};
     ~BoxCollider() override = default;
     
-    void Generate(const glm::vec3 &halfExtents, Physics::Layer layer, 
+    void Generate(glm::vec3 halfExtents, Physics::Layer layer, 
         const glm::vec3 &offset = glm::vec3(0.0f), const glm::quat &rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
 
     

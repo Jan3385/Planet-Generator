@@ -34,8 +34,8 @@ protected:
     std::vector<std::type_index> GetDependencies() const override 
     { return {typeid(Component::Transform)}; }
 
-    static JPH::ShapeRefC ApplyOffset(JPH::ShapeRefC ref, glm::vec3 pos, glm::quat rot);
-    JPH::BodyID CreateBody(JPH::ShapeRefC shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer);
+    static JPH::ShapeRefC ApplyOffset(const JPH::ShapeRefC& ref, glm::vec3 pos, glm::quat rot);
+    JPH::BodyID CreateBody(const JPH::ShapeRefC& shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer);
     
     void Awake()     override;
     void OnDestroy() override;
@@ -57,6 +57,8 @@ protected:
     bool IsStatic() { return this->isStatic; }
 
     JPH::BodyID bodyID = JPH::BodyID();
+
+    friend class Object::BaseObject;
 private:
     bool isStatic = true;
 };

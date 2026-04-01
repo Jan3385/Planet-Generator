@@ -154,22 +154,28 @@ void GameEngine::Run(const EngineConfig::Config& config)
     modelObj->GetTransform()
         ->SetPos(glm::vec3(1.7f, 0.0f, 1.7f))
         ->SetScale(glm::vec3(0.25f))
-        ->SetRot(glm::vec3(0.0f, -45.0f, 0.0f));
+        ->SetRot(glm::vec3(0.0f, -45.0f, 0.0f))
+        ->ForceUpdateMatrixTransform();
 
     Component::MeshRender *modelRenderComp = modelObj->GetRenderComponent();
     std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
     modelRenderComp->SetMesh(modelMesh);
+    modelObj->AddComponent<Component::BoxCollider>()
+        ->Generate(glm::vec3(0.5f), Physics::Layer::Dynamic);
 
-    modelObj->SetParent(planet);
     GL::Shader::LogGLErrors("After Model Loading");
 
     // floor
     Object::GameObject *floor = currentLevel->CreateGameObject();
     floor->GetTransform()
         ->SetScale(glm::vec3(80.0f, 0.1f, 80.0f))
-        ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f));
+        ->SetPos(glm::vec3(0.0f, -2.0f, 0.0f))
+        ->ForceUpdateMatrixTransform();
     Component::MeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMesh(cube);
+
+    floor->AddComponent<Component::BoxCollider>()
+        ->Generate(glm::vec3(0.5f), Physics::Layer::Static);
 
     // lights
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), 3.5f);

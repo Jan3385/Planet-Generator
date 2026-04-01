@@ -7,10 +7,24 @@
 /// @param layer layer of the collider
 /// @param offset offset of the collider from the object position
 /// @param rotation offset rotation of the collider
-void Component::BoxCollider::Generate(const glm::vec3 &halfExtents, Physics::Layer layer, 
+void Component::BoxCollider::Generate(glm::vec3 halfExtents, Physics::Layer layer, 
     const glm::vec3 &offset, const glm::quat &rotation)
 {
-    JPH::ShapeRefC shape = new JPH::BoxShape(JPH::Vec3(halfExtents.x, halfExtents.y, halfExtents.z), 0.0f);
+    if(!this->transform){
+        Debug::LogError("BoxColliderComponent: Cannot generate collider without a TransformComponent");
+        return;
+    }
+
+    // scale with object scale 
+    halfExtents.x *= this->transform->GetScale().x;
+    halfExtents.y *= this->transform->GetScale().y;
+    halfExtents.z *= this->transform->GetScale().z;
+
+    JPH::BoxShapeSettings settings(JPH::Vec3(halfExtents.x, halfExtents.y, halfExtents.z), 0.0f);
+    JPH::ShapeSettings::ShapeResult result = settings.Create();
+    Debug::Assert(result.IsValid(), "BoxColliderComponent: Failed to create box shape");
+
+    JPH::ShapeRefC shape = result.Get();
 
     shape = ApplyOffset(shape, offset, rotation);
 

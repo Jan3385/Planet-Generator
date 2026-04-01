@@ -1,7 +1,9 @@
 #include "Physics.h"
 
+#include <cstdarg>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
 
 #include "Debug/Logger.h"
 
@@ -77,11 +79,32 @@ public:
     }
 };
 
+static void JoltTraceImpl(const char* inFMT, ...) {
+    va_list args;
+    va_start(args, inFMT);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), inFMT, args);
+    va_end(args);
+    Debug::LogTrace(std::string("[JPH] ") + buffer);
+}
+
+static bool JoltAssertFailed(const char* inExpression, const char* inMessage, const char* inFile, JPH::uint inLine) {
+    Debug::LogError(
+        std::string("[JPH Assert] ") + inExpression +
+        " | " + (inMessage ? inMessage : "") +
+        " | " + inFile + ":" + std::to_string(inLine)
+    );
+    return true;
+}
+
 Physics::Physics()
 {
     if(JPH::Factory::sInstance != nullptr) {
         Debug::LogFatal("[JPH] Factory instance already exists. Creating multiple physics instances is not supported!");
     }
+
+    JPH::Trace = JoltTraceImpl;
+    JPH::AssertFailed = JoltAssertFailed;
 
     // Initialize Jolt Physics
     JPH::RegisterDefaultAllocator();
@@ -112,6 +135,10 @@ Physics::Physics()
         *this->objectVsBpLayerFilter,
         *this->objectLayerPairFilter
     );
+
+    physicsSystem->OptimizeBroadPhase();
+
+    physicsSystem->SetGravity(JPH::Vec3(0.0f, -9.81f, 0.0f));
 }
 
 Physics::~Physics()
@@ -131,14 +158,27 @@ void Physics::Update(float deltaTime)
     );
 }
 
+void Physics::SetGlobalGravity(const glm::vec3 &gravity)
+{
+    physicsSystem->SetGravity(JPH::Vec3(gravity.x, gravity.y, gravity.z));
+}
+
 JPH::BodyID Physics::CreateBody(const JPH::BodyCreationSettings &settings)
 {
     JPH::BodyInterface& bodyInterface = this->physicsSystem->GetBodyInterface();
 
-    return bodyInterface.CreateAndAddBody(
+    Debug::AssertNot(settings.GetShape() == nullptr, "Cannot create a body with a null shape!");
+
+    JPH::EActivation activationMode = 
+        settings.mMotionType == JPH::EMotionType::Static ? JPH::EActivation::DontActivate : JPH::EActivation::Activate;
+
+    JPH::BodyID body = bodyInterface.CreateAndAddBody(
         settings,
-        JPH::EActivation::Activate
+        activationMode
     );
+
+    Debug::AssertNot(body.IsInvalid(), "Failed to create body!");
+    return body;
 }
 
 void Physics::EnableBody(JPH::BodyID bodyID)

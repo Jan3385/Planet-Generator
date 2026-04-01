@@ -5,7 +5,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 
-JPH::ShapeRefC Component::BaseCollider::ApplyOffset(JPH::ShapeRefC ref, glm::vec3 pos, glm::quat rot)
+JPH::ShapeRefC Component::BaseCollider::ApplyOffset(const JPH::ShapeRefC& ref, glm::vec3 pos, glm::quat rot)
 {
     if(pos != glm::vec3(0.0f) || rot != glm::quat(1.0f, 0.0f, 0.0f, 0.0f)){
         JPH::RotatedTranslatedShapeSettings offsetShape(
@@ -19,9 +19,13 @@ JPH::ShapeRefC Component::BaseCollider::ApplyOffset(JPH::ShapeRefC ref, glm::vec
     return ref;
 }
 
-JPH::BodyID Component::BaseCollider::CreateBody(JPH::ShapeRefC shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer)
+JPH::BodyID Component::BaseCollider::CreateBody(const JPH::ShapeRefC& shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer)
 {
     JPH::EMotionType motionType = Physics::GetMotionType(layer);
+
+    rot = glm::normalize(rot);
+    if(rot == glm::quat(0.0f, 0.0f, 0.0f, 0.0f)) rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+
     JPH::BodyCreationSettings settings(
         shape, 
         JPH::RVec3(pos.x, pos.y, pos.z), 
@@ -29,6 +33,9 @@ JPH::BodyID Component::BaseCollider::CreateBody(JPH::ShapeRefC shape, glm::vec3 
         motionType, 
         static_cast<JPH::ObjectLayer>(layer)
     );
+
+    //settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateMassAndInertia;
+    
     this->SetStatic(motionType == JPH::EMotionType::Static);
 
     return GameEngine::physics->CreateBody(settings);
@@ -61,6 +68,8 @@ void Component::BaseCollider::OnDisable()
 
 void Component::BaseCollider::SyncToTransform()
 {
+    if(this->bodyID.IsInvalid()) return;
+
     glm::vec3 pos = this->transform->GetPos();
     glm::quat rot = this->transform->GetRot();
 
@@ -73,6 +82,8 @@ void Component::BaseCollider::SyncToTransform()
 
 void Component::BaseCollider::LateUpdate()
 {
+    if(this->bodyID.IsInvalid()) return;
+
     if(this->isStatic)
         this->SyncToTransform();
     else
@@ -81,6 +92,8 @@ void Component::BaseCollider::LateUpdate()
 
 void Component::BaseCollider::UpdateTransform()
 {
+    if(this->bodyID.IsInvalid()) return;
+
     glm::vec3 pos = GameEngine::physics->GetBodyPosition(this->bodyID);
     glm::quat rot = GameEngine::physics->GetBodyRotation(this->bodyID);
 

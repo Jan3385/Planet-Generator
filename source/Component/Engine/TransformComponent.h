@@ -50,6 +50,7 @@ public:
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
 
+    void ForceUpdateMatrixTransform() { this->UpdateMatrixTransform(); }
     glm::mat4 GetMatrixTransform() const;
     glm::mat4 GetPreviousMatrixTransform() const;
 
