@@ -11,6 +11,7 @@
 #include "Component/Game/Planet/PlanetGenComponent.h"
 #include "Component/Engine/PointLightSourceComponent.h"
 #include "Component/Engine/Physics/BoxColliderComponent.h"
+#include "Component/Engine/Physics/SphereColliderComponent.h"
 #include "Component/Engine/Physics/ConvexHullColliderComponent.h"
 #include "Object/GameObject.h"
 
@@ -218,6 +219,10 @@ void GameEngine::Run(const EngineConfig::Config& config)
     //Component::PointLightSource::PointLightData lightData;
     //lightData.color = glm::vec3(1.0f, 1.0f, 1.0f);
     //pointLight->SetLightData(lightData);
+
+    // makes the player a collider
+    Component::SphereCollider *playerCollider = camObj->AddComponent<Component::SphereCollider>();
+    playerCollider->Generate(0.7f, Physics::Layer::Kinematic);
 
     GL::Shader::LogGLErrors("After Object Creation");
     // ---------

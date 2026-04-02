@@ -17,7 +17,8 @@ public:
     enum class Layer : JPH::ObjectLayer {
         Static = 0,
         Terrain = 1,
-        Dynamic = 2,
+        Kinematic = 2,
+        Dynamic = 3,
     };
 
     class PhysicsContactListener : public JPH::ContactListener {
@@ -52,7 +53,7 @@ public:
 
     JPH::BodyInterface& GetBodyInterface() { return this->physicsSystem->GetBodyInterface(); }
 
-    void UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation);
+    void UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation, bool kinematic);
     glm::vec3 GetBodyPosition(JPH::BodyID bodyID);
     glm::quat GetBodyRotation(JPH::BodyID bodyID);
 

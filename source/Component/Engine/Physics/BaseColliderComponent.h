@@ -71,6 +71,7 @@ protected:
     bool IsStatic() { return this->isStatic; }
 
     JPH::BodyID bodyID = JPH::BodyID();
+    JPH::EMotionType motionType;
 
     friend class Object::BaseObject;
 private:

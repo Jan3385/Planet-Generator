@@ -34,6 +34,8 @@ public:
         case Physics::Layer::Static:
         case Physics::Layer::Terrain:
             return NON_MOVING;
+        case Physics::Layer::Kinematic:
+            return MOVING;
         case Physics::Layer::Dynamic:
             return MOVING;
         default:
@@ -53,6 +55,8 @@ public:
             case Physics::Layer::Static:
             case Physics::Layer::Terrain:
                 return bpLayer == MOVING;   // static only collides with moving
+            case Physics::Layer::Kinematic:
+                return true;   // kinematic collides with everything
             case Physics::Layer::Dynamic:
                 return true;                // dynamic collides with everything
 
@@ -73,6 +77,8 @@ public:
             case Physics::Layer::Static:
             case Physics::Layer::Terrain:
                 return static_cast<Physics::Layer>(layer2) == Physics::Layer::Dynamic;  // static only collides with dynamic
+            case Physics::Layer::Kinematic:
+                return true;                                                            // kinematic collides with everything
             case Physics::Layer::Dynamic:
                 return true;                                                            // dynamic collides with everything
             default:
@@ -284,9 +290,12 @@ void Physics::RemoveBody(JPH::BodyID bodyID)
     this->physicsSystem->GetBodyInterface().DestroyBody(bodyID);
 }
 
-void Physics::UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation)
+void Physics::UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation, bool kinematic)
 {
-    this->physicsSystem->GetBodyInterface().SetPositionAndRotation(bodyID, position, rotation, JPH::EActivation::DontActivate);
+    if(!kinematic)
+        this->physicsSystem->GetBodyInterface().SetPositionAndRotation(bodyID, position, rotation, JPH::EActivation::DontActivate);
+    else
+        this->physicsSystem->GetBodyInterface().MoveKinematic(bodyID, position, rotation, GameEngine::instance->DeltaTime());
 }
 
 glm::vec3 Physics::GetBodyPosition(JPH::BodyID bodyID)
@@ -310,6 +319,8 @@ JPH::EMotionType Physics::GetMotionType(Layer layer)
         case Layer::Static:
         case Layer::Terrain:
             return JPH::EMotionType::Static;
+        case Layer::Kinematic:
+            return JPH::EMotionType::Kinematic;
         case Layer::Dynamic:
             return JPH::EMotionType::Dynamic;
         default:

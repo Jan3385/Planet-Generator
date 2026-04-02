@@ -37,7 +37,8 @@ JPH::BodyID Component::BaseCollider::CreateBody(const JPH::ShapeRefC& shape, glm
     settings.mUserData = reinterpret_cast<JPH::uint64>(this); // for collision callbacks
     //settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateMassAndInertia;
     
-    this->SetStatic(motionType == JPH::EMotionType::Static);
+    this->SetStatic(motionType != JPH::EMotionType::Dynamic);
+    this->motionType = motionType;
 
     return GameEngine::physics->CreateBody(settings, this);
 }
@@ -77,7 +78,8 @@ void Component::BaseCollider::SyncToTransform()
     GameEngine::physics->UpdateBodyTransform(
         this->bodyID,
         JPH::RVec3(pos.x, pos.y, pos.z),
-        JPH::Quat(rot.x, rot.y, rot.z, rot.w)
+        JPH::Quat(rot.x, rot.y, rot.z, rot.w),
+        this->motionType == JPH::EMotionType::Kinematic
     );
 }
 
