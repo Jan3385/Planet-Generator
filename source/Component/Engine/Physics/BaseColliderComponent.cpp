@@ -34,11 +34,12 @@ JPH::BodyID Component::BaseCollider::CreateBody(const JPH::ShapeRefC& shape, glm
         static_cast<JPH::ObjectLayer>(layer)
     );
 
+    settings.mUserData = reinterpret_cast<JPH::uint64>(this); // for collision callbacks
     //settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateMassAndInertia;
     
     this->SetStatic(motionType == JPH::EMotionType::Static);
 
-    return GameEngine::physics->CreateBody(settings);
+    return GameEngine::physics->CreateBody(settings, this);
 }
 
 void Component::BaseCollider::Awake()

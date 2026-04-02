@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <Jolt/Jolt.h>
 
 #include "Engine/Physics.h"
@@ -7,7 +9,8 @@
 #include "Component/BaseComponent.h"
 #include "Component/Engine/TransformComponent.h"
 
-namespace Component {
+namespace Component 
+{
 /**
  * @brief Base Collider class
  * @details Handles collision detection for the object
@@ -15,6 +18,15 @@ namespace Component {
  */
 class BaseCollider : public BaseComponent, public Component::IOffsetUpdatable {
 public:
+    struct CollisionData {
+        JPH::BodyID otherID;
+        BaseCollider* otherCollider;
+        JPH::ContactManifold manifold;
+    };
+    std::function<void(const CollisionData&)> onCollisionEnter = nullptr;
+    std::function<void(const CollisionData&)> onCollisionStay = nullptr;
+    std::function<void(const JPH::BodyID&)> onCollisionExit = nullptr;
+
     BaseCollider(Object::BaseObject* owner) : BaseComponent(owner) {};
     ~BaseCollider() override = default;
 

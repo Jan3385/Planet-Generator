@@ -1,11 +1,15 @@
 #include "Physics.h"
 
+#include "Engine/Engine.h"
+
 #include <cstdarg>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
 #include "Debug/Logger.h"
+
+#include "Component/Engine/Physics/BaseColliderComponent.h"
 
 // how many substeps happen each physics update
 constexpr uint8_t collisionSteps = 1;
@@ -124,6 +128,8 @@ Physics::Physics()
     this->objectVsBpLayerFilter = std::make_unique<_ObjectVsBPLayerFilterImpl>();
     this->objectLayerPairFilter = std::make_unique<_ObjectLayerPairFilter>();
 
+    this->contactListener = std::make_unique<PhysicsContactListener>();
+
     // Create physics system
     this->physicsSystem = std::make_unique<JPH::PhysicsSystem>();
     this->physicsSystem->Init(
@@ -135,6 +141,8 @@ Physics::Physics()
         *this->objectVsBpLayerFilter,
         *this->objectLayerPairFilter
     );
+
+    this->physicsSystem->SetContactListener(this->contactListener.get());
 
     physicsSystem->OptimizeBroadPhase();
 
@@ -156,6 +164,62 @@ void Physics::Update(float deltaTime)
         this->tempAllocator.get(),
         this->jobSystem.get()
     );
+
+    while (!this->contactListener->eventQueue.empty()) {
+        auto event = this->contactListener->eventQueue.front();
+        this->contactListener->eventQueue.pop();
+
+        Component::BaseCollider* col1 = this->bodyIDToColliderMap[event.id1];
+        Component::BaseCollider* col2 = this->bodyIDToColliderMap[event.id2];
+
+        switch (event.type)
+        {
+        case PhysicsContactListener::ContactEvent::Type::Added:
+            if(col1 && col1->onCollisionEnter) {
+                col1->onCollisionEnter({
+                    .otherID = event.id2,
+                    .otherCollider = col2,
+                    .manifold = event.manifold
+                });
+            }
+            if(col2 && col2->onCollisionEnter) {
+                col2->onCollisionEnter({
+                    .otherID = event.id1,
+                    .otherCollider = col1,
+                    .manifold = event.manifold.SwapShapes()
+                });
+            }
+            break;
+        case PhysicsContactListener::ContactEvent::Type::Persisted:
+            if(col1 && col1->onCollisionStay) {
+                col1->onCollisionStay({
+                    .otherID = event.id2,
+                    .otherCollider = col2,
+                    .manifold = event.manifold
+                });
+            }
+            if(col2 && col2->onCollisionStay) {
+                col2->onCollisionStay({
+                    .otherID = event.id1,
+                    .otherCollider = col1,
+                    .manifold = event.manifold.SwapShapes()
+                });
+            }
+            break;
+        case PhysicsContactListener::ContactEvent::Type::Removed:
+            if(col1 && col1->onCollisionExit) {
+                col1->onCollisionExit(event.id2);
+            }
+            if(col2 && col2->onCollisionExit) {
+                col2->onCollisionExit(event.id1);
+            }
+            break;
+        default:
+            Debug::LogWarn("[JPH] Unknown contact event type: " + std::to_string(static_cast<int>(event.type)));
+            break;
+        }
+    }
+
 }
 
 void Physics::SetGlobalGravity(const glm::vec3 &gravity)
@@ -163,7 +227,11 @@ void Physics::SetGlobalGravity(const glm::vec3 &gravity)
     physicsSystem->SetGravity(JPH::Vec3(gravity.x, gravity.y, gravity.z));
 }
 
-JPH::BodyID Physics::CreateBody(const JPH::BodyCreationSettings &settings)
+/// @brief Creates a physics body for the physics simulation
+/// @param settings The settings for the body creation, including shape, mass, friction, etc.
+/// @param caller The collider component that called CreateBody, can be nullptr
+/// @return The ID of the created body
+JPH::BodyID Physics::CreateBody(const JPH::BodyCreationSettings &settings, Component::BaseCollider* caller)
 {
     JPH::BodyInterface& bodyInterface = this->physicsSystem->GetBodyInterface();
 
@@ -178,6 +246,9 @@ JPH::BodyID Physics::CreateBody(const JPH::BodyCreationSettings &settings)
     );
 
     Debug::AssertNot(body.IsInvalid(), "Failed to create body!");
+
+    this->bodyIDToColliderMap[body] = caller;
+
     return body;
 }
 
@@ -207,7 +278,8 @@ void Physics::RemoveBody(JPH::BodyID bodyID)
         Debug::LogWarn("[JPH] Attempted to remove an invalid body ID");
         return;
     }
-
+    
+    this->bodyIDToColliderMap.erase(bodyID);
     this->physicsSystem->GetBodyInterface().RemoveBody(bodyID);
     this->physicsSystem->GetBodyInterface().DestroyBody(bodyID);
 }
@@ -244,4 +316,42 @@ JPH::EMotionType Physics::GetMotionType(Layer layer)
             Debug::LogFatal("[JPH] Invalid object layer: " + std::to_string(static_cast<int>(layer)));
             return JPH::EMotionType::Static;
     }
+}
+
+void Physics::PhysicsContactListener::OnContactAdded(
+    const JPH::Body &inBody1, const JPH::Body &inBody2, 
+    const JPH::ContactManifold &inManifold, JPH::ContactSettings &ioSettings)
+{
+    std::lock_guard<std::mutex> lock(this->eventQueueMutex);
+    this->eventQueue.push({
+        .type = ContactEvent::Type::Added,
+        .id1 = inBody1.GetID(),
+        .id2 = inBody2.GetID(),
+        .manifold = inManifold
+    });
+}
+
+void Physics::PhysicsContactListener::OnContactPersisted(
+    const JPH::Body &inBody1, const JPH::Body &inBody2, 
+    const JPH::ContactManifold &inManifold, JPH::ContactSettings &ioSettings)
+{
+    std::lock_guard<std::mutex> lock(this->eventQueueMutex);
+    this->eventQueue.push({
+        .type = ContactEvent::Type::Persisted,
+        .id1 = inBody1.GetID(),
+        .id2 = inBody2.GetID(),
+        .manifold = inManifold
+    });
+}
+
+void Physics::PhysicsContactListener::OnContactRemoved(const JPH::SubShapeIDPair &inSubShapePair)
+{
+    std::lock_guard<std::mutex> lock(this->eventQueueMutex);
+
+    this->eventQueue.push({
+        .type = ContactEvent::Type::Removed,
+        .id1 = inSubShapePair.GetBody1ID(),
+        .id2 = inSubShapePair.GetBody2ID(),
+        .manifold = JPH::ContactManifold()
+    });
 }

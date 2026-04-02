@@ -161,8 +161,11 @@ void GameEngine::Run(const EngineConfig::Config& config)
     Component::MeshRender *modelRenderComp = modelObj->GetRenderComponent();
     std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
     modelRenderComp->SetMesh(modelMesh);
-    modelObj->AddComponent<Component::ConvexHullCollider>()
-        ->Generate(*modelMesh->GetMeshes()[0], Physics::Layer::Dynamic);
+    Component::ConvexHullCollider *modelCollider = modelObj->AddComponent<Component::ConvexHullCollider>();
+    modelCollider->Generate(*modelMesh->GetMeshes()[0], Physics::Layer::Dynamic);
+    modelCollider->onCollisionEnter = [](const Component::BaseCollider::CollisionData& data) {
+        Debug::LogInfo("Collision Enter with body ID: " + std::to_string(data.otherID.GetIndex()));
+    };
 
     GL::Shader::LogGLErrors("After Model Loading");
 
