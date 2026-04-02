@@ -4,6 +4,10 @@
 #include "GLWrapper/Mesh.h"
 
 namespace Component {
+
+/// @brief Convex hull collider component
+/// @details Generates a convex hull collider from a set of points or a mesh
+/// @note Convex hull can be static, non-static and kinematic
 class ConvexHullCollider : public BaseCollider {
 public:
     ConvexHullCollider(Object::BaseObject* owner) : BaseCollider(owner) {};
