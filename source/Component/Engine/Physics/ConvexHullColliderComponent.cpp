@@ -10,11 +10,12 @@ void Component::ConvexHullCollider::Generate(std::vector<JPH::Vec3> points, Phys
         return;
     }
 
-    glm::vec3 objScale = this->transform->GetScale();
-    float scale = std::max(objScale.x, std::max(objScale.y, objScale.z));
+    glm::vec3 scale = this->transform->GetScale();
 
     for(auto& point : points){
-        point *= scale;
+        point.SetX(point.GetX() * scale.x);
+        point.SetY(point.GetY() * scale.y);
+        point.SetZ(point.GetZ() * scale.z);
     }
 
     JPH::ConvexHullShapeSettings settings(points.data(), points.size());
