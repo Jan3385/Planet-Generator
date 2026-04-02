@@ -3,12 +3,12 @@
 #include "Component/Engine/Physics/BaseColliderComponent.h"
 
 namespace Component {
-class BoxCollider : public BaseCollider {
+class SphereCollider : public BaseCollider {
 public:
-    BoxCollider(Object::BaseObject* owner) : BaseCollider(owner) {};
-    ~BoxCollider() override = default;
+    SphereCollider(Object::BaseObject* owner) : BaseCollider(owner) {};
+    ~SphereCollider() override = default;
     
-    void Generate(glm::vec3 size, Physics::Layer layer, 
+    void Generate(float radius, Physics::Layer layer, 
         const glm::vec3 &offset = glm::vec3(0.0f), const glm::quat &rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
 
     

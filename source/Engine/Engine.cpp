@@ -11,6 +11,7 @@
 #include "Component/Game/Planet/PlanetGenComponent.h"
 #include "Component/Engine/PointLightSourceComponent.h"
 #include "Component/Engine/Physics/BoxColliderComponent.h"
+#include "Component/Engine/Physics/ConvexHullColliderComponent.h"
 #include "Object/GameObject.h"
 
 #include "Generator/MeshGenerator.h"
@@ -154,14 +155,14 @@ void GameEngine::Run(const EngineConfig::Config& config)
     modelObj->GetTransform()
         ->SetPos(glm::vec3(1.7f, 0.0f, 1.7f))
         ->SetScale(glm::vec3(0.25f))
-        ->SetRot(glm::vec3(0.0f, -45.0f, 0.0f))
+        ->SetRot(glm::vec3(0.0f, -90.0f, 0.0f))
         ->ForceUpdateMatrixTransform();
 
     Component::MeshRender *modelRenderComp = modelObj->GetRenderComponent();
     std::shared_ptr<GL::Model> modelMesh = std::make_shared<GL::Model>("Models/teapot.obj");
     modelRenderComp->SetMesh(modelMesh);
-    modelObj->AddComponent<Component::BoxCollider>()
-        ->Generate(glm::vec3(0.5f), Physics::Layer::Dynamic);
+    modelObj->AddComponent<Component::ConvexHullCollider>()
+        ->Generate(*modelMesh->GetMeshes()[0], Physics::Layer::Dynamic);
 
     GL::Shader::LogGLErrors("After Model Loading");
 

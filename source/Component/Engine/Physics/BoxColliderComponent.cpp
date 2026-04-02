@@ -3,11 +3,11 @@
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
 /// @brief Generates a box collider for the component
-/// @param halfExtents half of the box collider extents in each direction
+/// @param size size of the box collider in each direction
 /// @param layer layer of the collider
 /// @param offset offset of the collider from the object position
 /// @param rotation offset rotation of the collider
-void Component::BoxCollider::Generate(glm::vec3 halfExtents, Physics::Layer layer, 
+void Component::BoxCollider::Generate(glm::vec3 size, Physics::Layer layer, 
     const glm::vec3 &offset, const glm::quat &rotation)
 {
     if(!this->transform){
@@ -15,12 +15,12 @@ void Component::BoxCollider::Generate(glm::vec3 halfExtents, Physics::Layer laye
         return;
     }
 
-    // scale with object scale 
-    halfExtents.x *= this->transform->GetScale().x;
-    halfExtents.y *= this->transform->GetScale().y;
-    halfExtents.z *= this->transform->GetScale().z;
+    size /= 2.0f; // Jolt needs half of the size
 
-    JPH::BoxShapeSettings settings(JPH::Vec3(halfExtents.x, halfExtents.y, halfExtents.z), 0.0f);
+    // scale with object scale 
+    size *= this->transform->GetScale();
+
+    JPH::BoxShapeSettings settings(JPH::Vec3(size.x, size.y, size.z), 0.0f);
     JPH::ShapeSettings::ShapeResult result = settings.Create();
     Debug::Assert(result.IsValid(), "BoxColliderComponent: Failed to create box shape");
 

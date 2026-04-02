@@ -163,6 +163,8 @@ void Renderer::DrawImGuiWindows()
     ImGui::Text("Delta Time: %.3f ms", GameEngine::instance->DeltaTime() * 1000.0f);
     ImGui::Text("Immediate FPS: %.1f", GameEngine::instance->GetFPS());
     ImGui::Text("Avg FPS: %.1f", GameEngine::instance->GetAvgFPS());
+    glm::vec3 camPos = GameEngine::currentLevel->GetCamera()->GetPosition();
+    ImGui::Text("Camera Position: (%.1f, %.1f, %.1f)", camPos.x, camPos.y, camPos.z);
     if(ImGui::Button("Toggle Wireframe")){
         this->WireframeMode(!this->isWireframeMode);
     }
