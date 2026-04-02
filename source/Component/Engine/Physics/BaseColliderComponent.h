@@ -29,6 +29,8 @@ public:
     glm::vec3 GetLinearVelocity() const;
     glm::vec3 GetAngularVelocity() const;
 
+    void SetContinuousCollisionDetection(bool enabled);
+
     void SyncToTransform();
 protected:
     std::vector<std::type_index> GetDependencies() const override 

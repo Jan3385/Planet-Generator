@@ -149,3 +149,13 @@ glm::vec3 Component::BaseCollider::GetAngularVelocity() const
 
     return glm::vec3(vel.GetX(), vel.GetY(), vel.GetZ());
 }
+
+void Component::BaseCollider::SetContinuousCollisionDetection(bool enabled)
+{
+    Debug::AssertNot(this->bodyID.IsInvalid(), "[BaseCollider] Attempted to set CCD of an invalid body ID");
+
+    GameEngine::physics->GetBodyInterface().SetMotionQuality(
+        this->bodyID, 
+        enabled ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete
+    );
+}
