@@ -194,7 +194,7 @@ Component::Transform* Component::Transform::SetUpDirection(glm::vec3 newUp)
 
 glm::mat4 Component::Transform::UpdateMatrixTransform()
 {
-    if(!dirtyTransform) return matrixTransform;
+    if(!this->dirtyTransform) return matrixTransform;
 
     this->matrixTransform = glm::mat4(1.0f);
     this->matrixTransform = glm::translate(this->matrixTransform, this->position);
@@ -206,7 +206,7 @@ glm::mat4 Component::Transform::UpdateMatrixTransform()
     if(parent){
         Component::Transform* parentTransform = parent->GetComponent<Component::Transform>();
         if(parentTransform) {
-            this->invParentMatrixTransform = glm::inverse(parentTransform->GetMatrixTransform()); //FIXME:
+            this->invParentMatrixTransform = glm::inverse(parentTransform->GetMatrixTransform());
             this->matrixTransform = parentTransform->GetMatrixTransform() * this->matrixTransform;
         }
     }
@@ -221,7 +221,8 @@ glm::mat4 Component::Transform::UpdateMatrixTransform()
         }
     }
 
-    dirtyTransform = false;
+    this->dirtyTransform = false;
+    this->initializedTransform = true;
 
     return this->matrixTransform;
 }
@@ -231,7 +232,20 @@ glm::mat4 Component::Transform::UpdateMatrixTransform()
 /// @return world transform matrix
 glm::mat4 Component::Transform::GetMatrixTransform() const
 {
+    Debug::Assert(this->initializedTransform, "[Transform Component] Trying to access uninitialized transform matrix! Force matrix update call or wait a frame for initialization");
+
     return this->matrixTransform;
+}
+
+/// @brief Force a matrix update
+/// @return the new world transform matrix
+glm::mat4 Component::Transform::ForceUpdateMatrixTransform()
+{
+    this->MarkDirty();
+    
+    this->prevMatrixTransform = this->GetMatrixTransform();
+
+    return this->UpdateMatrixTransform();
 }
 
 /// @brief Gets the world transform matrix from the previous frame
@@ -291,4 +305,12 @@ void Component::Transform::EarlyUpdate()
 
 void Component::Transform::LateUpdate()
 {
+}
+
+void Component::Transform::Awake()
+{
+    // mark dirty just in case
+    this->MarkDirty();
+
+    this->UpdateMatrixTransform();
 }

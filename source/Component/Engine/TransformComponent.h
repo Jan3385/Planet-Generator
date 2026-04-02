@@ -10,6 +10,8 @@ namespace Component {
  * @brief Transform component class
  * @details Handles position, rotation and scale of the object
  * @note Once inserted into an object, it should not be removed
+ * @warning Matrix transform is only updated during EarlyUpdate, this will cause wierd results when setting and getting values during the same frame
+ * @warning Matrix transform latency can be fixed by calling `ForceUpdateMatrixTransform`
  */
 class Transform : public BaseComponent, public Component::IOffsetUpdatable {
 public:
@@ -50,8 +52,8 @@ public:
     glm::vec3 GetForwardVector() const { return modelForward; }
     glm::vec3 GetRightVector() const { return modelRight; }
 
-    void ForceUpdateMatrixTransform() { this->UpdateMatrixTransform(); }
     glm::mat4 GetMatrixTransform() const;
+    glm::mat4 ForceUpdateMatrixTransform();
     glm::mat4 GetPreviousMatrixTransform() const;
 
     std::vector<std::type_index> GetDependencies() const override 
@@ -64,8 +66,10 @@ protected:
 
     void MarkDirty() { dirtyTransform = true; }
 private:
-    void EarlyUpdate();
-    void LateUpdate();
+    void EarlyUpdate() override;
+    void LateUpdate() override;
+
+    void Awake() override;
 
     glm::vec3 position = glm::vec3(0.0f);
 
@@ -78,8 +82,11 @@ private:
     glm::vec3 scale    = glm::vec3(1.0f);
 
     bool dirtyTransform = true;
+    bool initializedTransform = false;
     glm::mat4 matrixTransform;
     glm::mat4 invParentMatrixTransform = glm::inverse(glm::mat4(1.0f));
     glm::mat4 prevMatrixTransform = glm::mat4(1.0f);
+
+    friend class Object::BaseObject;
 };
 }
