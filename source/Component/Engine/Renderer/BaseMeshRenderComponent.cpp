@@ -1,6 +1,6 @@
 #include "BaseMeshRenderComponent.h"
 
-#include "Engine/Engine.h"
+#include "Engine/Renderer.h"
 
 glm::vec3 Component::BaseMeshRender::GetPosition() const
 {
@@ -33,13 +33,13 @@ void Component::BaseMeshRender::SetRenderCallback(Object::Material::Transparency
     case Object::Material::Transparency::Special:
         break;
     case Object::Material::Transparency::Opaque:
-        GameEngine::renderer->AddRenderCallback(this);
+        Renderer::Ins()->AddRenderCallback(this);
         break;
     case Object::Material::Transparency::Transparent:
-        GameEngine::renderer->AddTransparentRenderCallback(this);
+        Renderer::Ins()->AddTransparentRenderCallback(this);
         break;
     case Object::Material::Transparency::OpaqueNoLight:
-        GameEngine::renderer->AddNoLightRenderCallback(this);
+        Renderer::Ins()->AddNoLightRenderCallback(this);
         break;
     default:
         Debug::LogWarn("BaseMeshRender: Unknown transparency type in SetRenderCallback");
@@ -55,13 +55,13 @@ void Component::BaseMeshRender::UnsetRenderCallback()
     case Object::Material::Transparency::Special:
         break;
     case Object::Material::Transparency::Opaque:
-        GameEngine::renderer->RemoveRenderCallback(this);
+        Renderer::Ins()->RemoveRenderCallback(this);
         break;
     case Object::Material::Transparency::Transparent:
-        GameEngine::renderer->RemoveTransparentRenderCallback(this);
+        Renderer::Ins()->RemoveTransparentRenderCallback(this);
         break;
     case Object::Material::Transparency::OpaqueNoLight:
-        GameEngine::renderer->RemoveNoLightRenderCallback(this);
+        Renderer::Ins()->RemoveNoLightRenderCallback(this);
         break;
     default:
         Debug::LogWarn("BaseMeshRender: Unknown transparency type in UnsetRenderCallback");

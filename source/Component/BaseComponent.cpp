@@ -2,7 +2,6 @@
 
 #include "Object/BaseObject.h"
 #include "Engine/Renderer.h"
-#include "Engine/Engine.h"
 
 void Component::BaseComponent::CheckDependencies() const
 {
@@ -15,10 +14,10 @@ void Component::BaseComponent::CheckDependencies() const
 
 Component::IImGuiUpdatable::IImGuiUpdatable()
 {
-    GameEngine::renderer->AddImGuiCallback(this);
+    Renderer::Ins()->AddImGuiCallback(this);
 }
 
 Component::IImGuiUpdatable::~IImGuiUpdatable()
 {
-    GameEngine::renderer->RemoveImGuiCallback(this);
+    Renderer::Ins()->RemoveImGuiCallback(this);
 }

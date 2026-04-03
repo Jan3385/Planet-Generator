@@ -1,11 +1,11 @@
 #include "MaterialLibrary.h"
 
-#include "Engine/Engine.h"
+#include "Engine/Renderer.h"
 
 MaterialLibrary::MaterialLibrary()
 {
     using namespace Object;
-    Material* defaultMat = this->CreateMaterial("default", &GameEngine::renderer->GetDefaultLightShader());
+    Material* defaultMat = this->CreateMaterial("default", &Renderer::Ins()->GetDefaultLightShader());
     defaultMat->attributes = Material::RenderAttributes::NormalMatrix | Material::RenderAttributes::Transform;
     defaultMat->transparency = Material::Transparency::Opaque;
     defaultMat->SetValue("material.color", glm::vec4(0.7f, 0.7f, 0.7f, 1.0f));

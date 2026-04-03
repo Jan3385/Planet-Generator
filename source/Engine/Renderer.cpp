@@ -7,16 +7,19 @@
 
 #include "Debug/Logger.h"
 #include "Engine/Engine.h"
+#include "Engine/Lighting.h"
 #include "Generator/MeshGenerator.h"
 #include "Component/BaseComponent.h"
 #include "Component/Game/Planet/PlanetGenComponent.h"
 #include "Component/Engine/PointLightSourceComponent.h"
 #include "Math/Random.h"
 
+Renderer* Renderer::instance = nullptr;
+
 void UpdateViewport(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    GameEngine::renderer->StoreWindowSize(width, height);
+    Renderer::Ins()->StoreWindowSize(width, height);
 }
 
 void Renderer::StoreWindowSize(int width, int height)
@@ -193,16 +196,16 @@ void Renderer::DrawImGuiWindows()
     }
     static float sunDir[3] = {-0.8f, -0.8f, 0.3f};
     if(ImGui::DragFloat3("Light Direction", &sunDir[0], 0.1f, -1.0f, 1.0f)){
-        GameEngine::lighting->SetDirectionalLightSourceDirection(glm::vec3(sunDir[0], sunDir[1], sunDir[2]));
+        Lighting::Ins()->SetDirectionalLightSourceDirection(glm::vec3(sunDir[0], sunDir[1], sunDir[2]));
     }
-    glm::vec3 ambientColor = GameEngine::lighting->GetAmbientColor();
+    glm::vec3 ambientColor = Lighting::Ins()->GetAmbientColor();
     float ambientColorArr[3] = {ambientColor.r, ambientColor.g, ambientColor.b};
     if(ImGui::ColorEdit3("Ambient Color", ambientColorArr)){
-        GameEngine::lighting->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
+        Lighting::Ins()->SetAmbientColor(glm::vec3(ambientColorArr[0], ambientColorArr[1], ambientColorArr[2]));
     }
-    float ambientIntensity = GameEngine::lighting->GetAmbientIntensity();
+    float ambientIntensity = Lighting::Ins()->GetAmbientIntensity();
     if(ImGui::DragFloat("Ambient Intensity", &ambientIntensity, 0.01f, 0.0f, 10.0f)){
-        GameEngine::lighting->SetAmbientIntensity(ambientIntensity);
+        Lighting::Ins()->SetAmbientIntensity(ambientIntensity);
     }
     
     const char *renderModes[] = { "Standard", "Normal", "Albedo", "Metallic", "Roughness", "Shadow", "Ambient Occlusion" };
@@ -252,7 +255,7 @@ void Renderer::GenerateScreenQuad()
 void Renderer::SetupLightShader()
 {
     this->lightPassShader = new GL::BasicShaderProgram("LightPassShader");
-    GameEngine::lighting->RegisterShaderLightUpdateCallback(this->lightPassShader);
+    Lighting::Ins()->RegisterShaderLightUpdateCallback(this->lightPassShader);
     this->lightPassShader->Use();
     this->lightPassShader->SetInt("gPosition", 0);
     this->lightPassShader->SetInt("gNormal", 1);
@@ -510,6 +513,8 @@ Renderer::~Renderer()
     if(this->mlaa) delete this->mlaa;
     if(this->taa) delete this->taa;
     if(this->ssao) delete this->ssao;
+
+    if(this->instance == this) this->instance = nullptr;
 }
 
 void Renderer::SetVSYNC(bool enabled)
@@ -542,8 +547,8 @@ void Renderer::Update()
     camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
 
     // bind N nearest point lights to the shader
-    GameEngine::lighting->RecalculateClosedPointLights(camera->GetPosition());
-    GameEngine::lighting->BindClosestPointLights(0, this->GetLightPassShader());
+    Lighting::Ins()->RecalculateClosedPointLights(camera->GetPosition());
+    Lighting::Ins()->BindClosestPointLights(0, this->GetLightPassShader());
 
     // setup projections etc
     glm::mat4 projection = camera->GetProjection();
@@ -619,13 +624,13 @@ void Renderer::Update()
     // 2. Light pass
     
     // 2.1 Shadow pass
-    GameEngine::lighting->RenderShadowLights();
+    Lighting::Ins()->RenderShadowLights();
 
     // 2.2 Light accumulation pass
     glClear(GL_DEPTH_BUFFER_BIT);
     this->lightPassShader->Use();
     this->geometryFramebuffer->BindTextures();
-    GameEngine::lighting->BindShadowMaps(5);
+    Lighting::Ins()->BindShadowMaps(5);
     this->postProcessFramebuffer->UpdateSize(screenSize);
     this->postProcessFramebuffer->BindShaderFBO();
     glClear(renderClearFlags);

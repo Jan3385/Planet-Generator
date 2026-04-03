@@ -42,7 +42,14 @@ public:
 
     void Update();
     void EndFrame();
+
+    Input* MakeInstance() { instance = this; return this; };
+
+    /// @brief Gets the singleton instance of the Input class
+    static Input* Ins() { return instance; }
 private:
+    static Input* instance;
+
     static bool ignoreKeyboardInput;
     static bool ignoreMouseInput;
 

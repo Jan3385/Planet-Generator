@@ -147,6 +147,11 @@ public:
     glm::vec2 GetScreenSize() const { return glm::vec2(this->windowWidth, this->windowHeight); }
 
     static std::array<glm::vec4, 6> CalculateFrustumPlanes(const glm::mat4& projection, const glm::mat4& view);
+
+    Renderer* MakeInstance() { instance = this; return this; };
+
+    /// @brief Gets the singleton instance of the Renderer class
+    static Renderer* Ins() { return instance; }
 protected:
     void ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes);
     void ObjectsSpecialRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes);
@@ -173,6 +178,8 @@ protected:
     GL::FrameBuffer *geometryFramebuffer;
     GL::FrameBuffer *postProcessFramebuffer;
 private:
+    static Renderer* instance;
+
     bool isWireframeMode = false;
     bool showFrustumColliders = false;
     EngineConfig::AntiAliasingMethod antiAliasingMethod;

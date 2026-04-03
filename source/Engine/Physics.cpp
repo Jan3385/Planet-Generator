@@ -11,6 +11,8 @@
 
 #include "Component/Engine/Physics/BaseColliderComponent.h"
 
+Physics* Physics::instance = nullptr;
+
 // how many substeps happen each physics update
 constexpr uint8_t collisionSteps = 1;
 
@@ -160,6 +162,8 @@ Physics::~Physics()
     JPH::UnregisterTypes();
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;
+
+    if(this->instance == this) this->instance = nullptr;
 }
 
 void Physics::Update(float deltaTime)

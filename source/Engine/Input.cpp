@@ -3,37 +3,39 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include "Engine/Engine.h"
+#include "Engine/Renderer.h"
+
+Input* Input::instance = nullptr;
 
 bool Input::ignoreKeyboardInput = false;
 bool Input::ignoreMouseInput = false;
 constexpr int KEY_OFFSET = GLFW_KEY_SPACE;
 Input::CursorMode Input::currentCursorMode = Input::CursorMode::Normal;
-bool Input::currKey[GLFW_KEY_LAST - GLFW_KEY_SPACE + 1] = { false };
-bool Input::prevKey[GLFW_KEY_LAST - GLFW_KEY_SPACE + 1] = { false };
+bool Input::currKey[GLFW_KEY_LAST - KEY_OFFSET + 1] = { false };
+bool Input::prevKey[GLFW_KEY_LAST - KEY_OFFSET + 1] = { false };
 
 Input::Input()
 {
-    glfwSetCursorPosCallback(GameEngine::renderer->window,
+    glfwSetCursorPosCallback(Renderer::Ins()->window,
         [](GLFWwindow* window, double xpos, double ypos) {
-            GameEngine::input->CursorPositionCallback(window, xpos, ypos);
+            Input::Ins()->CursorPositionCallback(window, xpos, ypos);
         });
     
-    glfwSetScrollCallback(GameEngine::renderer->window,
+    glfwSetScrollCallback(Renderer::Ins()->window,
         [](GLFWwindow* window, double xoffset, double yoffset) {
-            GameEngine::input->MouseScrollCallback(window, xoffset, yoffset);
+            Input::Ins()->MouseScrollCallback(window, xoffset, yoffset);
         });
 }
 
 Input::~Input()
 {
-
+    if(instance == this) instance = nullptr;
 }
 
 void Input::SetCursorMode(CursorMode mode)
 {
     Input::currentCursorMode = mode;
-    glfwSetInputMode(GameEngine::renderer->window, GLFW_CURSOR, static_cast<int>(mode));
+    glfwSetInputMode(Renderer::Ins()->window, GLFW_CURSOR, static_cast<int>(mode));
 }
 
 void Input::ToggleTrappedCursor()
@@ -78,12 +80,12 @@ glm::vec2 Input::GetMovementVector()
 
 bool Input::IsMouseButtonDown(MouseButton button)
 {
-    return !Input::ignoreMouseInput && glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_PRESS;
+    return !Input::ignoreMouseInput && glfwGetMouseButton(Renderer::Ins()->window, static_cast<int>(button)) == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonUp(MouseButton button)
 {
-    return Input::ignoreMouseInput || glfwGetMouseButton(GameEngine::renderer->window, static_cast<int>(button)) == GLFW_RELEASE;
+    return Input::ignoreMouseInput || glfwGetMouseButton(Renderer::Ins()->window, static_cast<int>(button)) == GLFW_RELEASE;
 }
 
 glm::vec2 Input::GetCursorDelta() const
@@ -101,7 +103,7 @@ void Input::Update()
     glfwPollEvents();
 
     for(int key = KEY_OFFSET; key <= GLFW_KEY_LAST; key++){
-        Input::currKey[key - KEY_OFFSET] = glfwGetKey(GameEngine::renderer->window, key) == GLFW_PRESS && !Input::ignoreKeyboardInput;
+        Input::currKey[key - KEY_OFFSET] = glfwGetKey(Renderer::Ins()->window, key) == GLFW_PRESS && !Input::ignoreKeyboardInput;
     }
 }
 

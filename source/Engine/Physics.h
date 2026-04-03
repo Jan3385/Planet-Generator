@@ -58,7 +58,14 @@ public:
     glm::quat GetBodyRotation(JPH::BodyID bodyID);
 
     static JPH::EMotionType GetMotionType(Layer layer);
+
+    Physics* MakeInstance() { instance = this; return this; };
+
+    /// @brief Gets the singleton instance of the Physics class
+    static Physics* Ins() { return instance; }
 private:
+    static Physics* instance;
+
     std::unique_ptr<JPH::PhysicsSystem> physicsSystem;
 
     std::unique_ptr<JPH::TempAllocatorImpl>   tempAllocator;

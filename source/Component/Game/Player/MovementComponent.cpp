@@ -34,7 +34,7 @@ void Component::Movement::Update()
 
     if(Input::GetCursorMode() == Input::CursorMode::Trapped){
         transform->RotateBy(
-            glm::vec2(-GameEngine::input->GetCursorDelta().x, -GameEngine::input->GetCursorDelta().y)
+            glm::vec2(-Input::Ins()->GetCursorDelta().x, -Input::Ins()->GetCursorDelta().y)
             * 0.15f
         );
     }
@@ -67,7 +67,7 @@ void Component::Movement::Update()
 
     transform->MovePosBy(moveVector);
 
-    if(GameEngine::input->IsKeyPressed(GLFW_KEY_ESCAPE))
+    if(Input::Ins()->IsKeyPressed(GLFW_KEY_ESCAPE))
         Input::ToggleTrappedCursor();
 }
 

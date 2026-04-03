@@ -1,7 +1,8 @@
 #include "PointLightSourceComponent.h"
 
 #include "Object/BaseObject.h"
-#include "Engine/Engine.h"
+#include "Engine/Renderer.h"
+#include "Engine/Lighting.h"
 #include "Debug/Logger.h"
 
 constexpr unsigned int SHADOW_MAP_SIZE = 512;
@@ -56,7 +57,7 @@ void Component::PointLightSource::RenderShadowMap(GL::Shader &shadowShader)
     for (uint8_t i = 0; i < 6; i++)
         shadowShader.SetMat4(std::format("shadowMatrices[{}]", i), shadowTransforms[i]);
     
-    GameEngine::renderer->RenderShadowMap(shadowShader, nullptr);
+    Renderer::Ins()->RenderShadowMap(shadowShader, nullptr);
 
     this->shadowFBO.UnbindShaderFBO();
 }
@@ -79,22 +80,22 @@ void Component::PointLightSource::Awake()
         this->shadowFBO.CompleteSetup();
     }
 
-    GameEngine::lighting->AddPointLightSource(this);
+    Lighting::Ins()->AddPointLightSource(this);
 }
 
 void Component::PointLightSource::OnDestroy()
 {
-    GameEngine::lighting->RemovePointLightSource(this);
+    Lighting::Ins()->RemovePointLightSource(this);
 }
 
 void Component::PointLightSource::OnEnable()
 {
-    GameEngine::lighting->AddPointLightSource(this);
+    Lighting::Ins()->AddPointLightSource(this);
 }
 
 void Component::PointLightSource::OnDisable()
 {
-    GameEngine::lighting->RemovePointLightSource(this);
+    Lighting::Ins()->RemovePointLightSource(this);
 }
 
 void Component::PointLightSource::Update()

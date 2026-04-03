@@ -48,25 +48,25 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
     InitializeGLFW(config);
 
-    lighting = new Lighting();
+    lighting = (new Lighting())->MakeInstance();
     lighting->SetDirectionalLightSource(
         glm::vec3(-0.8f, -0.8f, 0.3f),
         glm::vec3(0.5f, 0.5f, 0.5f)
     );
     lighting->SetAmbientIntensity(0.02f);
 
-    renderer = new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma);
+    renderer = (new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma))->MakeInstance();
     GL::Shader::LogGLErrors("After Renderer Init");
 
     currentLevel = new Level();
-    input = new Input();
+    input = (new Input())->MakeInstance();
 
     lighting->InitializeShadowMapping();
     GL::Shader::LogGLErrors("After Shadow Mapping Init");
 
     Renderer::SetVSYNC(config.VSync);
 
-    physics = new Physics();
+    physics = (new Physics())->MakeInstance();
 
     materialLibrary = new MaterialLibrary();
     materialLibrary->CreateMaterial("red", &renderer->GetDefaultColorShader())

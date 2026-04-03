@@ -22,7 +22,7 @@ public:
     };
 
     Lighting();
-    ~Lighting() = default;
+    ~Lighting();
 
     void SetAmbientColor(const glm::vec3& color);
     glm::vec3 GetAmbientColor() const { return this->ambientColor; }
@@ -47,7 +47,14 @@ public:
     void SetDirectionalLightSource(const DirectionLightSource& directionalLight);
     void SetDirectionalLightSource(const glm::vec3& direction,
                                    const glm::vec3& color);  
+
+    Lighting* MakeInstance() { instance = this; return this; };
+
+    /// @brief Gets the singleton instance of the Lighting class
+    static Lighting* Ins() { return instance; }
 private:
+    static Lighting* instance;
+
     std::array<Component::PointLightSource*, MAX_EFFECTING_POINT_LIGHTS> closestPLights;
 
     GL::BasicShaderProgram dlShadowShader;

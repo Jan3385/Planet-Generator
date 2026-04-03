@@ -6,12 +6,19 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp>
 
-#include "Engine/Renderer.h"
 #include "Engine/Engine.h"
+#include "Engine/Renderer.h"
+
+Lighting* Lighting::instance = nullptr;
 
 Lighting::Lighting()
 {
 
+}
+
+Lighting::~Lighting()
+{
+    if(instance == this) instance = nullptr;
 }
 
 void Lighting::SetAmbientColor(const glm::vec3 &color)
@@ -153,7 +160,7 @@ void Lighting::RenderShadowLights()
     dlShadowShader.Use();
 
     Renderer::Frustum shadowFrustumPlanes = Renderer::CalculateFrustumPlanes(lightProjection, lightView);
-    GameEngine::renderer->RenderShadowMap(dlShadowShader, &shadowFrustumPlanes);
+    Renderer::Ins()->RenderShadowMap(dlShadowShader, &shadowFrustumPlanes);
 
     dlShadowFBO.UnbindShaderFBO();
 
@@ -162,7 +169,7 @@ void Lighting::RenderShadowLights()
             pointLight->RenderShadowMap(plShadowShader);
     }
 
-    glm::vec2 screenSize = GameEngine::renderer->GetScreenSize();
+    glm::vec2 screenSize = Renderer::Ins()->GetScreenSize();
     glViewport(0, 0, static_cast<GLsizei>(screenSize.x), static_cast<GLsizei>(screenSize.y));
 }
 
