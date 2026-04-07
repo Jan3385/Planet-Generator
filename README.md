@@ -6,7 +6,7 @@ A procedural planet generator powered by OpenGL build in C++. Uses the GLAD and 
 
 ## Planet generation
 
-The planets are generated using several value noises overlayed on top of each other which then offset the height of each vertex
+The planets are generated using several value noises overlaid on top of each other which then offset the height of each vertex
 
 The color is then decided with a palette of materials based on height. Each material has its own ambient, specular and diffuse color along with reflectivity
 
@@ -48,7 +48,7 @@ To build and run this project you will need to have the following installed
 > `cmake -S . --preset release`
 
 > [!NOTE]
-> If you do not have **VCPKG_ROOT** enviroment variable configured use the following command instead:
+> If you do not have **VCPKG_ROOT** environment variable configured use the following command instead:
 > 
 > `cmake -S . --preset release -DCMAKE_TOOLCHAIN_FILE="PATH\TO\VCPKG\CMAKE\vcpkg.cmake"`
 
