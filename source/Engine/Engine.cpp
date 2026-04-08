@@ -171,9 +171,6 @@ void GameEngine::Run(const EngineConfig::Config& config)
     modelRenderComp->SetMesh(modelMesh);
     Component::ConvexHullCollider *modelCollider = modelObj->AddComponent<Component::ConvexHullCollider>();
     modelCollider->Generate(*modelMesh->GetMeshes()[0], Physics::Layer::Dynamic);
-    modelCollider->onCollisionEnter = [](const Component::BaseCollider::CollisionData& data) {
-        Debug::LogInfo("Collision Enter with body ID: " + std::to_string(data.otherID.GetIndex()));
-    };
 
     modelObj->AddComponent<Component::GravityForce>();
 

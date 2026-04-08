@@ -16,6 +16,8 @@ void Component::GravityForce::Update()
 
 void Component::GravityForce::FixedUpdate()
 {
+    if(this->transform == nullptr || this->collider == nullptr) return;
+
     glm::vec3 totalGravity = Component::GravityGenerator::GetGravityAt(this->transform->GetPos());
     this->collider->AddForce(totalGravity);
 }

@@ -24,7 +24,7 @@ public:
     }
 protected:
     std::vector<std::type_index> GetDependencies() const override 
-        { return {typeid(Component::Transform), typeid(Component::BaseCollider) }; }
+        { return {typeid(Component::Transform) }; }
 private:
     Component::Transform* transform = nullptr;
     Component::BaseCollider* collider = nullptr;
