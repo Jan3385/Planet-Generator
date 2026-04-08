@@ -71,7 +71,7 @@ protected:
     bool IsStatic() { return this->isStatic; }
 
     JPH::BodyID bodyID = JPH::BodyID();
-    JPH::EMotionType motionType;
+    Physics::Layer layer = Physics::Layer::NO_COLLISION;
 
     friend class Object::BaseObject;
 private:

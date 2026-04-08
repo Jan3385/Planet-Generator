@@ -3,6 +3,7 @@
 #include "Component/BaseComponent.h"
 #include "Component/Engine/TransformComponent.h"
 #include "Component/Engine/Renderer/MeshRenderComponent.h"
+#include "Component/Engine/Physics/ConvexHullColliderComponent.h"
 #include "Math/Color.h"
 
 namespace Component {
@@ -66,6 +67,7 @@ private:
     Transform* transform = nullptr;
     MeshRender* planetRenderComponent = nullptr;
     MeshRender* atmosphereRenderComponent = nullptr;
+    ConvexHullCollider* planetCollider = nullptr;
     
 
     std::shared_ptr<GL::Mesh> planetMesh;

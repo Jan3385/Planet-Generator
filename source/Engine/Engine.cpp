@@ -13,6 +13,8 @@
 #include "Component/Engine/Physics/BoxColliderComponent.h"
 #include "Component/Engine/Physics/SphereColliderComponent.h"
 #include "Component/Engine/Physics/ConvexHullColliderComponent.h"
+#include "Component/Game/Planet/GravityGeneratorComponent.h"
+#include "Component/Game/Planet/GravityForceComponent.h"
 #include "Object/GameObject.h"
 
 #include "Generator/MeshGenerator.h"
@@ -67,6 +69,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     Renderer::SetVSYNC(config.VSync);
 
     physics = (new Physics())->MakeInstance();
+    physics->SetGlobalGravity(glm::vec3(0.0f, 0.0f, 0.0f));
 
     materialLibrary = new MaterialLibrary();
     materialLibrary->CreateMaterial("red", &renderer->GetDefaultColorShader())
@@ -131,7 +134,9 @@ void GameEngine::Run(const EngineConfig::Config& config)
 
 
     Object::BaseObject *planet = currentLevel->CreateObject();
-    planet->AddComponent<Component::Transform>()->SetScale(glm::vec3(planetScale));
+    planet->AddComponent<Component::Transform>()
+        ->SetScale(glm::vec3(planetScale))
+        ->ForceUpdateMatrixTransform();
 
     Component::PlanetGen *planetGenComp = planet->AddComponent<Component::PlanetGen>();
     planetGenComp->SetMaterials("planet", "atmosphere");
@@ -148,13 +153,15 @@ void GameEngine::Run(const EngineConfig::Config& config)
         { glm::vec3(1.0f, 1.0f, 1.0f),    glm::vec2(0.0f, 0.02f)}
     );
 
+    planet->AddComponent<Component::GravityGenerator>()->strength = 5000.0f;
+
     planetGenComp->PlanetifyMesh(rand());
     // -----
 
     // model import
     Object::GameObject *modelObj = currentLevel->CreateGameObject();
     modelObj->GetTransform()
-        ->SetPos(glm::vec3(1.7f, 0.0f, 1.7f))
+        ->SetPos(glm::vec3(2.2f, 0.0f, 2.2f))
         ->SetScale(glm::vec3(0.25f))
         ->SetRot(glm::vec3(0.0f, -90.0f, 0.0f))
         ->ForceUpdateMatrixTransform();
@@ -168,6 +175,8 @@ void GameEngine::Run(const EngineConfig::Config& config)
         Debug::LogInfo("Collision Enter with body ID: " + std::to_string(data.otherID.GetIndex()));
     };
 
+    modelObj->AddComponent<Component::GravityForce>();
+
     GL::Shader::LogGLErrors("After Model Loading");
 
     // floor
@@ -179,8 +188,8 @@ void GameEngine::Run(const EngineConfig::Config& config)
     Component::MeshRender *floorRenderComp = floor->GetRenderComponent();
     floorRenderComp->SetMesh(cube);
 
-    floor->AddComponent<Component::BoxCollider>()
-        ->Generate(glm::vec3(0.5f), Physics::Layer::Static);
+    //floor->AddComponent<Component::BoxCollider>()
+    //    ->Generate(glm::vec3(1.0f), Physics::Layer::Static);
 
     // lights
     Object::BaseObject *lightObj = currentLevel->CreateLightObject(Math::RGB(255, 0, 0), 3.5f);
@@ -201,10 +210,10 @@ void GameEngine::Run(const EngineConfig::Config& config)
         ->SetScale(glm::vec3(0.3f));
     shadowCaster->GetRenderComponent()->SetMesh(cube);
 
-    //lightObj->Disable();
-    //lightObj2->Disable();
-    //shadowCaster->Disable();
-    //floor->Disable();
+    lightObj->Disable();
+    lightObj2->Disable();
+    shadowCaster->Disable();
+    floor->Disable();
     //modelObj->Disable();
     GL::Shader::LogGLErrors("After Creating Lights");
 

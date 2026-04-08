@@ -34,6 +34,7 @@ public:
         switch (static_cast<Physics::Layer>(inLayer))
         {
         case Physics::Layer::Static:
+        case Physics::Layer::NO_COLLISION:
         case Physics::Layer::Terrain:
             return NON_MOVING;
         case Physics::Layer::Kinematic:
@@ -54,11 +55,13 @@ public:
 
     virtual bool ShouldCollide(JPH::ObjectLayer layer, JPH::BroadPhaseLayer bpLayer) const override {
         switch (static_cast<Physics::Layer>(layer)) {
+            case Physics::Layer::NO_COLLISION:
+                return false;               // NO_COLLISION layer does not collide with anything
             case Physics::Layer::Static:
             case Physics::Layer::Terrain:
                 return bpLayer == MOVING;   // static only collides with moving
             case Physics::Layer::Kinematic:
-                return true;   // kinematic collides with everything
+                return true;                // kinematic collides with everything
             case Physics::Layer::Dynamic:
                 return true;                // dynamic collides with everything
 
@@ -76,6 +79,8 @@ public:
 
     virtual bool ShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const override {
         switch (static_cast<Physics::Layer>(layer1)) {
+            case Physics::Layer::NO_COLLISION:
+                return false;                                                           // NO_COLLISION layer does not collide with anything
             case Physics::Layer::Static:
             case Physics::Layer::Terrain:
                 return static_cast<Physics::Layer>(layer2) == Physics::Layer::Dynamic;  // static only collides with dynamic
@@ -282,7 +287,7 @@ void Physics::DisableBody(JPH::BodyID bodyID)
     this->physicsSystem->GetBodyInterface().DeactivateBody(bodyID);
 }
 
-void Physics::RemoveBody(JPH::BodyID bodyID)
+void Physics::RemoveBody(JPH::BodyID &bodyID)
 {
     if(bodyID.IsInvalid()) [[unlikely]] {
         Debug::LogWarn("[JPH] Attempted to remove an invalid body ID");
@@ -292,6 +297,16 @@ void Physics::RemoveBody(JPH::BodyID bodyID)
     this->bodyIDToColliderMap.erase(bodyID);
     this->physicsSystem->GetBodyInterface().RemoveBody(bodyID);
     this->physicsSystem->GetBodyInterface().DestroyBody(bodyID);
+}
+
+void Physics::SetLayer(JPH::BodyID bodyID, Layer layer)
+{
+    if(bodyID.IsInvalid()) [[unlikely]] {
+        Debug::LogWarn("[JPH] Attempted to set layer of an invalid body ID");
+        return;
+    }
+
+    this->physicsSystem->GetBodyInterface().SetObjectLayer(bodyID, static_cast<JPH::ObjectLayer>(layer));
 }
 
 void Physics::UpdateBodyTransform(JPH::BodyID bodyID, const JPH::RVec3 &position, const JPH::Quat &rotation, bool kinematic)

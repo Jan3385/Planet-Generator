@@ -21,8 +21,19 @@ JPH::ShapeRefC Component::BaseCollider::ApplyOffset(const JPH::ShapeRefC& ref, g
     return ref;
 }
 
+/// @brief Creates a physics body with given shape
+/// @param shape A shape reference of the collider
+/// @param pos position offset of the collider relative to the transform
+/// @param rot rotation offset of the collider relative to the transform
+/// @param layer physics layer of the collider
+/// @note If body already exists, it is automatically removed
+/// @return the ID of the created body
 JPH::BodyID Component::BaseCollider::CreateBody(const JPH::ShapeRefC& shape, glm::vec3 pos, glm::quat rot, Physics::Layer layer)
 {
+    if(this->bodyID.IsInvalid() == false){
+        Physics::Ins()->RemoveBody(this->bodyID);
+    }
+
     JPH::EMotionType motionType = Physics::GetMotionType(layer);
 
     rot = glm::normalize(rot);
@@ -40,7 +51,7 @@ JPH::BodyID Component::BaseCollider::CreateBody(const JPH::ShapeRefC& shape, glm
     //settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateMassAndInertia;
     
     this->SetStatic(motionType != JPH::EMotionType::Dynamic);
-    this->motionType = motionType;
+    this->layer = layer;
 
     return Physics::Ins()->CreateBody(settings, this);
 }
@@ -60,14 +71,18 @@ void Component::BaseCollider::OnDestroy()
 
 void Component::BaseCollider::OnEnable()
 {
-    if(!this->bodyID.IsInvalid())
-        Physics::Ins()->EnableBody(this->bodyID);
+    if(this->bodyID.IsInvalid()) return;
+
+    Physics::Ins()->SetLayer(this->bodyID, this->layer);
+    Physics::Ins()->EnableBody(this->bodyID);
 }
 
 void Component::BaseCollider::OnDisable()
 {
-    if(!this->bodyID.IsInvalid())
-        Physics::Ins()->DisableBody(this->bodyID);
+    if(this->bodyID.IsInvalid()) return;
+
+    Physics::Ins()->SetLayer(this->bodyID, Physics::Layer::NO_COLLISION);
+    Physics::Ins()->DisableBody(this->bodyID);
 }
 
 void Component::BaseCollider::SyncToTransform()
@@ -81,7 +96,7 @@ void Component::BaseCollider::SyncToTransform()
         this->bodyID,
         JPH::RVec3(pos.x, pos.y, pos.z),
         JPH::Quat(rot.x, rot.y, rot.z, rot.w),
-        this->motionType == JPH::EMotionType::Kinematic
+        Physics::GetMotionType(this->layer) == JPH::EMotionType::Kinematic
     );
 }
 

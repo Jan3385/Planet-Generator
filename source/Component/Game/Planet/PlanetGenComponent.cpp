@@ -41,6 +41,8 @@ void Component::PlanetGen::PlanetifyMesh(uint32_t seed)
 
     mesh->vertices = std::move(vertices);
     mesh->UpdateMeshBuffers();
+
+    this->planetCollider->Generate(*mesh, Physics::Layer::Kinematic);
 }
 
 void Component::PlanetGen::SetMaterials(std::string planetMatName, std::string atmosphereMatName)
@@ -107,6 +109,9 @@ void Component::PlanetGen::Awake()
 
     this->atmosphereRenderComponent
         ->SetMesh(atmosphereMesh);
+
+    this->planetCollider = GetOwner()->AddComponent<Component::ConvexHullCollider>();
+    planetCollider->SetTransform(transform);
 }
 
 void Component::PlanetGen::OnDestroy()

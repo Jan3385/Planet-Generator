@@ -16,9 +16,10 @@ class Physics {
 public:
     enum class Layer : JPH::ObjectLayer {
         Static = 0,
-        Terrain = 1,
-        Kinematic = 2,
-        Dynamic = 3,
+        NO_COLLISION = 1,
+        Terrain = 2,
+        Kinematic = 3,
+        Dynamic = 4,
     };
 
     class PhysicsContactListener : public JPH::ContactListener {
@@ -49,7 +50,8 @@ public:
     JPH::BodyID CreateBody(const JPH::BodyCreationSettings &settings, Component::BaseCollider* caller);
     void EnableBody(JPH::BodyID bodyID);
     void DisableBody(JPH::BodyID bodyID);
-    void RemoveBody(JPH::BodyID bodyID);
+    void RemoveBody(JPH::BodyID &bodyID);
+    void SetLayer(JPH::BodyID bodyID, Layer layer);
 
     JPH::BodyInterface& GetBodyInterface() { return this->physicsSystem->GetBodyInterface(); }
 
