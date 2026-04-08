@@ -93,7 +93,7 @@ void Component::PlanetGen::Awake()
     Object::BaseObject* child = GameEngine::currentLevel->CreateObject();
     child->SetParent(GetOwner());
     Transform* childTransform = child->AddComponent<Component::Transform>();
-    childTransform->SetScale(glm::vec3(1.0f + (PLANET_SCALE * 0.11f)));
+    childTransform->SetScale(glm::vec3(transform->GetScale() * (1 + PLANET_SCALE * 0.15f)));
     
     this->planetRenderComponent = GetOwner()->AddComponent<Component::MeshRender>();
     this->atmosphereRenderComponent = child->AddComponent<Component::MeshRender>();

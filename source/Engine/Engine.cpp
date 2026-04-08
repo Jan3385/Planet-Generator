@@ -161,7 +161,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     // model import
     Object::GameObject *modelObj = currentLevel->CreateGameObject();
     modelObj->GetTransform()
-        ->SetPos(glm::vec3(2.2f, 0.0f, 2.2f))
+        ->SetPos(glm::vec3(2.2f, 0.0f, 2.2f) * planetScale)
         ->SetScale(glm::vec3(0.25f))
         ->SetRot(glm::vec3(0.0f, -90.0f, 0.0f))
         ->ForceUpdateMatrixTransform();
