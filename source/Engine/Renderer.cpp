@@ -472,12 +472,37 @@ Renderer::SSAO_Components *Renderer::GenerateSSAOComponents()
     return ssao;
 }
 
-Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma)
+Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, EngineConfig::WindowMode windowMode, float gamma)
  : antiAliasingMethod(antialiasing)
 {
     this->SetupShaderValues();
 
-    this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
+    if (windowMode == EngineConfig::WindowMode::Windowed){
+        this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
+    }
+    else if (windowMode == EngineConfig::WindowMode::Borderless) {
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        Debug::Assert(monitor, "Failed to get primary monitor!");
+        Debug::Assert(mode, "Failed to get monitor video mode!");
+
+        this->window = glfwCreateWindow(mode->width, mode->height, "Planet renderer", nullptr, nullptr);
+
+        glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
+        glfwSetWindowPos(window, 0, 0);
+        width = mode->width; height = mode->height;
+    }
+    else if (windowMode == EngineConfig::WindowMode::Fullscreen){
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        Debug::Assert(monitor, "Failed to get primary monitor!");
+        Debug::Assert(mode, "Failed to get monitor video mode!");
+
+        this->window = glfwCreateWindow(mode->width, mode->height, "Planet renderer", monitor, nullptr);
+        width = mode->width; height = mode->height;
+    }
 
     if(!this->window) {
         Debug::LogFatal("Failed to create GLFW window");
@@ -486,12 +511,15 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
 
     glfwMakeContextCurrent(this->window);
     glfwSetFramebufferSizeCallback(this->window, UpdateViewport);
-
+    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         Debug::LogFatal("Failed to initialize GLAD");
         return;
     }
+    
+    this->StoreWindowSize(width, height);
+    glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
     
@@ -596,7 +624,8 @@ void Renderer::Update()
 
     // Camera setup
     Component::Camera* camera = GameEngine::currentLevel->GetCamera();
-    camera->SetAspectRatio(static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight));
+    float aspectRatio = static_cast<float>(this->windowWidth) / static_cast<float>(this->windowHeight);
+    camera->SetAspectRatio(aspectRatio);
 
     // bind N nearest point lights to the shader
     Lighting::Ins()->RecalculateClosedPointLights(camera->GetPosition());

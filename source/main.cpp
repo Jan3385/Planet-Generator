@@ -8,6 +8,7 @@ int main(int argc, char* argv[]) {
     GameEngine engine;
     EngineConfig::Config config;
     config.antiAliasingMethod = EngineConfig::AntiAliasingMethod::TAA;
+    config.windowMode = EngineConfig::WindowMode::Windowed;
 
     engine.Run(config);
 

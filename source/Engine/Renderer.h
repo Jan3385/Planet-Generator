@@ -93,7 +93,7 @@ public:
 
     using Frustum = std::array<glm::vec4, 6>;
 
-    Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, float gamma);
+    Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, EngineConfig::WindowMode windowMode, float gamma);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {
@@ -230,8 +230,8 @@ private:
     SSAO_Components *ssao = nullptr;
     GL::Texture noSSAOTexture;
 
-    int windowWidth = 800;
-    int windowHeight = 600;
+    int windowWidth;
+    int windowHeight;
 
     friend Input;
 };

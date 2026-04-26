@@ -48,7 +48,7 @@ void GameEngine::Run(const EngineConfig::Config& config)
     );
     lighting->SetAmbientIntensity(0.02f);
 
-    renderer = (new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.gamma))->MakeInstance();
+    renderer = (new Renderer(config.windowWidth, config.windowHeight, config.antiAliasingMethod, config.windowMode, config.gamma))->MakeInstance();
     GL::Shader::LogGLErrors("After Renderer Init");
 
     currentLevel = new Level();
