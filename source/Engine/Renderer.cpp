@@ -28,6 +28,58 @@ void Renderer::StoreWindowSize(int width, int height)
     this->windowHeight = height;
 }
 
+GL::BasicShaderProgram &Renderer::RegisterShader(const std::string &shaderName)
+{
+    GL::BasicShaderProgram shader(shaderName.c_str());
+
+    this->shaders[shaderName] = std::move(shader);
+
+    return static_cast<GL::BasicShaderProgram&>(this->shaders[shaderName]);
+}
+
+GL::BasicShaderProgram &Renderer::RegisterShader(const std::string &shaderName, const char *vertexPath, const char *fragmentPath)
+{
+    GL::BasicShaderProgram shader(vertexPath, fragmentPath, shaderName);
+
+    this->shaders[shaderName] = std::move(shader);
+
+    return static_cast<GL::BasicShaderProgram&>(this->shaders[shaderName]);
+}
+
+GL::Shader &Renderer::RegisterShader(const std::string &shaderName, GL::Shader &shader)
+{
+    this->shaders[shaderName] = std::move(shader);
+
+    return static_cast<GL::Shader&>(this->shaders[shaderName]);
+}
+
+GL::Shader &Renderer::GetShader(const std::string &shaderName)
+{
+    return this->shaders.at(shaderName);
+}
+
+GL::Texture &Renderer::StoreTexture(const std::string &name, GL::Texture &texture)
+{
+    this->textures[name] = std::move(texture);
+    return this->textures[name];
+}
+
+GL::Texture &Renderer::GetTexture(const std::string &name)
+{
+    return this->textures.at(name);
+}
+
+GL::Cubemap &Renderer::StoreCubemap(const std::string &name, GL::Cubemap &cubemap)
+{
+    this->cubemaps[name] = std::move(cubemap);
+    return this->cubemaps[name];
+}
+
+GL::Cubemap &Renderer::GetCubemap(const std::string &name)
+{
+    return this->cubemaps.at(name);
+}
+
 void Renderer::ObjectGeometryRenderPass(glm::mat4 &projection, glm::mat4 &view, glm::vec3 &camPos, Frustum *frustumPlanes)
 {
     for(auto& callback : renderCallbacks) {

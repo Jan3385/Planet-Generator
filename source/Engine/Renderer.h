@@ -7,6 +7,7 @@
 #include "GLWrapper/BasicShaderProgram.h"
 #include "GLWrapper/FrameBuffer.h"
 #include "GLWrapper/Mesh.h"
+#include "GLWrapper/Cubemap.h"
 
 #include "Engine/Config.h"
 
@@ -135,6 +136,17 @@ public:
     GL::BasicShaderProgram& GetSkyboxShader() { return this->skyboxShader; }
     GL::BasicShaderProgram& GetLightPassShader() { return *this->lightPassShader; }
 
+    GL::BasicShaderProgram& RegisterShader(const std::string& shaderName);
+    GL::BasicShaderProgram& RegisterShader(const std::string& shaderName, const char* vertexPath, const char* fragmentPath);
+    GL::Shader& RegisterShader(const std::string& shaderName, GL::Shader& shader);
+    
+    GL::Shader& GetShader(const std::string& shaderName);
+
+    GL::Texture& StoreTexture(const std::string& name, GL::Texture& texture);
+    GL::Texture& GetTexture(const std::string& name);
+    GL::Cubemap& StoreCubemap(const std::string& name, GL::Cubemap& cubemap);
+    GL::Cubemap& GetCubemap(const std::string& name);
+
     void AddImGuiCallback(Component::IImGuiUpdatable* callback) {
         imguiCallbacks.push_back(callback);
     }
@@ -200,6 +212,9 @@ private:
     GL::BasicShaderProgram defaultLightShader;
     GL::BasicShaderProgram defaultColorShader;
     GL::BasicShaderProgram skyboxShader;
+    std::unordered_map<std::string, GL::Shader> shaders;
+    std::unordered_map<std::string, GL::Texture> textures;
+    std::unordered_map<std::string, GL::Cubemap> cubemaps;
 
     void DrawImGuiWindows();
     GLFWwindow* window = nullptr;
