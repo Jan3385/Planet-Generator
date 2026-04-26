@@ -472,15 +472,15 @@ Renderer::SSAO_Components *Renderer::GenerateSSAOComponents()
     return ssao;
 }
 
-Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, EngineConfig::WindowMode windowMode, float gamma)
- : antiAliasingMethod(antialiasing)
+Renderer::Renderer(EngineConfig::Config &config)
+ : antiAliasingMethod(config.antiAliasingMethod)
 {
     this->SetupShaderValues();
 
-    if (windowMode == EngineConfig::WindowMode::Windowed){
-        this->window = glfwCreateWindow(width, height, "Planet renderer", nullptr, nullptr);
+    if (config.windowMode == EngineConfig::WindowMode::Windowed){
+        this->window = glfwCreateWindow(config.windowWidth, config.windowHeight, "Planet renderer", nullptr, nullptr);
     }
-    else if (windowMode == EngineConfig::WindowMode::Borderless) {
+    else if (config.windowMode == EngineConfig::WindowMode::Borderless) {
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -491,9 +491,9 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
 
         glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
         glfwSetWindowPos(window, 0, 0);
-        width = mode->width; height = mode->height;
+        config.windowWidth = mode->width; config.windowHeight = mode->height;
     }
-    else if (windowMode == EngineConfig::WindowMode::Fullscreen){
+    else if (config.windowMode == EngineConfig::WindowMode::Fullscreen){
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -501,7 +501,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
         Debug::Assert(mode, "Failed to get monitor video mode!");
 
         this->window = glfwCreateWindow(mode->width, mode->height, "Planet renderer", monitor, nullptr);
-        width = mode->width; height = mode->height;
+        config.windowWidth = mode->width; config.windowHeight = mode->height;
     }
 
     if(!this->window) {
@@ -518,8 +518,8 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
         return;
     }
     
-    this->StoreWindowSize(width, height);
-    glViewport(0, 0, width, height);
+    this->StoreWindowSize(config.windowWidth, config.windowHeight);
+    glViewport(0, 0, config.windowWidth, config.windowHeight);
 
     glEnable(GL_DEPTH_TEST);
     
@@ -527,7 +527,7 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
     glCullFace(GL_BACK);
     this->SetReverseFaceCulling(false);
 
-    this->SetGammaCorrection(gamma);
+    this->SetGammaCorrection(config.gamma);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -552,11 +552,11 @@ Renderer::Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMe
 
     this->SetupGeometryFramebuffer();
 
-    if(antialiasing == EngineConfig::AntiAliasingMethod::MLAA) {
+    if(config.antiAliasingMethod == EngineConfig::AntiAliasingMethod::MLAA) {
         Debug::LogTrace("Initializing SMAA anti-aliasing components");
         this->mlaa = this->GenerateMLAAComponents();
     }
-    if(antialiasing == EngineConfig::AntiAliasingMethod::TAA) {
+    if(config.antiAliasingMethod == EngineConfig::AntiAliasingMethod::TAA) {
         Debug::LogTrace("Initializing TAA anti-aliasing components");
         this->taa = this->GenerateTAAComponents();
     }

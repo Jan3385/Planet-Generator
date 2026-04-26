@@ -93,7 +93,7 @@ public:
 
     using Frustum = std::array<glm::vec4, 6>;
 
-    Renderer(uint16_t width, uint16_t height, EngineConfig::AntiAliasingMethod antialiasing, EngineConfig::WindowMode windowMode, float gamma);
+    Renderer(EngineConfig::Config &config);
     ~Renderer();
 
     void AddRenderCallback(IRendererCallback* callback) {

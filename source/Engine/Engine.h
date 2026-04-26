@@ -25,7 +25,7 @@ public:
     GameEngine();
     ~GameEngine();
 
-    void Run(const EngineConfig::Config& config);
+    void Run(EngineConfig::Config& config);
 
     float DeltaTime() const { return deltaTime; }
     static constexpr float FixedDeltaTime() { return FIXED_UPDATE_INTERVAL; }
