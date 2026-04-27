@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 
 #include <cstdarg>
+
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
@@ -105,6 +106,7 @@ static void JoltTraceImpl(const char* inFMT, ...) {
     Debug::LogTrace(std::string("[JPH] ") + buffer);
 }
 
+#ifdef JPH_ENABLE_ASSERTS
 static bool JoltAssertFailed(const char* inExpression, const char* inMessage, const char* inFile, JPH::uint inLine) {
     Debug::LogError(
         std::string("[JPH Assert] ") + inExpression +
@@ -113,6 +115,7 @@ static bool JoltAssertFailed(const char* inExpression, const char* inMessage, co
     );
     return true;
 }
+#endif
 
 Physics::Physics()
 {
@@ -121,7 +124,10 @@ Physics::Physics()
     }
 
     JPH::Trace = JoltTraceImpl;
+
+#ifdef JPH_ENABLE_ASSERTS
     JPH::AssertFailed = JoltAssertFailed;
+#endif
 
     // Initialize Jolt Physics
     JPH::RegisterDefaultAllocator();
