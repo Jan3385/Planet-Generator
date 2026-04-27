@@ -5,7 +5,7 @@
 
 #include "Component/Engine/Physics/BaseColliderComponent.h"
 
-#include "GLWrapper/mesh.h"
+#include "GLWrapper/Mesh.h"
 
 namespace Component {
 class StaticCompoundCollider : public BaseCollider {
